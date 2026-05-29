@@ -11,11 +11,13 @@ async function asUser<T>(
   userId: string,
   fn: (tx: typeof client) => Promise<T>,
 ): Promise<T> {
+  // postgres.js `begin` has a return type of `UnwrapPromiseArray<T>` which doesn't
+  // satisfy `Promise<T>` in TypeScript's variance checks — cast at the call site.
   return client.begin(async (tx) => {
     await tx`select set_config('request.jwt.claims', ${JSON.stringify({ sub: userId, role: "authenticated" })}, true)`;
     await tx`select set_config('role', 'authenticated', true)`;
     return fn(tx as unknown as typeof client);
-  });
+  }) as unknown as Promise<T>;
 }
 
 async function createAuthUser(displayName: string): Promise<string> {
