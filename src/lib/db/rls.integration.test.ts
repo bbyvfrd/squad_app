@@ -22,7 +22,7 @@ async function asUser<T>(
 
 async function createAuthUser(displayName: string): Promise<string> {
   const id = newId();
-  const email = `rls-${Date.now()}-${id.slice(0, 8)}@example.com`;
+  const email = `rls-${id}@example.com`;
   await client`
     insert into auth.users (instance_id, id, aud, role, email, raw_user_meta_data, created_at, updated_at)
     values ('00000000-0000-0000-0000-000000000000', ${id}, 'authenticated', 'authenticated',

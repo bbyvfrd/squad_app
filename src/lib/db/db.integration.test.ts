@@ -9,7 +9,7 @@ import { clientProfiles, games, participations, profiles, sports } from "./schem
 // schema). The on_auth_user_created trigger then creates the public.profiles row.
 async function createAuthUser(displayName: string): Promise<string> {
   const id = newId();
-  const email = `it-${Date.now()}-${id.slice(0, 8)}@example.com`;
+  const email = `it-${id}@example.com`;
   await client`
     insert into auth.users (instance_id, id, aud, role, email, raw_user_meta_data, created_at, updated_at)
     values ('00000000-0000-0000-0000-000000000000', ${id}, 'authenticated', 'authenticated',
