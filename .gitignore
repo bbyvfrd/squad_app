@@ -44,3 +44,7 @@ next-env.d.ts
 
 # Claude Code local agent settings
 .claude/
+
+# Plain .env may hold real secrets; .env.example is the tracked exception
+.env
+!.env.example

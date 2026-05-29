@@ -8,6 +8,10 @@ const envSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
 });
 
+// The exact env keys the schema declares — the single source of truth for the
+// .env.example parity check (see env-parity.test.ts). Avoids a hand-copied list.
+export const ENV_KEYS = Object.keys(envSchema.shape);
+
 export type Config = {
   nodeEnv: "development" | "test" | "production";
   databaseUrl: string;
