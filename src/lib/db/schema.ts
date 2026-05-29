@@ -1,53 +1,266 @@
+import { sql } from "drizzle-orm";
 import {
-  pgTable,
-  uuid,
-  text,
-  integer,
-  timestamp,
+  boolean,
+  check,
+  foreignKey,
+  index,
   pgEnum,
+  pgPolicy,
+  pgTable,
+  primaryKey,
+  smallint,
+  text,
+  timestamp,
+  unique,
+  uniqueIndex,
+  uuid,
 } from "drizzle-orm/pg-core";
+import { authenticatedRole, authUsers } from "drizzle-orm/supabase";
 
-export const participantStatus = pgEnum("participant_status", [
+// ── Enums ────────────────────────────────────────────────────────────────────
+export const participationStatus = pgEnum("participation_status", [
   "requested",
   "approved",
   "declined",
   "cancelled",
 ]);
 
-export const users = pgTable("users", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  name: text("name").notNull(),
-  email: text("email").notNull().unique(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-});
+// 'completed' is deferred (spec §3).
+export const gameStatus = pgEnum("game_status", ["open", "cancelled"]);
 
-export const venues = pgTable("venues", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  ownerUserId: uuid("owner_user_id").references(() => users.id).notNull(),
-  name: text("name").notNull(),
-  locationText: text("location_text").notNull(),
-  contactInfo: text("contact_info"),
-  description: text("description"),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-});
+// ── Identity: shared account + split surface profiles ─────────────────────────
+// profiles.id === auth.users.id. Row is created by the handle_new_user trigger
+// (Task 3), so there is NO INSERT policy here.
+export const profiles = pgTable(
+  "profiles",
+  {
+    id: uuid("id").primaryKey().notNull(),
+    displayName: text("display_name").notNull(),
+    avatarUrl: text("avatar_url"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.id],
+      foreignColumns: [authUsers.id],
+      name: "profiles_id_auth_users_fk",
+    }).onDelete("cascade"),
+    // Holds only display fields, so a broad SELECT to all signed-in users is safe.
+    pgPolicy("profiles_select", { for: "select", to: authenticatedRole, using: sql`true` }),
+    pgPolicy("profiles_update", {
+      for: "update",
+      to: authenticatedRole,
+      using: sql`(select auth.uid()) = id`,
+      withCheck: sql`(select auth.uid()) = id`,
+    }),
+  ],
+);
 
-export const games = pgTable("games", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  organizerUserId: uuid("organizer_user_id").references(() => users.id).notNull(),
-  venueId: uuid("venue_id").references(() => venues.id),
-  sport: text("sport").notNull(),
-  title: text("title").notNull(),
-  startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
-  maxPlayers: integer("max_players").notNull(),
-  locationText: text("location_text").notNull(),
-  notes: text("notes"),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-});
+export const clientProfiles = pgTable(
+  "client_profiles",
+  {
+    profileId: uuid("profile_id")
+      .primaryKey()
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    isPlayer: boolean("is_player").notNull().default(false),
+    isOrganizer: boolean("is_organizer").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    check("chk_client_capability", sql`is_player or is_organizer`),
+    // Self-only. A SELECT path is required for UPDATE to work, hence FOR ALL.
+    pgPolicy("client_self", {
+      for: "all",
+      to: authenticatedRole,
+      using: sql`(select auth.uid()) = profile_id`,
+      withCheck: sql`(select auth.uid()) = profile_id`,
+    }),
+  ],
+);
 
-export const gameParticipants = pgTable("game_participants", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  gameId: uuid("game_id").references(() => games.id).notNull(),
-  userId: uuid("user_id").references(() => users.id).notNull(),
-  status: participantStatus("status").default("requested").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-});
+export const venueOwnerProfiles = pgTable(
+  "venue_owner_profiles",
+  {
+    profileId: uuid("profile_id")
+      .primaryKey()
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    businessName: text("business_name"),
+    contactPhone: text("contact_phone"),
+    contactEmail: text("contact_email"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    pgPolicy("venue_owner_self", {
+      for: "all",
+      to: authenticatedRole,
+      using: sql`(select auth.uid()) = profile_id`,
+      withCheck: sql`(select auth.uid()) = profile_id`,
+    }),
+  ],
+);
+
+// ── Reference: sports lookup (lookup table, not an enum, so it can grow) ───────
+export const sports = pgTable(
+  "sports",
+  {
+    id: smallint("id").primaryKey().generatedAlwaysAsIdentity(),
+    key: text("key").notNull().unique(),
+    name: text("name").notNull(),
+    displayOrder: smallint("display_order").notNull().default(0),
+    isActive: boolean("is_active").notNull().default(true),
+  },
+  () => [
+    // Public reference; writes are service-role only (no write policy → denied).
+    pgPolicy("sports_read", { for: "select", to: authenticatedRole, using: sql`true` }),
+  ],
+);
+
+// ── Venues (defined before games: games.venue_id references it) ───────────────
+export const venues = pgTable(
+  "venues",
+  {
+    id: uuid("id").primaryKey().notNull(), // app-supplied UUIDv7 (newId)
+    ownerId: uuid("owner_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    address: text("address"),
+    contactInfo: text("contact_info"),
+    description: text("description"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (t) => [
+    index("venues_owner_active_idx").on(t.ownerId).where(sql`deleted_at is null`),
+    pgPolicy("venues_select", {
+      for: "select",
+      to: authenticatedRole,
+      using: sql`deleted_at is null or owner_id = (select auth.uid())`,
+    }),
+    pgPolicy("venues_write", {
+      for: "all",
+      to: authenticatedRole,
+      using: sql`owner_id = (select auth.uid())`,
+      withCheck: sql`owner_id = (select auth.uid()) and exists (select 1 from venue_owner_profiles v where v.profile_id = (select auth.uid()))`,
+    }),
+  ],
+);
+
+// ── Core coordination loop ────────────────────────────────────────────────────
+export const games = pgTable(
+  "games",
+  {
+    id: uuid("id").primaryKey().notNull(), // app-supplied UUIDv7 (newId)
+    organizerId: uuid("organizer_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    sportId: smallint("sport_id")
+      .notNull()
+      .references(() => sports.id, { onDelete: "restrict" }),
+    venueId: uuid("venue_id").references(() => venues.id, { onDelete: "set null" }),
+    title: text("title").notNull(),
+    startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
+    capacity: smallint("capacity").notNull(),
+    locationText: text("location_text"), // nullable in v1 (validation later)
+    notes: text("notes"),
+    status: gameStatus("status").notNull().default("open"),
+    shareToken: text("share_token"), // invite/share seam
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }), // soft delete
+  },
+  (t) => [
+    check("chk_games_capacity", sql`capacity > 0`),
+    index("games_sport_starts_idx").on(t.sportId, t.startsAt),
+    index("games_open_upcoming_idx")
+      .on(t.startsAt)
+      .where(sql`status = 'open' and deleted_at is null`),
+    index("games_organizer_idx").on(t.organizerId).where(sql`deleted_at is null`),
+    index("games_venue_idx").on(t.venueId).where(sql`venue_id is not null`),
+    uniqueIndex("games_share_token_uq").on(t.shareToken).where(sql`share_token is not null`),
+    pgPolicy("games_select", {
+      for: "select",
+      to: authenticatedRole,
+      using: sql`deleted_at is null or organizer_id = (select auth.uid())`,
+    }),
+    pgPolicy("games_insert", {
+      for: "insert",
+      to: authenticatedRole,
+      withCheck: sql`organizer_id = (select auth.uid()) and exists (select 1 from client_profiles c where c.profile_id = (select auth.uid()) and c.is_organizer)`,
+    }),
+    pgPolicy("games_update", {
+      for: "update",
+      to: authenticatedRole,
+      using: sql`organizer_id = (select auth.uid())`,
+      withCheck: sql`organizer_id = (select auth.uid())`,
+    }),
+  ],
+);
+
+export const participations = pgTable(
+  "participations",
+  {
+    id: uuid("id").primaryKey().notNull(), // app-supplied UUIDv7 (newId)
+    gameId: uuid("game_id")
+      .notNull()
+      .references(() => games.id, { onDelete: "cascade" }),
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    status: participationStatus("status").notNull().default("requested"),
+    requestedAt: timestamp("requested_at", { withTimezone: true }).defaultNow().notNull(),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    unique("uq_participation").on(t.gameId, t.playerId), // one request per player
+    index("participations_game_status_idx").on(t.gameId, t.status),
+    index("participations_player_idx").on(t.playerId),
+    pgPolicy("part_select", {
+      for: "select",
+      to: authenticatedRole,
+      using: sql`player_id = (select auth.uid()) or exists (select 1 from games g where g.id = game_id and g.organizer_id = (select auth.uid()))`,
+    }),
+    pgPolicy("part_insert", {
+      for: "insert",
+      to: authenticatedRole,
+      withCheck: sql`player_id = (select auth.uid()) and exists (select 1 from client_profiles c where c.profile_id = (select auth.uid()) and c.is_player) and exists (select 1 from games g where g.id = game_id and g.status = 'open' and g.deleted_at is null)`,
+    }),
+    pgPolicy("part_update", {
+      for: "update",
+      to: authenticatedRole,
+      using: sql`player_id = (select auth.uid()) or exists (select 1 from games g where g.id = game_id and g.organizer_id = (select auth.uid()))`,
+      withCheck: sql`player_id = (select auth.uid()) or exists (select 1 from games g where g.id = game_id and g.organizer_id = (select auth.uid()))`,
+    }),
+  ],
+);
+
+export const venueSports = pgTable(
+  "venue_sports",
+  {
+    venueId: uuid("venue_id")
+      .notNull()
+      .references(() => venues.id, { onDelete: "cascade" }),
+    sportId: smallint("sport_id")
+      .notNull()
+      .references(() => sports.id, { onDelete: "restrict" }),
+  },
+  (t) => [
+    primaryKey({ columns: [t.venueId, t.sportId] }),
+    index("venue_sports_sport_idx").on(t.sportId),
+    pgPolicy("vsports_read", { for: "select", to: authenticatedRole, using: sql`true` }),
+    pgPolicy("vsports_write", {
+      for: "all",
+      to: authenticatedRole,
+      using: sql`exists (select 1 from venues v where v.id = venue_id and v.owner_id = (select auth.uid()))`,
+      withCheck: sql`exists (select 1 from venues v where v.id = venue_id and v.owner_id = (select auth.uid()))`,
+    }),
+  ],
+);
