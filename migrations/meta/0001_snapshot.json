@@ -1,6 +1,6 @@
 {
-  "id": "91cad994-3d08-4db2-98fa-793c81a3e30c",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "c24e804a-d44e-4822-8cf9-ffd20eb106e1",
+  "prevId": "91cad994-3d08-4db2-98fa-793c81a3e30c",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -48,15 +48,15 @@
         "client_profiles_profile_id_profiles_id_fk": {
           "name": "client_profiles_profile_id_profiles_id_fk",
           "tableFrom": "client_profiles",
-          "tableTo": "profiles",
           "columnsFrom": [
             "profile_id"
           ],
+          "tableTo": "profiles",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -192,9 +192,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "games_open_upcoming_idx": {
           "name": "games_open_upcoming_idx",
@@ -207,10 +207,10 @@
             }
           ],
           "isUnique": false,
-          "where": "status = 'open' and deleted_at is null",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "status = 'open' and deleted_at is null",
+          "concurrently": false
         },
         "games_organizer_idx": {
           "name": "games_organizer_idx",
@@ -223,10 +223,10 @@
             }
           ],
           "isUnique": false,
-          "where": "deleted_at is null",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "deleted_at is null",
+          "concurrently": false
         },
         "games_venue_idx": {
           "name": "games_venue_idx",
@@ -239,10 +239,10 @@
             }
           ],
           "isUnique": false,
-          "where": "venue_id is not null",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "venue_id is not null",
+          "concurrently": false
         },
         "games_share_token_uq": {
           "name": "games_share_token_uq",
@@ -255,51 +255,51 @@
             }
           ],
           "isUnique": true,
-          "where": "share_token is not null",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "share_token is not null",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "games_organizer_id_profiles_id_fk": {
           "name": "games_organizer_id_profiles_id_fk",
           "tableFrom": "games",
-          "tableTo": "profiles",
           "columnsFrom": [
             "organizer_id"
           ],
+          "tableTo": "profiles",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "games_sport_id_sports_id_fk": {
           "name": "games_sport_id_sports_id_fk",
           "tableFrom": "games",
-          "tableTo": "sports",
           "columnsFrom": [
             "sport_id"
           ],
+          "tableTo": "sports",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "restrict"
         },
         "games_venue_id_venues_id_fk": {
           "name": "games_venue_id_venues_id_fk",
           "tableFrom": "games",
-          "tableTo": "venues",
           "columnsFrom": [
             "venue_id"
           ],
+          "tableTo": "venues",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
@@ -418,9 +418,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "participations_player_idx": {
           "name": "participations_player_idx",
@@ -433,48 +433,48 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "participations_game_id_games_id_fk": {
           "name": "participations_game_id_games_id_fk",
           "tableFrom": "participations",
-          "tableTo": "games",
           "columnsFrom": [
             "game_id"
           ],
+          "tableTo": "games",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "participations_player_id_profiles_id_fk": {
           "name": "participations_player_id_profiles_id_fk",
           "tableFrom": "participations",
-          "tableTo": "profiles",
           "columnsFrom": [
             "player_id"
           ],
+          "tableTo": "profiles",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "uq_participation": {
           "name": "uq_participation",
-          "nullsNotDistinct": false,
           "columns": [
             "game_id",
             "player_id"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {
@@ -552,16 +552,16 @@
         "profiles_id_auth_users_fk": {
           "name": "profiles_id_auth_users_fk",
           "tableFrom": "profiles",
-          "tableTo": "users",
-          "schemaTo": "auth",
           "columnsFrom": [
             "id"
           ],
+          "tableTo": "users",
+          "schemaTo": "auth",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -600,15 +600,15 @@
           "primaryKey": true,
           "notNull": true,
           "identity": {
-            "type": "always",
             "name": "sports_id_seq",
-            "schema": "public",
             "increment": "1",
-            "startWith": "1",
             "minValue": "1",
             "maxValue": "32767",
+            "startWith": "1",
             "cache": "1",
-            "cycle": false
+            "cycle": false,
+            "schema": "public",
+            "type": "always"
           }
         },
         "key": {
@@ -644,10 +644,10 @@
       "uniqueConstraints": {
         "sports_key_unique": {
           "name": "sports_key_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "key"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {
@@ -712,15 +712,15 @@
         "venue_owner_profiles_profile_id_profiles_id_fk": {
           "name": "venue_owner_profiles_profile_id_profiles_id_fk",
           "tableFrom": "venue_owner_profiles",
-          "tableTo": "profiles",
           "columnsFrom": [
             "profile_id"
           ],
+          "tableTo": "profiles",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -769,37 +769,37 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "venue_sports_venue_id_venues_id_fk": {
           "name": "venue_sports_venue_id_venues_id_fk",
           "tableFrom": "venue_sports",
-          "tableTo": "venues",
           "columnsFrom": [
             "venue_id"
           ],
+          "tableTo": "venues",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "venue_sports_sport_id_sports_id_fk": {
           "name": "venue_sports_sport_id_sports_id_fk",
           "tableFrom": "venue_sports",
-          "tableTo": "sports",
           "columnsFrom": [
             "sport_id"
           ],
+          "tableTo": "sports",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "restrict"
         }
       },
       "compositePrimaryKeys": {
@@ -909,25 +909,25 @@
             }
           ],
           "isUnique": false,
-          "where": "deleted_at is null",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "deleted_at is null",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "venues_owner_id_profiles_id_fk": {
           "name": "venues_owner_id_profiles_id_fk",
           "tableFrom": "venues",
-          "tableTo": "profiles",
           "columnsFrom": [
             "owner_id"
           ],
+          "tableTo": "profiles",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -978,10 +978,10 @@
     }
   },
   "schemas": {},
+  "views": {},
   "sequences": {},
   "roles": {},
   "policies": {},
-  "views": {},
   "_meta": {
     "columns": {},
     "schemas": {},
