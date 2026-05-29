@@ -1,10 +1,13 @@
 import { describe, it, expect, afterAll } from "vitest";
 import { db, client } from "./client";
 import { users } from "./schema";
-import { eq } from "drizzle-orm";
+import { eq, like } from "drizzle-orm";
 
 describe("database integration", () => {
+  // Remove any test rows even if an assertion above throws, then close the pool.
+  // (Inline cleanup would be skipped on failure, leaking rows into CI re-runs.)
   afterAll(async () => {
+    await db.delete(users).where(like(users.email, "it-%@example.com"));
     await client.end();
   });
 
@@ -18,7 +21,5 @@ describe("database integration", () => {
 
     const [found] = await db.select().from(users).where(eq(users.email, email));
     expect(found.name).toBe("Integration User");
-
-    await db.delete(users).where(eq(users.id, created.id));
   });
 });
