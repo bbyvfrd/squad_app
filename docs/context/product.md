@@ -47,9 +47,11 @@ Identity is implemented as **split profiles** (`profiles` + optional `client_pro
 
 | Object | Key fields |
 |---|---|
-| **User (identity)** | account = `profiles` (id, display_name); client surface = `client_profiles` (marker — any client can organize and play); venue surface = `venue_owner_profiles` (business_name, contact) |
+| **User (identity)** | account = `profiles` (id, `full_name`, optional `display_name`, optional `city_id`); client surface = `client_profiles` (marker — any client can organize and play); venue surface = `venue_owner_profiles` (business_name, contact); phone in `auth.users` only |
+| **Skill** | `client_sport_skills` — per-user per-sport `skill_level` (5-tier: beginner/intermediate/amateur/advanced/professional); advisory — never gates joining, drives organizer indicator only |
+| **City** | `cities` lookup (key, name); used on `profiles.city_id` (home city) and `games.city_id` (discovery dimension) |
 | **Venue** | id, owner_id, name, supported_sports[] (via `venue_sports`), location_text, contact_info, description |
-| **Game** | id, organizer_id, optional venue_id, sport (→ `sports`), title, datetime, max_players, location_text, notes, status |
+| **Game** | id, organizer_id, optional venue_id, sport (→ `sports`), title, starts_at, optional ends_at (CHECK > starts_at), optional skill_level (null = all levels), optional city_id, capacity, location_text, notes, status |
 | **Participation** | id, game_id, player_id, status (`requested`\|`approved`\|`declined`\|`cancelled`); unique `(game_id, player_id)` |
 
 ## States

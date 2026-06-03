@@ -16,6 +16,8 @@
 - **Core loop** — create game → request → approve → confirmed.
 - **The eight sports** — football, basketball, tennis, volleyball, padel, running, gym/fitness, swimming.
 - **Split profiles (identity)** — one auth account → a base `profiles` row + optional `client_profiles` (client-app surface marker) and `venue_owner_profiles`. Authoritative schema: `db-schema-and-backend-design.md`.
+- **Skill level** — a 5-tier ordered enum (`beginner < intermediate < amateur < advanced < professional`) declared per user per sport in `client_sport_skills`. Advisory only: a declared level never blocks a join request; it drives the organizer's "below required" indicator and discovery filtering. The organizer decides on approval.
+- **City** — a lookup entry in the `cities` table (mirrors the `sports` pattern). Used as a home-city filter on `profiles.city_id` and a discovery dimension on `games.city_id`. Seeded with major Azerbaijani cities; expandable without a schema change.
 
 ## Market benchmarks (reference only — not targets)
 

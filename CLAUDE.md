@@ -34,9 +34,11 @@ Identity uses **split profiles** (one auth account → a base `profiles` row + o
 
 | Object | Table(s) | Key fields |
 |---|---|---|
-| **Identity** | `profiles` (+ `client_profiles`, `venue_owner_profiles`) | profiles: `id` (= auth.users.id), display_name · client_profiles: client-surface marker (no role flags — any client can organize and play) · venue_owner_profiles: business_name, contact |
+| **Identity** | `profiles` (+ `client_profiles`, `venue_owner_profiles`) | profiles: `id` (= auth.users.id), `full_name` (NOT NULL), `display_name` (nullable, optional public handle), `city_id` · client_profiles: client-surface marker (no role flags — any client can organize and play) · venue_owner_profiles: business_name, contact · **phone lives in `auth.users` only** |
+| **Skill** | `client_sport_skills` | (profile_id, sport_id) PK; `skill_level` enum (beginner/intermediate/amateur/advanced/professional); per-user per-sport; advisory only |
+| **City** | `cities` | id, key (e.g. 'baku'), name; lookup table seeded with major Azerbaijani cities |
 | **Venue** | `venues` (+ `venue_sports`) | id, owner_id, name, supported sports (via `venue_sports`), address, contact_info, description |
-| **Game** | `games` | id, organizer_id, optional venue_id, sport_id (→ `sports` lookup), title, starts_at, capacity, location_text, notes, status, share_token |
+| **Game** | `games` | id, organizer_id, optional venue_id, sport_id (→ `sports` lookup), title, starts_at, `ends_at` (nullable, CHECK > starts_at), `skill_level` (nullable = all levels), `city_id`, capacity, location_text, notes, status, share_token |
 | **Participation** | `participations` | id, game_id, player_id, status (`requested`\|`approved`\|`declined`\|`cancelled`); `UNIQUE(game_id, player_id)` |
 
 ## Tech stack
@@ -89,6 +91,7 @@ Dockerfile
 - **Domain hot path in one module.** All create-game / request / approve / cancel write logic goes through `lib/booking/`. This localizes a future concurrency upgrade (e.g., a lock + `SELECT … FOR UPDATE`) if real contended slot-booking ever enters scope.
 - **Idempotent writes.** Enforce idempotency on core-loop mutations with DB unique constraints — e.g. unique `(game_id, player_id)` participation. A player can request a spot only once; double-taps must not create duplicates.
 - **Status is the single source of participation truth.** Player and organizer views render the same `requested/approved/declined/cancelled` model.
+- **Skill levels are advisory — the organizer decides.** `games.skill_level` and `client_sport_skills` drive the organizer's "below required" indicator and discovery filtering only. Nothing in the DB or RLS gates a join request based on skill; the `lib/booking` layer may prompt for a level but never blocks the insert.
 - **Match existing code.** Mirror the surrounding file's naming, structure, and idioms.
 - **Tests gate the core loop.** Keep the Playwright path (signup → create game → request → approve) green.
 
