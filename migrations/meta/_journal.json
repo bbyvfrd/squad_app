@@ -22,6 +22,13 @@
       "when": 1780468596776,
       "tag": "0002_drop_player_organizer_flags",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1780473723764,
+      "tag": "0003_skill_levels_identity_city",
+      "breakpoints": true
     }
   ]
 }
