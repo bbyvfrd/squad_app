@@ -15,6 +15,13 @@
       "when": 1780076127050,
       "tag": "0001_signup_trigger_and_sports_seed",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1780468596776,
+      "tag": "0002_drop_player_organizer_flags",
+      "breakpoints": true
     }
   ]
 }

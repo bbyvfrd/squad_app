@@ -23,7 +23,7 @@ It is **not** a booking, payments, or ticketing product in v1.
 
 - **Users:** hero = **organizer**; secondary = player; tertiary = venue owner.
 - **Two surfaces, one app, two route groups:** `/app` = client (player + organizer), `/venue` = venue owner (listings only).
-- **Client modes:** a client user can be `player`, `organizer`, or `both`. Never force player/organizer into separate apps.
+- **Client roles:** organizer and player are **per-game roles, not account types** — every client user can both create games (as organizer) and request spots (as player). Never split player/organizer into separate apps.
 - **8 fixed sports:** football, basketball, tennis, volleyball, padel, running, gym/fitness, swimming. No user-created sports.
 - **Geography:** Azerbaijan-wide — do **not** hard-code a geo restriction (must allow later expansion). **Language:** English (v1).
 - **Participation statuses:** `requested` → `approved` / `declined`, plus `cancelled`. That's the whole model — no waitlists, replacements, penalties, or fairness rules.
@@ -34,7 +34,7 @@ Identity uses **split profiles** (one auth account → a base `profiles` row + o
 
 | Object | Table(s) | Key fields |
 |---|---|---|
-| **Identity** | `profiles` (+ `client_profiles`, `venue_owner_profiles`) | profiles: `id` (= auth.users.id), display_name · client_profiles: is_player, is_organizer · venue_owner_profiles: business_name, contact |
+| **Identity** | `profiles` (+ `client_profiles`, `venue_owner_profiles`) | profiles: `id` (= auth.users.id), display_name · client_profiles: client-surface marker (no role flags — any client can organize and play) · venue_owner_profiles: business_name, contact |
 | **Venue** | `venues` (+ `venue_sports`) | id, owner_id, name, supported sports (via `venue_sports`), address, contact_info, description |
 | **Game** | `games` | id, organizer_id, optional venue_id, sport_id (→ `sports` lookup), title, starts_at, capacity, location_text, notes, status, share_token |
 | **Participation** | `participations` | id, game_id, player_id, status (`requested`\|`approved`\|`declined`\|`cancelled`); `UNIQUE(game_id, player_id)` |

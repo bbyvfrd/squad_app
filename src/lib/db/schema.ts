@@ -57,6 +57,11 @@ export const profiles = pgTable(
   ],
 );
 
+// One client identity per profile. Player vs organizer is a per-GAME role
+// (games.organizer_id / participations.player_id), NOT a per-user type: any
+// client user can both create and join games. This row only marks "this profile
+// uses the client app" — it gates client writes (see the games/participations
+// insert policies) and keeps the client surface distinct from venue owners.
 export const clientProfiles = pgTable(
   "client_profiles",
   {
@@ -64,13 +69,10 @@ export const clientProfiles = pgTable(
       .primaryKey()
       .notNull()
       .references(() => profiles.id, { onDelete: "cascade" }),
-    isPlayer: boolean("is_player").notNull().default(false),
-    isOrganizer: boolean("is_organizer").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (t) => [
-    check("chk_client_capability", sql`is_player or is_organizer`),
+  () => [
     // Self-only. A SELECT path is required for UPDATE to work, hence FOR ALL.
     pgPolicy("client_self", {
       for: "all",
@@ -192,7 +194,7 @@ export const games = pgTable(
     pgPolicy("games_insert", {
       for: "insert",
       to: authenticatedRole,
-      withCheck: sql`organizer_id = (select auth.uid()) and exists (select 1 from client_profiles c where c.profile_id = (select auth.uid()) and c.is_organizer)`,
+      withCheck: sql`organizer_id = (select auth.uid()) and exists (select 1 from client_profiles c where c.profile_id = (select auth.uid()))`,
     }),
     pgPolicy("games_update", {
       for: "update",
@@ -231,7 +233,7 @@ export const participations = pgTable(
     pgPolicy("part_insert", {
       for: "insert",
       to: authenticatedRole,
-      withCheck: sql`player_id = (select auth.uid()) and exists (select 1 from client_profiles c where c.profile_id = (select auth.uid()) and c.is_player) and exists (select 1 from games g where g.id = game_id and g.status = 'open' and g.deleted_at is null)`,
+      withCheck: sql`player_id = (select auth.uid()) and exists (select 1 from client_profiles c where c.profile_id = (select auth.uid())) and exists (select 1 from games g where g.id = game_id and g.status = 'open' and g.deleted_at is null)`,
     }),
     pgPolicy("part_update", {
       for: "update",

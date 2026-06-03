@@ -45,12 +45,21 @@ describe("handle_new_user trigger", () => {
   });
 });
 
+describe("client_profiles", () => {
+  it("accepts a client profile with no role flags (any client can play and organize)", async () => {
+    const u = await createAuthUser("Client");
+    await db.insert(clientProfiles).values({ profileId: u });
+    const [row] = await db.select().from(clientProfiles).where(eq(clientProfiles.profileId, u));
+    expect(row?.profileId).toBe(u);
+  });
+});
+
 describe("constraints", () => {
   it("blocks a duplicate (game_id, player_id) participation", async () => {
     const organizer = await createAuthUser("Org");
-    await db.insert(clientProfiles).values({ profileId: organizer, isOrganizer: true });
+    await db.insert(clientProfiles).values({ profileId: organizer });
     const player = await createAuthUser("Player");
-    await db.insert(clientProfiles).values({ profileId: player, isPlayer: true });
+    await db.insert(clientProfiles).values({ profileId: player });
 
     const gameId = newId();
     await db.insert(games).values({
@@ -70,7 +79,7 @@ describe("constraints", () => {
 
   it("rejects a game with capacity <= 0", async () => {
     const organizer = await createAuthUser("Org2");
-    await db.insert(clientProfiles).values({ profileId: organizer, isOrganizer: true });
+    await db.insert(clientProfiles).values({ profileId: organizer });
     await expect(
       db.insert(games).values({
         id: newId(),
@@ -82,19 +91,12 @@ describe("constraints", () => {
       }),
     ).rejects.toThrow();
   });
-
-  it("rejects a client_profile that is neither player nor organizer", async () => {
-    const u = await createAuthUser("Neither");
-    await expect(
-      db.insert(clientProfiles).values({ profileId: u, isPlayer: false, isOrganizer: false }),
-    ).rejects.toThrow();
-  });
 });
 
 describe("derived spots-remaining", () => {
   it("counts approved participations for a game", async () => {
     const organizer = await createAuthUser("Org3");
-    await db.insert(clientProfiles).values({ profileId: organizer, isOrganizer: true });
+    await db.insert(clientProfiles).values({ profileId: organizer });
     const gameId = newId();
     await db.insert(games).values({
       id: gameId,
@@ -106,9 +108,9 @@ describe("derived spots-remaining", () => {
     });
 
     const p1 = await createAuthUser("P1");
-    await db.insert(clientProfiles).values({ profileId: p1, isPlayer: true });
+    await db.insert(clientProfiles).values({ profileId: p1 });
     const p2 = await createAuthUser("P2");
-    await db.insert(clientProfiles).values({ profileId: p2, isPlayer: true });
+    await db.insert(clientProfiles).values({ profileId: p2 });
 
     await db.insert(participations).values({ id: newId(), gameId, playerId: p1, status: "approved" });
     await db.insert(participations).values({ id: newId(), gameId, playerId: p2, status: "requested" });
