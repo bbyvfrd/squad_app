@@ -74,13 +74,14 @@ CREATE TABLE profiles (
   updated_at    timestamptz NOT NULL DEFAULT now()
 );
 
+-- Marks "this profile uses the client app". Player vs organizer is a per-GAME
+-- role (games.organizer_id / participations.player_id), NOT a per-user flag:
+-- any client user can both create and join games. Kept distinct from
+-- venue_owner_profiles because /app and /venue are separate surfaces.
 CREATE TABLE client_profiles (
   profile_id    uuid PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE,
-  is_player     boolean NOT NULL DEFAULT false,
-  is_organizer  boolean NOT NULL DEFAULT false,
   created_at    timestamptz NOT NULL DEFAULT now(),
-  updated_at    timestamptz NOT NULL DEFAULT now(),
-  CONSTRAINT chk_client_capability CHECK (is_player OR is_organizer)
+  updated_at    timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE TABLE venue_owner_profiles (
@@ -183,8 +184,8 @@ Primary keys are auto-indexed; FK columns that aren't already index-leading get 
 | profiles | authenticated (display fields) | trigger (on signup) | self |
 | client / venue_owner profiles | self | self | self |
 | sports | everyone | — seeded | — service-role |
-| games | authenticated non-deleted; organizer sees own always | client w/ `is_organizer` | owning organizer |
-| participations | the player **or** the game's organizer | client w/ `is_player`, on an open game | organizer (approve/decline) · player (cancel own) |
+| games | authenticated non-deleted; organizer sees own always | any client (has `client_profiles`) | owning organizer |
+| participations | the player **or** the game's organizer | any client (has `client_profiles`), on an open game | organizer (approve/decline) · player (cancel own) |
 | venues | public non-deleted | venue owner | owner |
 | venue_sports | public | venue owner | venue owner |
 
@@ -225,7 +226,7 @@ CREATE POLICY games_select ON games FOR SELECT TO authenticated
   USING (deleted_at IS NULL OR organizer_id = (select auth.uid()));
 CREATE POLICY games_insert ON games FOR INSERT TO authenticated
   WITH CHECK (organizer_id = (select auth.uid())
-    AND EXISTS (SELECT 1 FROM client_profiles c WHERE c.profile_id = (select auth.uid()) AND c.is_organizer));
+    AND EXISTS (SELECT 1 FROM client_profiles c WHERE c.profile_id = (select auth.uid())));
 CREATE POLICY games_update ON games FOR UPDATE TO authenticated
   USING (organizer_id = (select auth.uid())) WITH CHECK (organizer_id = (select auth.uid()));
 
@@ -236,7 +237,7 @@ CREATE POLICY part_select ON participations FOR SELECT TO authenticated
     OR EXISTS (SELECT 1 FROM games g WHERE g.id = game_id AND g.organizer_id = (select auth.uid())));
 CREATE POLICY part_insert ON participations FOR INSERT TO authenticated
   WITH CHECK (player_id = (select auth.uid())
-    AND EXISTS (SELECT 1 FROM client_profiles c WHERE c.profile_id = (select auth.uid()) AND c.is_player)
+    AND EXISTS (SELECT 1 FROM client_profiles c WHERE c.profile_id = (select auth.uid()))
     AND EXISTS (SELECT 1 FROM games g WHERE g.id = game_id AND g.status='open' AND g.deleted_at IS NULL));
 CREATE POLICY part_update ON participations FOR UPDATE TO authenticated
   USING (player_id = (select auth.uid())

@@ -66,11 +66,11 @@ describe("RLS is enabled on every public base table", () => {
 describe("participations RLS: read isolation", () => {
   it("hides a participation from an unrelated player", async () => {
     const organizer = await createAuthUser("Org");
-    await db.insert(clientProfiles).values({ profileId: organizer, isOrganizer: true });
+    await db.insert(clientProfiles).values({ profileId: organizer });
     const playerA = await createAuthUser("A");
-    await db.insert(clientProfiles).values({ profileId: playerA, isPlayer: true });
+    await db.insert(clientProfiles).values({ profileId: playerA });
     const playerB = await createAuthUser("B");
-    await db.insert(clientProfiles).values({ profileId: playerB, isPlayer: true });
+    await db.insert(clientProfiles).values({ profileId: playerB });
 
     const gameId = newId();
     await db.insert(games).values({
@@ -91,26 +91,52 @@ describe("participations RLS: read isolation", () => {
   });
 });
 
-describe("games RLS: insert requires organizer capability", () => {
-  it("blocks a player-only user from creating a game; allows an organizer", async () => {
+describe("client-role RLS: any client user can create and join games", () => {
+  it("lets a client user (no role flags) create a game", async () => {
     const fid = await footballId();
+    const host = await createAuthUser("Host");
+    await db.insert(clientProfiles).values({ profileId: host });
 
-    const playerOnly = await createAuthUser("PlayerOnly");
-    await db.insert(clientProfiles).values({ profileId: playerOnly, isPlayer: true });
-    await expect(
-      asUser(playerOnly, (tx) => tx`
-        insert into games (id, organizer_id, sport_id, title, starts_at, capacity)
-        values (${newId()}, ${playerOnly}, ${fid}, 'Nope', now() + interval '1 day', 8)
-      `),
-    ).rejects.toThrow(/row-level security/i);
-
-    const organizer = await createAuthUser("Organizer");
-    await db.insert(clientProfiles).values({ profileId: organizer, isOrganizer: true });
-    const created = await asUser(organizer, (tx) => tx`
+    const created = await asUser(host, (tx) => tx`
       insert into games (id, organizer_id, sport_id, title, starts_at, capacity)
-      values (${newId()}, ${organizer}, ${fid}, 'Yes', now() + interval '1 day', 8)
+      values (${newId()}, ${host}, ${fid}, 'Hosted', now() + interval '1 day', 8)
       returning id
     `);
     expect(created).toHaveLength(1);
+  });
+
+  it("lets a client user request a spot in an open game", async () => {
+    const fid = await footballId();
+    const host = await createAuthUser("Host2");
+    await db.insert(clientProfiles).values({ profileId: host });
+    const gameId = newId();
+    await db.insert(games).values({
+      id: gameId,
+      organizerId: host,
+      sportId: fid,
+      title: "Joinable",
+      startsAt: new Date(Date.now() + 86_400_000),
+      capacity: 8,
+    });
+
+    const joiner = await createAuthUser("Joiner");
+    await db.insert(clientProfiles).values({ profileId: joiner });
+    const joined = await asUser(joiner, (tx) => tx`
+      insert into participations (id, game_id, player_id)
+      values (${newId()}, ${gameId}, ${joiner})
+      returning id
+    `);
+    expect(joined).toHaveLength(1);
+  });
+
+  it("blocks a user without a client profile from creating a game", async () => {
+    const fid = await footballId();
+    const outsider = await createAuthUser("Outsider");
+    await expect(
+      asUser(outsider, (tx) => tx`
+        insert into games (id, organizer_id, sport_id, title, starts_at, capacity)
+        values (${newId()}, ${outsider}, ${fid}, 'Nope', now() + interval '1 day', 8)
+      `),
+    ).rejects.toThrow(/row-level security/i);
   });
 });

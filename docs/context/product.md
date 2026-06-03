@@ -38,7 +38,7 @@ Recreational sports coordination for Azerbaijan. It replaces messy chat/call coo
 
 ## Surfaces & screens
 
-- **Client app** (`/app`): signup/login + mode selection · organizer dashboard · browse games · game detail · create game · request management · venue detail (read-only).
+- **Client app** (`/app`): signup/login · organizer dashboard · browse games · game detail · create game · request management · venue detail (read-only).
 - **Venue owner app** (`/venue`): signup/login · dashboard · create listing · edit listing · listing preview.
 
 ## Domain model (product objects — authoritative schema: `db-schema-and-backend-design.md`)
@@ -47,14 +47,14 @@ Identity is implemented as **split profiles** (`profiles` + optional `client_pro
 
 | Object | Key fields |
 |---|---|
-| **User (identity)** | account = `profiles` (id, display_name); client capability = `client_profiles` (is_player, is_organizer); venue capability = `venue_owner_profiles` (business_name, contact) |
+| **User (identity)** | account = `profiles` (id, display_name); client surface = `client_profiles` (marker — any client can organize and play); venue surface = `venue_owner_profiles` (business_name, contact) |
 | **Venue** | id, owner_id, name, supported_sports[] (via `venue_sports`), location_text, contact_info, description |
 | **Game** | id, organizer_id, optional venue_id, sport (→ `sports`), title, datetime, max_players, location_text, notes, status |
 | **Participation** | id, game_id, player_id, status (`requested`\|`approved`\|`declined`\|`cancelled`); unique `(game_id, player_id)` |
 
 ## States
 
-- **Client modes:** player / organizer / both.
+- **Client roles:** organizer + player are per-game roles; every client user can do both.
 - **Participation:** requested / approved / declined / cancelled.
 - **Screen states:** loading / loaded / empty / validation error / save failure / load failure / success.
 
@@ -68,4 +68,4 @@ Payments/deposits/refunds/checkout · venue booking calendars or availability ·
 
 ## Success criteria
 
-A user can sign up, choose a mode, browse games by sport, create a game, request to join, approve/decline as an organizer, see an approved spot with no payment or extra confirmation, and create/edit a venue listing. The product must make the core loop real — it does not need to be polished or monetizable first.
+A user can sign up, browse games by sport, create a game, request to join, approve/decline as an organizer, see an approved spot with no payment or extra confirmation, and create/edit a venue listing. The product must make the core loop real — it does not need to be polished or monetizable first.
