@@ -73,7 +73,7 @@ VALUES (NEW.id,
 ### `games` — skill + timing + city
 - Add `skill_level skill_level NULL` (`null` = all levels; minimum semantics).
 - Add `ends_at timestamptz NULL` + `CHECK (ends_at IS NULL OR ends_at > starts_at)` (`chk_games_ends_after_starts`).
-- Add `city_id smallint NULL REFERENCES cities(id) ON DELETE RESTRICT` (existing `location_text` stays as the specific spot).
+- Add `city_id smallint NULL REFERENCES cities(id) ON DELETE SET NULL` (existing `location_text` stays as the specific spot).
 - Optional index for city discovery: extend/adapt `games_open_upcoming_idx` or add `games_city_starts_idx (city_id, starts_at)` — finalise in the plan based on the discovery query.
 
 ## Behaviour (app layer — `lib/booking`)
