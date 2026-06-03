@@ -41,14 +41,16 @@ Recreational sports coordination for Azerbaijan. It replaces messy chat/call coo
 - **Client app** (`/app`): signup/login + mode selection · organizer dashboard · browse games · game detail · create game · request management · venue detail (read-only).
 - **Venue owner app** (`/venue`): signup/login · dashboard · create listing · edit listing · listing preview.
 
-## Domain model (product objects — not the final schema)
+## Domain model (product objects — authoritative schema: `db-schema-and-backend-design.md`)
+
+Identity is implemented as **split profiles** (`profiles` + optional `client_profiles` / `venue_owner_profiles`); the conceptual `User` below maps onto that. See the schema doc for tables, keys, indexing, and RLS.
 
 | Object | Key fields |
 |---|---|
-| **User** | id, name, email, account surface (`client`\|`venue_owner`), client mode (`player`\|`organizer`\|`both`), created_at |
-| **Venue** | id, owner_user_id, name, supported_sports[], location_text, contact_info, description, created_at |
-| **Game** | id, organizer_user_id, optional venue_id, sport, title, datetime, max_players, location_text, notes, created_at |
-| **GameParticipant** | id, game_id, user_id, status (`requested`\|`approved`\|`declined`\|`cancelled`), created_at |
+| **User (identity)** | account = `profiles` (id, display_name); client capability = `client_profiles` (is_player, is_organizer); venue capability = `venue_owner_profiles` (business_name, contact) |
+| **Venue** | id, owner_id, name, supported_sports[] (via `venue_sports`), location_text, contact_info, description |
+| **Game** | id, organizer_id, optional venue_id, sport (→ `sports`), title, datetime, max_players, location_text, notes, status |
+| **Participation** | id, game_id, player_id, status (`requested`\|`approved`\|`declined`\|`cancelled`); unique `(game_id, player_id)` |
 
 ## States
 

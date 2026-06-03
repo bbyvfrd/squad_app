@@ -20,6 +20,7 @@
 - Stack: Supabase (Postgres + Auth), Vercel, Drizzle ORM (migrations = schema source of truth), Tailwind + shadcn/ui, GitHub Actions, Terraform (HCP state), Zod config (fail-fast), Vitest + Playwright.
 - Architecture: **portable seams** (see `architecture.md`). Vercel atomic blue-green + health-gated rollback; CI portable with an isolated, vendor-aware deploy job only.
 - Refinements (from the market-pattern review): idempotent core-loop writes via DB unique constraints; all participation/booking writes behind one `lib/booking/` module.
+- **Data layer** (full spec: `docs/context/db-schema-and-backend-design.md`): identity = shared account + **split profiles** (`profiles` + `client_profiles` + `venue_owner_profiles`); authZ in two layers (app `lib/booking` primary + Supabase RLS as defense-in-depth, `(select auth.uid())` policies on every table); REST API under `/api/v1` (URI versioning) with action-based participation transitions; `sports` lookup table; derived spots-remaining; UUIDv7 PKs (app-generated); idempotent `UNIQUE(game_id, player_id)`.
 
 ## Non-decisions — deferred (do NOT lock here)
 

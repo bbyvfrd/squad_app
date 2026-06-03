@@ -10,11 +10,12 @@
 - **Player** — requests spots in games and receives explicit status.
 - **Venue owner** — publishes a venue listing that appears as read-only context on games.
 - **Game** — a scheduled session in one of the eight sports, created by an organizer.
-- **Game participant** — a user's relationship to a game, carrying a status.
+- **Game participant / participation** — a user's relationship to a game (the `participations` table), carrying a status; unique per `(game, player)`.
 - **Participation status** — `requested` → `approved` / `declined`; or `cancelled`.
 - **Client mode** — `player` / `organizer` / `both` (a single user can do both).
 - **Core loop** — create game → request → approve → confirmed.
 - **The eight sports** — football, basketball, tennis, volleyball, padel, running, gym/fitness, swimming.
+- **Split profiles (identity)** — one auth account → a base `profiles` row + optional `client_profiles` (player/organizer) and `venue_owner_profiles`. Authoritative schema: `db-schema-and-backend-design.md`.
 
 ## Market benchmarks (reference only — not targets)
 

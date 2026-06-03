@@ -189,6 +189,7 @@ Explicitly **not** adopted now: Redis, Kafka, PostGIS/H3, Go services, microserv
 
 ## Related
 
+- Database Schema & Backend Design (`docs/context/db-schema-and-backend-design.md`) — the data-layer design (schema, indexing, RLS, API) that sits on this foundation
 - Phase 1 MVP Build Spec
 - Decision Log
 - Non-Decisions

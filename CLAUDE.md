@@ -28,14 +28,16 @@ It is **not** a booking, payments, or ticketing product in v1.
 - **Geography:** Azerbaijan-wide — do **not** hard-code a geo restriction (must allow later expansion). **Language:** English (v1).
 - **Participation statuses:** `requested` → `approved` / `declined`, plus `cancelled`. That's the whole model — no waitlists, replacements, penalties, or fairness rules.
 
-### Domain model (product objects — a model, not the final schema)
+### Domain model (conceptual — authoritative schema is `docs/context/db-schema-and-backend-design.md`)
 
-| Object | Key fields |
-|---|---|
-| **User** | id, name, email, account surface (`client` \| `venue_owner`), client mode (`player`\|`organizer`\|`both`), created_at |
-| **Venue** | id, owner_user_id, name, supported_sports[], location_text, contact_info, description, created_at |
-| **Game** | id, organizer_user_id, optional venue_id, sport, title, datetime, max_players, location_text, notes, created_at |
-| **GameParticipant** | id, game_id, user_id, status (`requested`\|`approved`\|`declined`\|`cancelled`), created_at |
+Identity uses **split profiles** (one auth account → a base `profiles` row + optional `client_profiles` / `venue_owner_profiles`), **not** a single user table. The full 8-table schema, indexing, RLS policies, and `/api/v1` surface live in the schema doc — consult it for any data/backend work.
+
+| Object | Table(s) | Key fields |
+|---|---|---|
+| **Identity** | `profiles` (+ `client_profiles`, `venue_owner_profiles`) | profiles: `id` (= auth.users.id), display_name · client_profiles: is_player, is_organizer · venue_owner_profiles: business_name, contact |
+| **Venue** | `venues` (+ `venue_sports`) | id, owner_id, name, supported sports (via `venue_sports`), address, contact_info, description |
+| **Game** | `games` | id, organizer_id, optional venue_id, sport_id (→ `sports` lookup), title, starts_at, capacity, location_text, notes, status, share_token |
+| **Participation** | `participations` | id, game_id, player_id, status (`requested`\|`approved`\|`declined`\|`cancelled`); `UNIQUE(game_id, player_id)` |
 
 ## Tech stack
 
@@ -85,7 +87,7 @@ Dockerfile
 ## Conventions
 
 - **Domain hot path in one module.** All create-game / request / approve / cancel write logic goes through `lib/booking/`. This localizes a future concurrency upgrade (e.g., a lock + `SELECT … FOR UPDATE`) if real contended slot-booking ever enters scope.
-- **Idempotent writes.** Enforce idempotency on core-loop mutations with DB unique constraints — e.g. unique `(game_id, user_id)` participation. A player can request a spot only once; double-taps must not create duplicates.
+- **Idempotent writes.** Enforce idempotency on core-loop mutations with DB unique constraints — e.g. unique `(game_id, player_id)` participation. A player can request a spot only once; double-taps must not create duplicates.
 - **Status is the single source of participation truth.** Player and organizer views render the same `requested/approved/declined/cancelled` model.
 - **Match existing code.** Mirror the surrounding file's naming, structure, and idioms.
 - **Tests gate the core loop.** Keep the Playwright path (signup → create game → request → approve) green.
@@ -142,8 +144,8 @@ Out of scope for v1 — do not build unless the vault's scope changes:
 
 The vault is the upstream **brain**; this repo consumes a curated, read-only slice of it.
 
-- `docs/context/` holds distilled, stable artifacts synced from the vault (product, decisions, architecture, design system, glossary). The vault's raw research does **not** belong here.
-- This file `@`-imports the two load-bearing ones — `@docs/context/decisions.md` and `@docs/context/architecture.md` — so they are always in context. Read `docs/context/product.md`, `docs/context/design-system.md`, and `docs/context/glossary.md` when a task touches them.
+- `docs/context/` holds distilled, stable artifacts synced from the vault (product, decisions, architecture, schema/backend design, design system, glossary). The vault's raw research does **not** belong here.
+- This file `@`-imports the two load-bearing ones — `@docs/context/decisions.md` and `@docs/context/architecture.md` — so they are always in context. Read `docs/context/product.md`, `docs/context/db-schema-and-backend-design.md`, `docs/context/design-system.md`, and `docs/context/glossary.md` when a task touches them.
 - Build instructions live in `docs/plans/` (run once, in order) — not imported here. See the bundle README.
 - **Direction is one-way:** change product/architecture decisions in the vault, then re-sync the affected `docs/context/` file. Never decide them here.
 
