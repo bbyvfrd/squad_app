@@ -8,6 +8,17 @@ updates:
     groups:
       all-npm:
         patterns: ["*"]
+        # Group only non-breaking updates; majors come as separate PRs so one
+        # breaking major can't sink the whole batch (e.g. the ESLint 10 bump).
+        update-types: ["minor", "patch"]
+    ignore:
+      # ESLint & TypeScript majors are gated by Next's eslint-config / tsc support
+      # (ESLint 10 dropped the getFilename API that eslint-plugin-react still calls).
+      # Adopt them deliberately with a Next.js upgrade, not an automated major bump.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
