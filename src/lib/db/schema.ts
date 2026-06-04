@@ -28,6 +28,15 @@ export const participationStatus = pgEnum("participation_status", [
 // 'completed' is deferred (spec §3).
 export const gameStatus = pgEnum("game_status", ["open", "cancelled"]);
 
+// Ordered low→high so app code can compute "below required" (advisory only).
+export const skillLevel = pgEnum("skill_level", [
+  "beginner",
+  "intermediate",
+  "amateur",
+  "advanced",
+  "professional",
+]);
+
 // ── Identity: shared account + split surface profiles ─────────────────────────
 // profiles.id === auth.users.id. Row is created by the handle_new_user trigger
 // (Task 3), so there is NO INSERT policy here.
@@ -35,8 +44,10 @@ export const profiles = pgTable(
   "profiles",
   {
     id: uuid("id").primaryKey().notNull(),
-    displayName: text("display_name").notNull(),
+    fullName: text("full_name").notNull(),
+    displayName: text("display_name"),
     avatarUrl: text("avatar_url"),
+    cityId: smallint("city_id").references(() => cities.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
@@ -83,6 +94,34 @@ export const clientProfiles = pgTable(
   ],
 );
 
+// A client's declared level per sport. Advisory: nothing here gates joining a
+// game — the value drives the organizer's "below required" indicator only.
+export const clientSportSkills = pgTable(
+  "client_sport_skills",
+  {
+    profileId: uuid("profile_id")
+      .notNull()
+      .references(() => clientProfiles.profileId, { onDelete: "cascade" }),
+    sportId: smallint("sport_id")
+      .notNull()
+      .references(() => sports.id, { onDelete: "restrict" }),
+    skillLevel: skillLevel("skill_level").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.profileId, t.sportId] }),
+    index("client_sport_skills_sport_idx").on(t.sportId),
+    pgPolicy("csk_select", { for: "select", to: authenticatedRole, using: sql`true` }),
+    pgPolicy("csk_write", {
+      for: "all",
+      to: authenticatedRole,
+      using: sql`(select auth.uid()) = profile_id`,
+      withCheck: sql`(select auth.uid()) = profile_id`,
+    }),
+  ],
+);
+
 export const venueOwnerProfiles = pgTable(
   "venue_owner_profiles",
   {
@@ -103,6 +142,22 @@ export const venueOwnerProfiles = pgTable(
       using: sql`(select auth.uid()) = profile_id`,
       withCheck: sql`(select auth.uid()) = profile_id`,
     }),
+  ],
+);
+
+// ── Reference: cities lookup (lookup table, not an enum, so it can grow) ───────
+export const cities = pgTable(
+  "cities",
+  {
+    id: smallint("id").primaryKey().generatedAlwaysAsIdentity(),
+    key: text("key").notNull().unique(),
+    name: text("name").notNull(),
+    displayOrder: smallint("display_order").notNull().default(0),
+    isActive: boolean("is_active").notNull().default(true),
+  },
+  () => [
+    // Public reference; writes are service-role only (no write policy → denied).
+    pgPolicy("cities_read", { for: "select", to: authenticatedRole, using: sql`true` }),
   ],
 );
 
@@ -168,6 +223,9 @@ export const games = pgTable(
     venueId: uuid("venue_id").references(() => venues.id, { onDelete: "set null" }),
     title: text("title").notNull(),
     startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
+    skillLevel: skillLevel("skill_level"), // null = all levels
+    endsAt: timestamp("ends_at", { withTimezone: true }),
+    cityId: smallint("city_id").references(() => cities.id, { onDelete: "set null" }),
     capacity: smallint("capacity").notNull(),
     locationText: text("location_text"), // nullable in v1 (validation later)
     notes: text("notes"),
@@ -179,7 +237,9 @@ export const games = pgTable(
   },
   (t) => [
     check("chk_games_capacity", sql`capacity > 0`),
+    check("chk_games_ends_after_starts", sql`ends_at is null or ends_at > starts_at`),
     index("games_sport_starts_idx").on(t.sportId, t.startsAt),
+    index("games_city_starts_idx").on(t.cityId, t.startsAt).where(sql`deleted_at is null`),
     index("games_open_upcoming_idx")
       .on(t.startsAt)
       .where(sql`status = 'open' and deleted_at is null`),

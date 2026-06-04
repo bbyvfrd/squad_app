@@ -26,7 +26,7 @@ async function createAuthUser(displayName: string): Promise<string> {
   await client`
     insert into auth.users (instance_id, id, aud, role, email, raw_user_meta_data, created_at, updated_at)
     values ('00000000-0000-0000-0000-000000000000', ${id}, 'authenticated', 'authenticated',
-            ${email}, ${`{"display_name":"${displayName}"}`}::jsonb, now(), now())
+            ${email}, ${`{"full_name":"${displayName}","display_name":"${displayName}"}`}::jsonb, now(), now())
   `;
   return id;
 }
@@ -138,5 +138,35 @@ describe("client-role RLS: any client user can create and join games", () => {
         values (${newId()}, ${outsider}, ${fid}, 'Nope', now() + interval '1 day', 8)
       `),
     ).rejects.toThrow(/row-level security/i);
+  });
+});
+
+describe("client_sport_skills RLS: self-write, broad read", () => {
+  it("lets a user write only their own skills but read others'", async () => {
+    const sport = await footballId();
+    const a = await createAuthUser("A");
+    await db.insert(clientProfiles).values({ profileId: a });
+    const b = await createAuthUser("B");
+    await db.insert(clientProfiles).values({ profileId: b });
+
+    // A can insert their own skill.
+    await asUser(a, (tx) => tx`
+      insert into client_sport_skills (profile_id, sport_id, skill_level)
+      values (${a}, ${sport}, 'amateur')
+    `);
+
+    // A cannot insert a skill row for B.
+    await expect(
+      asUser(a, (tx) => tx`
+        insert into client_sport_skills (profile_id, sport_id, skill_level)
+        values (${b}, ${sport}, 'advanced')
+      `),
+    ).rejects.toThrow(/row-level security/i);
+
+    // B can read A's skill (broad read).
+    const seen = await asUser(b, (tx) => tx`
+      select skill_level from client_sport_skills where profile_id = ${a} and sport_id = ${sport}
+    `);
+    expect(seen).toHaveLength(1);
   });
 });

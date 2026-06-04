@@ -37,7 +37,7 @@ These were settled before this design and are cited, not re-decided:
 
 ## 2. Entity model
 
-Eight tables. Identity uses the shared-account + split-profile model; `sports` is a lookup table (not an enum) so the set can grow without a migration; spots-remaining is **derived** (count of `approved` participations), never stored.
+Ten tables. Identity uses the shared-account + split-profile model; `sports` and `cities` are lookup tables (not enums) so their sets can grow without a migration; spots-remaining is **derived** (count of `approved` participations), never stored. Phone lives in `auth.users` only — it is never mirrored onto `profiles` (privacy; see §3).
 
 **Live diagram (Miro):** https://miro.com/app/board/uXjVHMLmYbQ=/ — the interactive ERD/board version of this schema.
 
@@ -49,11 +49,15 @@ erDiagram
   PROFILES   ||--o{ GAMES : organizes
   PROFILES   ||--o{ PARTICIPATIONS : plays
   PROFILES   ||--o{ VENUES : owns
+  CLIENT_PROFILES ||--o{ CLIENT_SPORT_SKILLS : "declares level"
+  SPORTS     ||--o{ CLIENT_SPORT_SKILLS : ""
   SPORTS     ||--o{ GAMES : categorizes
   VENUES     |o--o{ GAMES : "contextualizes (optional)"
   GAMES      ||--o{ PARTICIPATIONS : has
   VENUES     ||--o{ VENUE_SPORTS : ""
   SPORTS     ||--o{ VENUE_SPORTS : ""
+  CITIES     ||--o{ PROFILES : "home city"
+  CITIES     ||--o{ GAMES : ""
 ```
 
 **Deferred-with-seams (intentionally absent in v1):** teams/groups, a real `bookings`/slots table, ratings/reviews, recurring-game model, chat. Each has a documented seam in the foundation plan; none is modeled now.
@@ -64,12 +68,26 @@ erDiagram
 -- Enums
 CREATE TYPE participation_status AS ENUM ('requested','approved','declined','cancelled');
 CREATE TYPE game_status          AS ENUM ('open','cancelled');   -- 'completed' deferred
+-- Ordered low→high so app code can compute "below required" (advisory only).
+CREATE TYPE skill_level          AS ENUM ('beginner','intermediate','amateur','advanced','professional');
+
+-- Reference: cities lookup (like sports — lookup table so it can grow)
+CREATE TABLE cities (
+  id             smallint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  key            text NOT NULL UNIQUE,        -- 'baku', 'ganja', ...
+  name           text NOT NULL,
+  display_order  smallint NOT NULL DEFAULT 0,
+  is_active      boolean NOT NULL DEFAULT true
+);   -- seeded with major Azerbaijani cities via migration
 
 -- Identity (Option B: shared account + split surface profiles)
+-- NOTE: phone is NOT here — it lives in auth.users only (privacy; see Auth § below).
 CREATE TABLE profiles (
   id            uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  display_name  text NOT NULL,
+  full_name     text NOT NULL,
+  display_name  text,                         -- optional public handle; falls back to full_name
   avatar_url    text,
+  city_id       smallint REFERENCES cities(id) ON DELETE SET NULL,
   created_at    timestamptz NOT NULL DEFAULT now(),
   updated_at    timestamptz NOT NULL DEFAULT now()
 );
@@ -83,6 +101,18 @@ CREATE TABLE client_profiles (
   created_at    timestamptz NOT NULL DEFAULT now(),
   updated_at    timestamptz NOT NULL DEFAULT now()
 );
+
+-- A client's declared level per sport. Advisory: nothing here gates joining a
+-- game — the value drives the organizer's "below required" indicator only.
+CREATE TABLE client_sport_skills (
+  profile_id   uuid     NOT NULL REFERENCES client_profiles(profile_id) ON DELETE CASCADE,
+  sport_id     smallint NOT NULL REFERENCES sports(id) ON DELETE RESTRICT,
+  skill_level  skill_level NOT NULL,
+  created_at   timestamptz NOT NULL DEFAULT now(),
+  updated_at   timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (profile_id, sport_id)
+);
+CREATE INDEX client_sport_skills_sport_idx ON client_sport_skills (sport_id);
 
 CREATE TABLE venue_owner_profiles (
   profile_id     uuid PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE,
@@ -123,6 +153,9 @@ CREATE TABLE games (
   venue_id      uuid REFERENCES venues(id) ON DELETE SET NULL,   -- optional context
   title         text NOT NULL,
   starts_at     timestamptz NOT NULL,
+  skill_level   skill_level,                  -- null = all levels; minimum semantics (advisory)
+  ends_at       timestamptz,                  -- optional; CONSTRAINT chk_games_ends_after_starts
+  city_id       smallint REFERENCES cities(id) ON DELETE SET NULL,
   capacity      smallint NOT NULL CHECK (capacity > 0),
   location_text text,                          -- nullable in v1 (validation later)
   notes         text,
@@ -130,7 +163,8 @@ CREATE TABLE games (
   share_token   text,                          -- ★ invite/share seam
   created_at    timestamptz NOT NULL DEFAULT now(),
   updated_at    timestamptz NOT NULL DEFAULT now(),
-  deleted_at    timestamptz                    -- ★ soft delete
+  deleted_at    timestamptz,                   -- ★ soft delete
+  CONSTRAINT chk_games_ends_after_starts CHECK (ends_at IS NULL OR ends_at > starts_at)
 );
 
 CREATE TABLE participations (
@@ -161,6 +195,7 @@ Driven by the real query patterns, not speculative:
 | Index | Serves |
 |---|---|
 | `games(sport_id, starts_at)` | Browse by sport, time-sorted (player's primary query) |
+| `games(city_id, starts_at) WHERE deleted_at IS NULL` (partial) | City-based discovery feed |
 | `games(starts_at) WHERE status='open' AND deleted_at IS NULL` (partial) | "Upcoming open games" feed |
 | `games(organizer_id) WHERE deleted_at IS NULL` (partial) | Organizer dashboard |
 | `games(venue_id) WHERE venue_id IS NOT NULL` (partial) | A venue's games |
@@ -170,6 +205,7 @@ Driven by the real query patterns, not speculative:
 | `UNIQUE(games.share_token) WHERE share_token IS NOT NULL` (partial) | Invite-link resolution |
 | `venues(owner_id) WHERE deleted_at IS NULL` (partial) | Venue-owner dashboard |
 | `venue_sports(sport_id)` | "Venues supporting sport X" |
+| `client_sport_skills(sport_id)` | "All players with a level for sport X" |
 
 Primary keys are auto-indexed; FK columns that aren't already index-leading get their own index above.
 
@@ -183,13 +219,15 @@ Primary keys are auto-indexed; FK columns that aren't already index-leading get 
 |---|---|---|---|
 | profiles | authenticated (display fields) | trigger (on signup) | self |
 | client / venue_owner profiles | self | self | self |
-| sports | everyone | — seeded | — service-role |
+| client_sport_skills | authenticated (organizers need requesters' levels) | self | self |
+| sports | authenticated | — seeded | — service-role |
+| cities | authenticated | — seeded | — service-role |
 | games | authenticated non-deleted; organizer sees own always | any client (has `client_profiles`) | owning organizer |
 | participations | the player **or** the game's organizer | any client (has `client_profiles`), on an open game | organizer (approve/decline) · player (cancel own) |
 | venues | public non-deleted | venue owner | owner |
 | venue_sports | public | venue owner | venue owner |
 
-### Enable RLS + policies (all 8 tables)
+### Enable RLS + policies (all 10 tables)
 
 RLS is enabled on **every** table — a table with RLS on and *no* policy denies all access, so each one gets explicit policies. All policies use `TO authenticated` and wrap helper calls as `(select auth.uid())`, so they run **once per query, not per row** (Supabase advisor `0003_auth_rls_initplan`).
 
@@ -197,6 +235,7 @@ RLS is enabled on **every** table — a table with RLS on and *no* policy denies
 -- profiles — created by trigger (below); self-update; display fields readable to all signed-in users.
 -- Holds ONLY display fields, so a broad SELECT is safe. If a sensitive column is ever added, move it
 -- to a private table OR expose a view WITH (security_invoker = true) — plain views bypass RLS.
+-- NOTE: phone is NOT on profiles — it lives in auth.users only (privacy; native Supabase Auth phone OTP).
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 CREATE POLICY profiles_select ON profiles FOR SELECT TO authenticated USING (true);
 CREATE POLICY profiles_update ON profiles FOR UPDATE TO authenticated
@@ -211,9 +250,19 @@ ALTER TABLE venue_owner_profiles ENABLE ROW LEVEL SECURITY;
 CREATE POLICY venue_owner_self ON venue_owner_profiles FOR ALL TO authenticated
   USING ((select auth.uid()) = profile_id) WITH CHECK ((select auth.uid()) = profile_id);
 
--- sports + venue_sports — public reference; writes are service-role (sports) / venue owner (venue_sports)
+-- client_sport_skills — readable by all authenticated (organizers need requesters' levels); writable by self
+ALTER TABLE client_sport_skills ENABLE ROW LEVEL SECURITY;
+CREATE POLICY csk_select ON client_sport_skills FOR SELECT TO authenticated USING (true);
+CREATE POLICY csk_write ON client_sport_skills FOR ALL TO authenticated
+  USING ((select auth.uid()) = profile_id) WITH CHECK ((select auth.uid()) = profile_id);
+
+-- sports + cities — public reference; writes are service-role only (no write policy → denied)
 ALTER TABLE sports ENABLE ROW LEVEL SECURITY;
 CREATE POLICY sports_read ON sports FOR SELECT TO authenticated USING (true);
+ALTER TABLE cities ENABLE ROW LEVEL SECURITY;
+CREATE POLICY cities_read ON cities FOR SELECT TO authenticated USING (true);
+
+-- venue_sports — public reference; writes by venue owner
 ALTER TABLE venue_sports ENABLE ROW LEVEL SECURITY;
 CREATE POLICY vsports_read ON venue_sports FOR SELECT TO authenticated USING (true);
 CREATE POLICY vsports_write ON venue_sports FOR ALL TO authenticated
@@ -261,8 +310,10 @@ CREATE POLICY venues_write ON venues FOR ALL TO authenticated
 CREATE FUNCTION private.handle_new_user() RETURNS trigger
   LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 BEGIN
-  INSERT INTO public.profiles (id, display_name)
-  VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data ->> 'display_name', ''));
+  INSERT INTO public.profiles (id, full_name, display_name)
+  VALUES (NEW.id,
+          COALESCE(NEW.raw_user_meta_data ->> 'full_name', ''),
+          NULLIF(NEW.raw_user_meta_data ->> 'display_name', ''));
   RETURN NEW;
 END; $$;
 CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users
@@ -316,6 +367,8 @@ Outside-in; infra layers reuse the foundation plan, data layers come from this d
 ## 8. Decisions locked here · open seams
 
 **Locked this session:** identity = shared account + split profiles (B); lean + cheap seams; `sports` as a lookup table; derived spots-remaining; UUIDv7 PKs, app-generated (`smallint` for sports); `games.organizer_id` CASCADE; nullable `location_text`; URI API versioning; action-based participation transitions; app-layer capacity/state-machine with RLS as defense-in-depth.
+
+**Locked (schema v2 — 2026-06-03):** `profiles.full_name` NOT NULL (populated by trigger from signup metadata); `profiles.display_name` nullable (optional public handle, app falls back to `full_name`); phone lives in `auth.users` only (native Supabase Auth phone OTP — never mirrored to `profiles`); `cities` lookup table (mirrors `sports` pattern, seeded with major Azerbaijani cities); `profiles.city_id` + `games.city_id` (FK to `cities`); `skill_level` enum (5-tier ordered: `beginner < intermediate < amateur < advanced < professional`); `client_sport_skills` per-sport skill declaration (advisory only — nothing in the schema gates joining; the organizer decides); `games.skill_level` nullable (null = all levels, minimum semantics); `games.ends_at` nullable with CHECK `ends_at > starts_at`.
 
 **Open / deferred (with seams):**
 - Mandatory-vs-optional field rules for game creation & venue listings (PRD open questions) — validation, not structure.
