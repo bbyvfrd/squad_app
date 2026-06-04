@@ -17,7 +17,7 @@ tags:
 
 ## 0. How to read this
 
-This is the **data-layer design** for the SQUAD multi-sport coordination MVP, derived directly from the Phase 1 PRD. It was produced *schema-first*: §1 restates the **already-decided** architecture as confirmed context (not re-opened), and §2–§6 are the new design work — the schema, indexing, authorization/RLS, and API surface that fall out of it.
+This is the **data-layer design** for the SQUAD multi-sport coordination MVP, derived directly from the Phase 1 PRD. It was produced _schema-first_: §1 restates the **already-decided** architecture as confirmed context (not re-opened), and §2–§6 are the new design work — the schema, indexing, authorization/RLS, and API surface that fall out of it.
 
 - **Scope boundary:** implemented in the **separate app repo**; this vault stays the product/research source of truth. Schema source of truth = SQL migrations (`migrations/`), per App Foundation — Portable Seams.
 - **Status:** draft for review. Field mandatory/optional rules and a few seams remain open (see §8).
@@ -26,14 +26,14 @@ This is the **data-layer design** for the SQUAD multi-sport coordination MVP, de
 
 These were settled before this design and are cited, not re-decided:
 
-| Dimension | Decision | Source |
-|---|---|---|
-| Architecture pattern | **Modular monolith** — one Next.js app, two route groups (`/app`, `/venue`), one shared backend | Decision Log, Foundation vs Market |
-| Communication | App-owned **REST** route handlers → `lib/booking` domain module → **Drizzle ORM** → Postgres. No GraphQL/gRPC/event bus (deferred) | Portable Seams §3, §10 |
-| Data pattern | **CRUD** (no CQRS / Event Sourcing — "don't over-engineer the MVP") | Portable Seams §11; Database Schema Design |
-| Database / Auth / Host | **Supabase Postgres + Supabase Auth + Vercel** (proposed), DB & auth behind seams | Non-Decisions |
-| Identity model | **Shared account + split surface profiles** (chosen this session) | §2 below |
-| Lookahead | **Lean + cheap seams** (chosen this session) | §2–§8 |
+| Dimension              | Decision                                                                                                                           | Source                                     |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| Architecture pattern   | **Modular monolith** — one Next.js app, two route groups (`/app`, `/venue`), one shared backend                                    | Decision Log, Foundation vs Market         |
+| Communication          | App-owned **REST** route handlers → `lib/booking` domain module → **Drizzle ORM** → Postgres. No GraphQL/gRPC/event bus (deferred) | Portable Seams §3, §10                     |
+| Data pattern           | **CRUD** (no CQRS / Event Sourcing — "don't over-engineer the MVP")                                                                | Portable Seams §11; Database Schema Design |
+| Database / Auth / Host | **Supabase Postgres + Supabase Auth + Vercel** (proposed), DB & auth behind seams                                                  | Non-Decisions                              |
+| Identity model         | **Shared account + split surface profiles** (chosen this session)                                                                  | §2 below                                   |
+| Lookahead              | **Lean + cheap seams** (chosen this session)                                                                                       | §2–§8                                      |
 
 ## 2. Entity model
 
@@ -192,20 +192,20 @@ CREATE TABLE venue_sports (
 
 Driven by the real query patterns, not speculative:
 
-| Index | Serves |
-|---|---|
-| `games(sport_id, starts_at)` | Browse by sport, time-sorted (player's primary query) |
-| `games(city_id, starts_at) WHERE deleted_at IS NULL` (partial) | City-based discovery feed |
-| `games(starts_at) WHERE status='open' AND deleted_at IS NULL` (partial) | "Upcoming open games" feed |
-| `games(organizer_id) WHERE deleted_at IS NULL` (partial) | Organizer dashboard |
-| `games(venue_id) WHERE venue_id IS NOT NULL` (partial) | A venue's games |
-| `participations(game_id, status)` | Request management; counting `approved` for spots-remaining |
-| `participations(player_id)` | Player's "my requests/games" |
-| `UNIQUE(game_id, player_id)` | Idempotent join + game-prefix scans |
-| `UNIQUE(games.share_token) WHERE share_token IS NOT NULL` (partial) | Invite-link resolution |
-| `venues(owner_id) WHERE deleted_at IS NULL` (partial) | Venue-owner dashboard |
-| `venue_sports(sport_id)` | "Venues supporting sport X" |
-| `client_sport_skills(sport_id)` | "All players with a level for sport X" |
+| Index                                                                   | Serves                                                      |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `games(sport_id, starts_at)`                                            | Browse by sport, time-sorted (player's primary query)       |
+| `games(city_id, starts_at) WHERE deleted_at IS NULL` (partial)          | City-based discovery feed                                   |
+| `games(starts_at) WHERE status='open' AND deleted_at IS NULL` (partial) | "Upcoming open games" feed                                  |
+| `games(organizer_id) WHERE deleted_at IS NULL` (partial)                | Organizer dashboard                                         |
+| `games(venue_id) WHERE venue_id IS NOT NULL` (partial)                  | A venue's games                                             |
+| `participations(game_id, status)`                                       | Request management; counting `approved` for spots-remaining |
+| `participations(player_id)`                                             | Player's "my requests/games"                                |
+| `UNIQUE(game_id, player_id)`                                            | Idempotent join + game-prefix scans                         |
+| `UNIQUE(games.share_token) WHERE share_token IS NOT NULL` (partial)     | Invite-link resolution                                      |
+| `venues(owner_id) WHERE deleted_at IS NULL` (partial)                   | Venue-owner dashboard                                       |
+| `venue_sports(sport_id)`                                                | "Venues supporting sport X"                                 |
+| `client_sport_skills(sport_id)`                                         | "All players with a level for sport X"                      |
 
 Primary keys are auto-indexed; FK columns that aren't already index-leading get their own index above.
 
@@ -215,21 +215,21 @@ Primary keys are auto-indexed; FK columns that aren't already index-leading get 
 
 ### AuthZ matrix
 
-| Resource | Read | Create | Update |
-|---|---|---|---|
-| profiles | authenticated (display fields) | trigger (on signup) | self |
-| client / venue_owner profiles | self | self | self |
-| client_sport_skills | authenticated (organizers need requesters' levels) | self | self |
-| sports | authenticated | — seeded | — service-role |
-| cities | authenticated | — seeded | — service-role |
-| games | authenticated non-deleted; organizer sees own always | any client (has `client_profiles`) | owning organizer |
-| participations | the player **or** the game's organizer | any client (has `client_profiles`), on an open game | organizer (approve/decline) · player (cancel own) |
-| venues | public non-deleted | venue owner | owner |
-| venue_sports | public | venue owner | venue owner |
+| Resource                      | Read                                                 | Create                                              | Update                                            |
+| ----------------------------- | ---------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------- |
+| profiles                      | authenticated (display fields)                       | trigger (on signup)                                 | self                                              |
+| client / venue_owner profiles | self                                                 | self                                                | self                                              |
+| client_sport_skills           | authenticated (organizers need requesters' levels)   | self                                                | self                                              |
+| sports                        | authenticated                                        | — seeded                                            | — service-role                                    |
+| cities                        | authenticated                                        | — seeded                                            | — service-role                                    |
+| games                         | authenticated non-deleted; organizer sees own always | any client (has `client_profiles`)                  | owning organizer                                  |
+| participations                | the player **or** the game's organizer               | any client (has `client_profiles`), on an open game | organizer (approve/decline) · player (cancel own) |
+| venues                        | public non-deleted                                   | venue owner                                         | owner                                             |
+| venue_sports                  | public                                               | venue owner                                         | venue owner                                       |
 
 ### Enable RLS + policies (all 10 tables)
 
-RLS is enabled on **every** table — a table with RLS on and *no* policy denies all access, so each one gets explicit policies. All policies use `TO authenticated` and wrap helper calls as `(select auth.uid())`, so they run **once per query, not per row** (Supabase advisor `0003_auth_rls_initplan`).
+RLS is enabled on **every** table — a table with RLS on and _no_ policy denies all access, so each one gets explicit policies. All policies use `TO authenticated` and wrap helper calls as `(select auth.uid())`, so they run **once per query, not per row** (Supabase advisor `0003_auth_rls_initplan`).
 
 ```sql
 -- profiles — created by trigger (below); self-update; display fields readable to all signed-in users.
@@ -333,23 +333,23 @@ The function lives in a **private (non-API-exposed) schema** — `SECURITY DEFIN
 
 **Versioning:** **URI versioning (`/api/v1`).** Whole-surface version; additive changes stay in v1, breaking changes → v2 with a `Sunset` deprecation window. Contract generated as **OpenAPI from Zod** (one source for validation + typed client).
 
-| Method + path | Purpose | Guard |
-|---|---|---|
-| `GET/PATCH /me` | Profile + capabilities | self |
-| `POST /me/client-profile` · `POST /me/venue-profile` | Enable a surface | self |
-| `GET /sports` | Reference list | any |
-| `GET /games?sport=&from=&cursor=` | Browse open upcoming games | client |
-| `POST /games` | Create game | organizer |
-| `GET /games/:id` | Detail + venue context + spots-remaining + viewer status | client |
-| `PATCH /games/:id` | Edit / cancel | owning organizer |
-| `GET /games/:id/participations` | Requests for a game | owning organizer |
-| `POST /games/:id/participations` | Request a spot (idempotent → 409 on dup) | player |
-| `PATCH /participations/:id` | `{action: approve\|decline\|cancel}` | organizer / player |
-| `GET /me/games` · `GET /me/participations` | Dashboards | self |
-| `GET /venues?sport=&cursor=` · `GET /venues/:id` | Browse / read venue context | any auth |
-| `POST /venues` · `PATCH /venues/:id` | Create / edit listing (`supported_sports[]` inline) | venue owner |
-| `GET /me/venues` | Venue-owner dashboard | self |
-| `GET /games/by-token/:shareToken` | Resolve invite link | seam |
+| Method + path                                        | Purpose                                                  | Guard              |
+| ---------------------------------------------------- | -------------------------------------------------------- | ------------------ |
+| `GET/PATCH /me`                                      | Profile + capabilities                                   | self               |
+| `POST /me/client-profile` · `POST /me/venue-profile` | Enable a surface                                         | self               |
+| `GET /sports`                                        | Reference list                                           | any                |
+| `GET /games?sport=&from=&cursor=`                    | Browse open upcoming games                               | client             |
+| `POST /games`                                        | Create game                                              | organizer          |
+| `GET /games/:id`                                     | Detail + venue context + spots-remaining + viewer status | client             |
+| `PATCH /games/:id`                                   | Edit / cancel                                            | owning organizer   |
+| `GET /games/:id/participations`                      | Requests for a game                                      | owning organizer   |
+| `POST /games/:id/participations`                     | Request a spot (idempotent → 409 on dup)                 | player             |
+| `PATCH /participations/:id`                          | `{action: approve\|decline\|cancel}`                     | organizer / player |
+| `GET /me/games` · `GET /me/participations`           | Dashboards                                               | self               |
+| `GET /venues?sport=&cursor=` · `GET /venues/:id`     | Browse / read venue context                              | any auth           |
+| `POST /venues` · `PATCH /venues/:id`                 | Create / edit listing (`supported_sports[]` inline)      | venue owner        |
+| `GET /me/venues`                                     | Venue-owner dashboard                                    | self               |
+| `GET /games/by-token/:shareToken`                    | Resolve invite link                                      | seam               |
 
 **Conventions:** action-based participation PATCH (state machine stays server-side) · error envelope `{error:{code,message,details?}}` with standard HTTP codes (`409` duplicate request, `422` semantic) · cursor/keyset pagination on `(starts_at, id)` · Zod validation at every boundary · optional `Idempotency-Key` header seam on creates · rate-limiting documented as a deferred seam.
 
@@ -371,6 +371,7 @@ Outside-in; infra layers reuse the foundation plan, data layers come from this d
 **Locked (schema v2 — 2026-06-03):** `profiles.full_name` NOT NULL (populated by trigger from signup metadata); `profiles.display_name` nullable (optional public handle, app falls back to `full_name`); phone lives in `auth.users` only (native Supabase Auth phone OTP — never mirrored to `profiles`); `cities` lookup table (mirrors `sports` pattern, seeded with major Azerbaijani cities); `profiles.city_id` + `games.city_id` (FK to `cities`); `skill_level` enum (5-tier ordered: `beginner < intermediate < amateur < advanced < professional`); `client_sport_skills` per-sport skill declaration (advisory only — nothing in the schema gates joining; the organizer decides); `games.skill_level` nullable (null = all levels, minimum semantics); `games.ends_at` nullable with CHECK `ends_at > starts_at`.
 
 **Open / deferred (with seams):**
+
 - Mandatory-vs-optional field rules for game creation & venue listings (PRD open questions) — validation, not structure.
 - The invite/share **artifact** (token mechanism reserved via `games.share_token`; the artifact itself undefined).
 - Cross-surface account behavior (one identity holding both a client and venue profile) — structurally supported, UX deferred.
@@ -383,7 +384,7 @@ Hardening applied after a `supabase`-skill review, verified against current docs
 
 - **RLS performance:** every policy wraps helpers as `(select auth.uid())` (once-per-query, not per-row) and filters on indexed columns (§4). Run `supabase db advisors` / MCP `get_advisors` after writing the migration to catch initplan, unindexed-FK, and RLS-disabled regressions.
 - **Migration ownership:** Drizzle Kit authors and applies the SQL migrations (source of truth); the Supabase CLI is used only for the local stack and `db advisors` — **not** for schema authorship. No double-management.
-- **Data API:** the app reaches Postgres server-side through Drizzle, so RLS is defense-in-depth. If any client uses the Supabase Data API directly, ensure the table is exposed *and* RLS is on. Keep the `service_role`/secret key server-only; use the **publishable** key (not the legacy `anon` key) in client code.
+- **Data API:** the app reaches Postgres server-side through Drizzle, so RLS is defense-in-depth. If any client uses the Supabase Data API directly, ensure the table is exposed _and_ RLS is on. Keep the `service_role`/secret key server-only; use the **publishable** key (not the legacy `anon` key) in client code.
 - **No `user_metadata` in authorization:** capability checks read `client_profiles` / `venue_owner_profiles`, never the user-editable JWT `user_metadata`. If capabilities ever move into the JWT for speed, use `raw_app_meta_data`.
 
 ## Related

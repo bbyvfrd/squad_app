@@ -23,7 +23,7 @@ This is **Plan 2 of 4** in the foundation series derived from `output/2026-05-29
 
 The design's §5 table describes the end-state pipeline. Two items are deliberately re-scoped here so this plan produces a **working, self-contained CI** with **no references to things that do not exist yet**. Both are documented seams, not cut features.
 
-1. **E2E runs against the app booted *inside* the CI job — not a "PR preview URL."** Preview URLs come from Vercel via `deploy.yml`, which is Plan 4. Pointing CI at a Vercel URL would make `ci.yml` vendor-aware, violating the design's own rule that "`ci.yml` is 100% portable; only `deploy.yml` knows about Vercel" (§5). So the `e2e` job builds the app and starts it via Playwright's `webServer`. Plan 4 adds a second, post-deploy core-loop check against the live preview.
+1. **E2E runs against the app booted _inside_ the CI job — not a "PR preview URL."** Preview URLs come from Vercel via `deploy.yml`, which is Plan 4. Pointing CI at a Vercel URL would make `ci.yml` vendor-aware, violating the design's own rule that "`ci.yml` is 100% portable; only `deploy.yml` knows about Vercel" (§5). So the `e2e` job builds the app and starts it via Playwright's `webServer`. Plan 4 adds a second, post-deploy core-loop check against the live preview.
 2. **The E2E smoke covers what Plan 1 actually built — not the full core loop.** Plan 1 shipped the health endpoint and two route-group placeholder pages. The `signup → create game → request → approve` routes do **not exist yet** (they are application-feature work, after the foundation series). So the smoke asserts: `/api/health` → `200 {status:"ok"}`, `/` renders the client placeholder, `/venue` renders the venue placeholder. The full-core-loop spec is left as a documented placeholder in the E2E job so it is added in one obvious place when those features ship.
 
 ## Staying Current With Context7 (per project directive)
@@ -48,18 +48,19 @@ Pins **not** independently version-checked here (re-verify before use): `pnpm/ac
 
 ## File Structure (created/modified by this plan)
 
-| File | Responsibility |
-|---|---|
-| `.github/workflows/ci.yml` | The entire portable CI pipeline (7 jobs); built up across Tasks 2–7 |
-| `.github/dependabot.yml` | Weekly update PRs for npm deps, GitHub Actions pins, and the Docker base image |
-| `.prettierrc.json` | Prettier config (formatting is gated in `lint`) |
-| `.prettierignore` | Paths Prettier must not touch (generated/vendored) |
-| `playwright.config.ts` | Playwright config: `testDir: e2e`, chromium, `webServer` boots `pnpm start` |
-| `e2e/smoke.spec.ts` | E2E smoke: health 200 + both placeholder surfaces render |
-| `package.json` | Add `format`, `format:check`, `test:e2e` scripts (modify) |
-| `README.md` | Add a "Continuous Integration" section (modify) |
+| File                       | Responsibility                                                                 |
+| -------------------------- | ------------------------------------------------------------------------------ |
+| `.github/workflows/ci.yml` | The entire portable CI pipeline (7 jobs); built up across Tasks 2–7            |
+| `.github/dependabot.yml`   | Weekly update PRs for npm deps, GitHub Actions pins, and the Docker base image |
+| `.prettierrc.json`         | Prettier config (formatting is gated in `lint`)                                |
+| `.prettierignore`          | Paths Prettier must not touch (generated/vendored)                             |
+| `playwright.config.ts`     | Playwright config: `testDir: e2e`, chromium, `webServer` boots `pnpm start`    |
+| `e2e/smoke.spec.ts`        | E2E smoke: health 200 + both placeholder surfaces render                       |
+| `package.json`             | Add `format`, `format:check`, `test:e2e` scripts (modify)                      |
+| `README.md`                | Add a "Continuous Integration" section (modify)                                |
 
 **Canonical names used across tasks (do not rename):**
+
 - Workflow file: `.github/workflows/ci.yml`; jobs: `secret-scan`, `lint`, `test`, `sast`, `vuln-scan`, `build-image`, `e2e`.
 - Scripts: `format`, `format:check`, `test:e2e` (added here); `lint`, `typecheck`, `test`, `test:integration` (exist from Plan 1 / create-next-app).
 - CI env keys (must match Plan 1's Zod schema in `src/lib/config/index.ts`): `NODE_ENV`, `DATABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
@@ -74,6 +75,7 @@ Pins **not** independently version-checked here (re-verify before use): `pnpm/ac
 Plan 1 already has ESLint (from create-next-app) and `typecheck` (`tsc --noEmit`). Design §5 stage 2 is "ESLint + Prettier + tsc", so add Prettier as a check.
 
 **Files:**
+
 - Create: `.prettierrc.json`, `.prettierignore`
 - Modify: `package.json` (scripts)
 
@@ -85,6 +87,7 @@ Expected: `prettier` added to `devDependencies`; `pnpm-lock.yaml` updated.
 - [ ] **Step 2: Create the Prettier config**
 
 Create `.prettierrc.json`:
+
 ```json
 {
   "semi": true,
@@ -97,6 +100,7 @@ Create `.prettierrc.json`:
 - [ ] **Step 3: Create `.prettierignore`**
 
 Create `.prettierignore`:
+
 ```
 node_modules
 .next
@@ -109,6 +113,7 @@ coverage
 - [ ] **Step 4: Add format scripts to `package.json`**
 
 In the `"scripts"` block add:
+
 ```json
 "format": "prettier --write .",
 "format:check": "prettier --check ."
@@ -136,11 +141,13 @@ git commit -m "chore: add Prettier formatting check"
 ## Task 2: Workflow skeleton + secret-scan job (stage 1)
 
 **Files:**
+
 - Create: `.github/workflows/ci.yml`
 
 - [ ] **Step 1: Create `ci.yml` with the workflow header and the first job**
 
 Create `.github/workflows/ci.yml`:
+
 ```yaml
 name: CI
 
@@ -180,9 +187,11 @@ Expected: prints `yaml-ok` (no parse error). If `js-yaml` is unavailable offline
 - [ ] **Step 3: Run gitleaks locally exactly as CI will (via Docker)**
 
 Run:
+
 ```bash
 docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest detect --source=/repo --no-banner --redact
 ```
+
 Expected: "no leaks found" and exit code 0. (If it flags Plan 1's `.env.example`, that file contains only placeholders like `replace-me`; confirm no real secret is present. Add a `.gitleaks.toml` allowlist only for confirmed false positives.)
 
 - [ ] **Step 4: Commit**
@@ -197,29 +206,31 @@ git commit -m "ci: add workflow skeleton and gitleaks secret scan"
 ## Task 3: Lint job (stage 2)
 
 **Files:**
+
 - Modify: `.github/workflows/ci.yml`
 
 - [ ] **Step 1: Add the `lint` job under `jobs:` in `.github/workflows/ci.yml`**
 
 Append this job (a new top-level entry under `jobs:`, sibling to `secret-scan`):
+
 ```yaml
-  # Stage 2 — formatting, lint, and types. No app code is executed, so no env/DB needed.
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Prettier
-        run: pnpm format:check
-      - name: ESLint
-        run: pnpm lint
-      - name: Typecheck
-        run: pnpm typecheck
+# Stage 2 — formatting, lint, and types. No app code is executed, so no env/DB needed.
+lint:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v5
+    - uses: pnpm/action-setup@v4
+    - uses: actions/setup-node@v5
+      with:
+        node-version: 20
+        cache: pnpm
+    - run: pnpm install --frozen-lockfile
+    - name: Prettier
+      run: pnpm format:check
+    - name: ESLint
+      run: pnpm lint
+    - name: Typecheck
+      run: pnpm typecheck
 ```
 
 - [ ] **Step 2: Verify all three checks pass locally (this is exactly what the job runs)**
@@ -241,53 +252,56 @@ git commit -m "ci: add lint job (prettier, eslint, typecheck)"
 This job stands up a throwaway Postgres service container, applies the Drizzle migrations against it (proving they apply), then runs Vitest unit/contract tests and the DB integration test.
 
 **Files:**
+
 - Modify: `.github/workflows/ci.yml`
 
 - [ ] **Step 1: Add the `test` job under `jobs:`**
 
 Append:
+
 ```yaml
-  # Stage 3 — unit/contract + integration tests against a real, ephemeral Postgres.
-  test:
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: postgres
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    env:
-      NODE_ENV: test
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
-      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon-key
-    steps:
-      - uses: actions/checkout@v5
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Apply migrations (proves migrations apply cleanly)
-        run: pnpm exec drizzle-kit migrate
-      - name: Unit + contract tests
-        run: pnpm test
-      - name: Integration tests
-        run: pnpm test:integration
+# Stage 3 — unit/contract + integration tests against a real, ephemeral Postgres.
+test:
+  runs-on: ubuntu-latest
+  services:
+    postgres:
+      image: postgres:16-alpine
+      env:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: postgres
+      ports:
+        - 5432:5432
+      options: >-
+        --health-cmd "pg_isready -U postgres"
+        --health-interval 10s
+        --health-timeout 5s
+        --health-retries 5
+  env:
+    NODE_ENV: test
+    DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+    NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon-key
+  steps:
+    - uses: actions/checkout@v5
+    - uses: pnpm/action-setup@v4
+    - uses: actions/setup-node@v5
+      with:
+        node-version: 20
+        cache: pnpm
+    - run: pnpm install --frozen-lockfile
+    - name: Apply migrations (proves migrations apply cleanly)
+      run: pnpm exec drizzle-kit migrate
+    - name: Unit + contract tests
+      run: pnpm test
+    - name: Integration tests
+      run: pnpm test:integration
 ```
 
 - [ ] **Step 2: Reproduce the job locally against a throwaway Postgres**
 
 Run (mirrors the service container without touching your local Supabase):
+
 ```bash
 docker run --rm -d --name ci-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=postgres -p 5432:5432 postgres:16-alpine
 sleep 4
@@ -298,6 +312,7 @@ NODE_ENV=test \
   sh -c 'pnpm exec drizzle-kit migrate && pnpm test && pnpm test:integration'
 docker stop ci-pg
 ```
+
 Expected: migrations apply ("migrations applied"); `pnpm test` passes all unit/contract tests; `pnpm test:integration` passes the insert/select integration test. Exit code 0.
 
 - [ ] **Step 3: Commit**
@@ -314,57 +329,62 @@ git commit -m "ci: add test job against ephemeral Postgres with migrations"
 Two jobs: `sast` (Semgrep OSS, in its official container) and `vuln-scan` (Trivy filesystem scan for vulnerable/secret-bearing deps, plus Trivy config scan for IaC/Dockerfile misconfigurations). Dependabot — the third item in stage 4 — is added in Task 8.
 
 **Files:**
+
 - Modify: `.github/workflows/ci.yml`
 
 - [ ] **Step 1: Add the `sast` job under `jobs:`**
 
 Append (the whole job runs inside the Semgrep image — the Context7-verified OSS pattern; `--error` makes findings fail the job; no token required):
+
 ```yaml
-  # Stage 4a — SAST with Semgrep OSS (no account/token needed).
-  sast:
-    runs-on: ubuntu-latest
-    container:
-      image: semgrep/semgrep
-    steps:
-      - uses: actions/checkout@v5
-      - name: Semgrep scan
-        run: semgrep scan --config auto --error
+# Stage 4a — SAST with Semgrep OSS (no account/token needed).
+sast:
+  runs-on: ubuntu-latest
+  container:
+    image: semgrep/semgrep
+  steps:
+    - uses: actions/checkout@v5
+    - name: Semgrep scan
+      run: semgrep scan --config auto --error
 ```
 
 - [ ] **Step 2: Add the `vuln-scan` job under `jobs:`**
 
 Append:
+
 ```yaml
-  # Stage 4b — dependency/secret scan (fs) + IaC/Dockerfile misconfig scan (config).
-  vuln-scan:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - name: Trivy filesystem scan (deps & secrets)
-        uses: aquasecurity/trivy-action@0.28.0
-        with:
-          scan-type: fs
-          scan-ref: .
-          severity: HIGH,CRITICAL
-          exit-code: "1"
-          ignore-unfixed: true
-      - name: Trivy config scan (IaC / Dockerfile)
-        uses: aquasecurity/trivy-action@0.28.0
-        with:
-          scan-type: config
-          scan-ref: .
-          severity: HIGH,CRITICAL
-          exit-code: "1"
+# Stage 4b — dependency/secret scan (fs) + IaC/Dockerfile misconfig scan (config).
+vuln-scan:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v5
+    - name: Trivy filesystem scan (deps & secrets)
+      uses: aquasecurity/trivy-action@0.28.0
+      with:
+        scan-type: fs
+        scan-ref: .
+        severity: HIGH,CRITICAL
+        exit-code: "1"
+        ignore-unfixed: true
+    - name: Trivy config scan (IaC / Dockerfile)
+      uses: aquasecurity/trivy-action@0.28.0
+      with:
+        scan-type: config
+        scan-ref: .
+        severity: HIGH,CRITICAL
+        exit-code: "1"
 ```
 
 - [ ] **Step 3: Run both scanners locally exactly as CI will (via Docker)**
 
 Run:
+
 ```bash
 docker run --rm -v "$PWD:/src" semgrep/semgrep semgrep scan --config auto --error
 docker run --rm -v "$PWD:/work" -w /work aquasec/trivy:latest fs --severity HIGH,CRITICAL --exit-code 1 --ignore-unfixed .
 docker run --rm -v "$PWD:/work" -w /work aquasec/trivy:latest config --severity HIGH,CRITICAL --exit-code 1 .
 ```
+
 Expected: Semgrep finds no blocking issues (exit 0); both Trivy scans exit 0. If Trivy `config` flags the Dockerfile (e.g., "last USER should not be root"), fix the Dockerfile to add a non-root `USER` rather than suppressing — that is a real finding the design's §5 intends to catch.
 
 - [ ] **Step 4: Commit**
@@ -381,60 +401,64 @@ git commit -m "ci: add Semgrep SAST and Trivy fs/config scans"
 Build the Plan 1 Dockerfile with Buildx, scan the resulting image with Trivy, and push to GHCR tagged by commit SHA — but only on pushes to `main` (PRs build + scan but do not publish, keeping the registry clean). Gated on the five check jobs.
 
 **Files:**
+
 - Modify: `.github/workflows/ci.yml`
 
 - [ ] **Step 1: Add the `build-image` job under `jobs:`**
 
 Append:
+
 ```yaml
-  # Stage 5 — build the portable image, scan it, publish to GHCR on main.
-  build-image:
-    needs: [secret-scan, lint, test, sast, vuln-scan]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: actions/checkout@v5
-      - name: Compute lowercase image ref
-        run: echo "IMAGE=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
-      - uses: docker/setup-buildx-action@v3
-      - name: Build image (load into local daemon for scanning)
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          load: true
-          tags: ${{ env.IMAGE }}:${{ github.sha }}
-      - name: Scan image with Trivy
-        uses: aquasecurity/trivy-action@0.28.0
-        with:
-          scan-type: image
-          image-ref: ${{ env.IMAGE }}:${{ github.sha }}
-          severity: HIGH,CRITICAL
-          exit-code: "1"
-          ignore-unfixed: true
-      - name: Log in to GHCR
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Push image to GHCR
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          docker tag ${{ env.IMAGE }}:${{ github.sha }} ${{ env.IMAGE }}:latest
-          docker push ${{ env.IMAGE }}:${{ github.sha }}
-          docker push ${{ env.IMAGE }}:latest
+# Stage 5 — build the portable image, scan it, publish to GHCR on main.
+build-image:
+  needs: [secret-scan, lint, test, sast, vuln-scan]
+  runs-on: ubuntu-latest
+  permissions:
+    contents: read
+    packages: write
+  steps:
+    - uses: actions/checkout@v5
+    - name: Compute lowercase image ref
+      run: echo "IMAGE=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
+    - uses: docker/setup-buildx-action@v3
+    - name: Build image (load into local daemon for scanning)
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        load: true
+        tags: ${{ env.IMAGE }}:${{ github.sha }}
+    - name: Scan image with Trivy
+      uses: aquasecurity/trivy-action@0.28.0
+      with:
+        scan-type: image
+        image-ref: ${{ env.IMAGE }}:${{ github.sha }}
+        severity: HIGH,CRITICAL
+        exit-code: "1"
+        ignore-unfixed: true
+    - name: Log in to GHCR
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Push image to GHCR
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: |
+        docker tag ${{ env.IMAGE }}:${{ github.sha }} ${{ env.IMAGE }}:latest
+        docker push ${{ env.IMAGE }}:${{ github.sha }}
+        docker push ${{ env.IMAGE }}:latest
 ```
 
 - [ ] **Step 2: Build and scan the image locally (the publish step only runs in CI on main)**
 
 Run:
+
 ```bash
 docker build -t sport-app:ci-test .
 docker run --rm -v "$PWD:/work" aquasec/trivy:latest image --severity HIGH,CRITICAL --exit-code 1 --ignore-unfixed sport-app:ci-test
 ```
+
 Expected: image builds successfully; Trivy image scan exits 0. (Plan 1's Dockerfile builder stage sets build-time placeholder env for the four config keys precisely so `next build` can evaluate the fail-fast `config` singleton inside Docker. If you ever see "Invalid environment configuration" here, that `ENV` block is missing from the builder stage — restore it.)
 
 - [ ] **Step 3: Commit**
@@ -451,6 +475,7 @@ git commit -m "ci: build, Trivy-scan, and push image to GHCR by SHA on main"
 Add Playwright, a config that boots the built app via `webServer`, a smoke spec covering what Plan 1 shipped, and the `e2e` CI job (same Postgres service + env as `test`).
 
 **Files:**
+
 - Create: `playwright.config.ts`, `e2e/smoke.spec.ts`
 - Modify: `package.json` (script), `.github/workflows/ci.yml`
 
@@ -462,6 +487,7 @@ Expected: `@playwright/test` added to `devDependencies`.
 - [ ] **Step 2: Add the `test:e2e` script to `package.json`**
 
 In the `"scripts"` block add:
+
 ```json
 "test:e2e": "playwright test"
 ```
@@ -469,6 +495,7 @@ In the `"scripts"` block add:
 - [ ] **Step 3: Create the Playwright config**
 
 Create `playwright.config.ts` (the `webServer` block is the Context7-verified pattern for booting the app under test):
+
 ```ts
 import { defineConfig, devices } from "@playwright/test";
 
@@ -495,6 +522,7 @@ export default defineConfig({
 - [ ] **Step 4: Write the smoke spec (covers exactly what Plan 1 built)**
 
 Create `e2e/smoke.spec.ts`:
+
 ```ts
 import { test, expect } from "@playwright/test";
 
@@ -522,6 +550,7 @@ test("venue surface renders", async ({ page }) => {
 - [ ] **Step 5: Run the E2E smoke locally**
 
 Run (needs local Supabase running + schema applied, so `/api/health` returns 200):
+
 ```bash
 supabase start
 pnpm dotenv -e .env.local -- drizzle-kit migrate
@@ -529,56 +558,58 @@ pnpm exec playwright install --with-deps chromium
 pnpm build
 pnpm test:e2e
 ```
+
 Expected: 3 passed. (`webServer` starts `pnpm start`; Next auto-loads `.env.local` for both `build` and `start`, so no `dotenv` wrapper is needed here — only `drizzle-kit migrate` above needs it since it is not a Next process. The health test confirms DB connectivity; both page tests confirm the route groups render.)
 
 - [ ] **Step 6: Add the `e2e` job under `jobs:` in `.github/workflows/ci.yml`**
 
 Append:
+
 ```yaml
-  # Stage 6 — Playwright E2E smoke against the app booted inside CI.
-  e2e:
-    needs: [secret-scan, lint, test, sast, vuln-scan]
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: postgres
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
-      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon-key
-    steps:
-      - uses: actions/checkout@v5
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Apply migrations
-        run: pnpm exec drizzle-kit migrate
-      - name: Install Playwright chromium
-        run: pnpm exec playwright install --with-deps chromium
-      - name: Build app
-        run: pnpm build
-      - name: Run E2E smoke
-        run: pnpm test:e2e
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 7
+# Stage 6 — Playwright E2E smoke against the app booted inside CI.
+e2e:
+  needs: [secret-scan, lint, test, sast, vuln-scan]
+  runs-on: ubuntu-latest
+  services:
+    postgres:
+      image: postgres:16-alpine
+      env:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: postgres
+      ports:
+        - 5432:5432
+      options: >-
+        --health-cmd "pg_isready -U postgres"
+        --health-interval 10s
+        --health-timeout 5s
+        --health-retries 5
+  env:
+    DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+    NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon-key
+  steps:
+    - uses: actions/checkout@v5
+    - uses: pnpm/action-setup@v4
+    - uses: actions/setup-node@v5
+      with:
+        node-version: 20
+        cache: pnpm
+    - run: pnpm install --frozen-lockfile
+    - name: Apply migrations
+      run: pnpm exec drizzle-kit migrate
+    - name: Install Playwright chromium
+      run: pnpm exec playwright install --with-deps chromium
+    - name: Build app
+      run: pnpm build
+    - name: Run E2E smoke
+      run: pnpm test:e2e
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 7
 ```
 
 > **Note:** `NODE_ENV` is intentionally omitted here — `next build`/`next start` set it to `production` themselves, and Plan 1's Zod schema defaults `NODE_ENV` to `development` if unset. Forcing `test` would fight Next's production build.
@@ -595,11 +626,13 @@ git commit -m "ci: add Playwright E2E smoke (health + route-group surfaces)"
 ## Task 8: Dependabot + repo security settings
 
 **Files:**
+
 - Create: `.github/dependabot.yml`
 
 - [ ] **Step 1: Create the Dependabot config**
 
 Create `.github/dependabot.yml` (covers npm deps, the CI action pins — directly serving the "stay up to date" directive — and the Docker base image):
+
 ```yaml
 version: 2
 updates:
@@ -629,6 +662,7 @@ Expected: prints `yaml-ok`.
 - [ ] **Step 3: Document/enable repo-level secret scanning (cannot live in `ci.yml`)**
 
 This is a one-time GitHub UI setting, recorded here so it is not forgotten and so Plan 3 can codify it via the Terraform `repo/` module:
+
 - Go to the repo → **Settings → Code security** → enable **Secret scanning** and **Push protection**.
 - Verify: the "Secret scanning" and "Push protection" toggles read **Enabled**.
 - (Branch protection + required status checks — making `secret-scan`, `lint`, `test`, `sast`, `vuln-scan`, `build-image`, `e2e` mandatory before merge — are codified in **Plan 3**, not clicked here.)
@@ -645,26 +679,28 @@ git commit -m "ci: add Dependabot for npm, actions, and docker"
 ## Task 9: README CI section + full-pipeline verification
 
 **Files:**
+
 - Modify: `README.md`
 
 - [ ] **Step 1: Add a "Continuous Integration" section to `README.md`**
 
 Append to `README.md`:
+
 ```markdown
 ## Continuous Integration
 
 `.github/workflows/ci.yml` runs on every PR and push to `main` (portable — no
 Vercel/vendor specifics; that lives in `deploy.yml`, Plan 4):
 
-| Job | What it gates |
-| --- | --- |
-| `secret-scan` | gitleaks — blocks any committed secret |
-| `lint` | Prettier + ESLint + `tsc` |
-| `test` | Vitest unit/contract + integration against an ephemeral Postgres (migrations applied first) |
-| `sast` | Semgrep OSS (SAST) |
-| `vuln-scan` | Trivy filesystem (deps/secrets) + config (IaC/Dockerfile) |
-| `build-image` | Build → Trivy-scan image → push to GHCR by commit SHA (push to `main` only) |
-| `e2e` | Playwright smoke (health 200 + both route-group surfaces) against the app booted in CI |
+| Job           | What it gates                                                                               |
+| ------------- | ------------------------------------------------------------------------------------------- |
+| `secret-scan` | gitleaks — blocks any committed secret                                                      |
+| `lint`        | Prettier + ESLint + `tsc`                                                                   |
+| `test`        | Vitest unit/contract + integration against an ephemeral Postgres (migrations applied first) |
+| `sast`        | Semgrep OSS (SAST)                                                                          |
+| `vuln-scan`   | Trivy filesystem (deps/secrets) + config (IaC/Dockerfile)                                   |
+| `build-image` | Build → Trivy-scan image → push to GHCR by commit SHA (push to `main` only)                 |
+| `e2e`         | Playwright smoke (health 200 + both route-group surfaces) against the app booted in CI      |
 
 No external secrets are required; GHCR uses the built-in `GITHUB_TOKEN`.
 Dependabot (`.github/dependabot.yml`) keeps npm deps, action pins, and the
@@ -678,14 +714,17 @@ Reproduce any job locally with Docker (gitleaks/semgrep/trivy) or the matching
 - [ ] **Step 2: Sanity-check the assembled workflow has all seven jobs**
 
 Run:
+
 ```bash
 python3 -c "import yaml; d=yaml.safe_load(open('.github/workflows/ci.yml')); print(sorted(d['jobs']))"
 ```
+
 Expected: `['build-image', 'e2e', 'lint', 'sast', 'secret-scan', 'test', 'vuln-scan']`
 
 - [ ] **Step 3: Push a branch, open a PR, and confirm every job is green**
 
 Run:
+
 ```bash
 git add -A
 git commit -m "docs: document CI pipeline in README"
@@ -694,6 +733,7 @@ git push -u origin ci/foundation-plan-2
 gh pr create --fill --title "Foundation Plan 2: CI pipeline" --body "Adds ci.yml (7 jobs) + Dependabot per the portable-seams design §5."
 gh pr checks --watch
 ```
+
 Expected: `gh pr checks --watch` shows all seven jobs complete with **pass**. If a job fails, fix it before merging — this PR is the real verification that the pipeline works end-to-end, not just that the YAML parses.
 
 - [ ] **Step 4: Merge once green**
@@ -701,6 +741,7 @@ Expected: `gh pr checks --watch` shows all seven jobs complete with **pass**. If
 ```bash
 gh pr merge --squash --delete-branch
 ```
+
 Expected: PR merges to `main`; the post-merge run's `build-image` job publishes `ghcr.io/<owner>/<repo>:<sha>` and `:latest`.
 
 ---

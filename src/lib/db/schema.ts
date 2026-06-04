@@ -194,7 +194,9 @@ export const venues = pgTable(
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
   (t) => [
-    index("venues_owner_active_idx").on(t.ownerId).where(sql`deleted_at is null`),
+    index("venues_owner_active_idx")
+      .on(t.ownerId)
+      .where(sql`deleted_at is null`),
     pgPolicy("venues_select", {
       for: "select",
       to: authenticatedRole,
@@ -239,13 +241,21 @@ export const games = pgTable(
     check("chk_games_capacity", sql`capacity > 0`),
     check("chk_games_ends_after_starts", sql`ends_at is null or ends_at > starts_at`),
     index("games_sport_starts_idx").on(t.sportId, t.startsAt),
-    index("games_city_starts_idx").on(t.cityId, t.startsAt).where(sql`deleted_at is null`),
+    index("games_city_starts_idx")
+      .on(t.cityId, t.startsAt)
+      .where(sql`deleted_at is null`),
     index("games_open_upcoming_idx")
       .on(t.startsAt)
       .where(sql`status = 'open' and deleted_at is null`),
-    index("games_organizer_idx").on(t.organizerId).where(sql`deleted_at is null`),
-    index("games_venue_idx").on(t.venueId).where(sql`venue_id is not null`),
-    uniqueIndex("games_share_token_uq").on(t.shareToken).where(sql`share_token is not null`),
+    index("games_organizer_idx")
+      .on(t.organizerId)
+      .where(sql`deleted_at is null`),
+    index("games_venue_idx")
+      .on(t.venueId)
+      .where(sql`venue_id is not null`),
+    uniqueIndex("games_share_token_uq")
+      .on(t.shareToken)
+      .where(sql`share_token is not null`),
     pgPolicy("games_select", {
       for: "select",
       to: authenticatedRole,

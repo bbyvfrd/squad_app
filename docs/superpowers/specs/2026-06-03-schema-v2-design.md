@@ -21,12 +21,15 @@ Extend the data layer with: per-user-per-sport **skill levels** (advisory, organ
 ## Schema changes
 
 ### New enum
+
 ```sql
 CREATE TYPE skill_level AS ENUM ('beginner','intermediate','amateur','advanced','professional');
 ```
 
 ### New table: `client_sport_skills`
+
 A client's declared level per sport. References `client_profiles` (only clients have sport skills).
+
 ```sql
 CREATE TABLE client_sport_skills (
   profile_id   uuid     NOT NULL REFERENCES client_profiles(profile_id) ON DELETE CASCADE,
@@ -37,12 +40,14 @@ CREATE TABLE client_sport_skills (
   PRIMARY KEY (profile_id, sport_id)
 );
 ```
+
 - Index: `client_sport_skills_sport_idx` on `(sport_id)` (for "players of sport X" lookups).
 - **RLS:** readable by all authenticated (skill level is low-sensitivity and organizers need to see requesters' levels); writable only by self.
   - `csk_select` — `FOR SELECT TO authenticated USING (true)`
   - `csk_write` — `FOR ALL TO authenticated USING ((select auth.uid()) = profile_id) WITH CHECK ((select auth.uid()) = profile_id)`
 
 ### New table: `cities` (lookup, like `sports`)
+
 ```sql
 CREATE TABLE cities (
   id            smallint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -52,17 +57,21 @@ CREATE TABLE cities (
   is_active     boolean NOT NULL DEFAULT true
 );
 ```
+
 - **RLS:** `cities_read` — `FOR SELECT TO authenticated USING (true)`; writes are service-role only (no write policy → denied).
 - **Seed** (custom migration, idempotent) with major Azerbaijani cities: Baku, Ganja, Sumqayit, Mingachevir, Lankaran, Shaki, Yevlakh, Nakhchivan, Shirvan, Khirdalan. (Geography stays Azerbaijan-wide and expandable — no geo restriction hard-coded.)
 
 ### `profiles` — identity additions
+
 - Add `full_name text NOT NULL` — added as `NOT NULL DEFAULT ''` to satisfy existing rows, then the default is dropped; the `handle_new_user` trigger populates it from signup metadata.
 - Relax `display_name` to **nullable** (optional public handle; the app falls back to `full_name`).
 - Add `city_id smallint NULL REFERENCES cities(id) ON DELETE SET NULL` (home city for default discovery filter).
 - **Phone is NOT added here** (privacy — see Auth below).
 
 ### `handle_new_user` trigger update
+
 Insert `full_name` (and existing `display_name`) from `raw_user_meta_data`:
+
 ```sql
 INSERT INTO public.profiles (id, full_name, display_name)
 VALUES (NEW.id,
@@ -71,6 +80,7 @@ VALUES (NEW.id,
 ```
 
 ### `games` — skill + timing + city
+
 - Add `skill_level skill_level NULL` (`null` = all levels; minimum semantics).
 - Add `ends_at timestamptz NULL` + `CHECK (ends_at IS NULL OR ends_at > starts_at)` (`chk_games_ends_after_starts`).
 - Add `city_id smallint NULL REFERENCES cities(id) ON DELETE SET NULL` (existing `location_text` stays as the specific spot).
@@ -79,6 +89,7 @@ VALUES (NEW.id,
 ## Behaviour (app layer — `lib/booking`)
 
 The skill model is advisory and lives in the join path (no RLS change):
+
 1. **Request to join** a game of sport `S`:
    - If the user has no `client_sport_skills` row for `S`, the app **prompts** them to choose a level and inserts the row.
    - Insert the participation **regardless** of whether the user's level meets `games.skill_level`.

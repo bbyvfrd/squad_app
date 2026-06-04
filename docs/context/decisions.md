@@ -25,11 +25,11 @@
 
 ## Non-decisions — deferred (do NOT lock here)
 
-| Topic | Why deferred | What unblocks it |
-|---|---|---|
-| Payment provider / payments | Payment need is still speculative; money is out of v1 | Evidence that deposits/payments are part of the launch wedge |
-| Cross-surface identity | Chosen direction: one auth system + an account-surface field; full separate-vs-unified accounts deferred | A later account-strategy pass |
-| Maps / geocoding | v1 uses text location only | A feature that needs real geo/discovery |
+| Topic                       | Why deferred                                                                                             | What unblocks it                                             |
+| --------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Payment provider / payments | Payment need is still speculative; money is out of v1                                                    | Evidence that deposits/payments are part of the launch wedge |
+| Cross-surface identity      | Chosen direction: one auth system + an account-surface field; full separate-vs-unified accounts deferred | A later account-strategy pass                                |
+| Maps / geocoding            | v1 uses text location only                                                                               | A feature that needs real geo/discovery                      |
 
 ## Open product questions — flag, don't decide
 

@@ -30,31 +30,31 @@ It is **not** a booking, payments, or ticketing product in v1.
 
 ### Domain model (conceptual — authoritative schema is `docs/context/db-schema-and-backend-design.md`)
 
-Identity uses **split profiles** (one auth account → a base `profiles` row + optional `client_profiles` / `venue_owner_profiles`), **not** a single user table. The full 8-table schema, indexing, RLS policies, and `/api/v1` surface live in the schema doc — consult it for any data/backend work.
+Identity uses **split profiles** (one auth account → a base `profiles` row + optional `client_profiles` / `venue_owner_profiles`), **not** a single user table. The full 10-table schema, indexing, RLS policies, and `/api/v1` surface live in the schema doc — consult it for any data/backend work.
 
-| Object | Table(s) | Key fields |
-|---|---|---|
-| **Identity** | `profiles` (+ `client_profiles`, `venue_owner_profiles`) | profiles: `id` (= auth.users.id), `full_name` (NOT NULL), `display_name` (nullable, optional public handle), `city_id` · client_profiles: client-surface marker (no role flags — any client can organize and play) · venue_owner_profiles: business_name, contact · **phone lives in `auth.users` only** |
-| **Skill** | `client_sport_skills` | (profile_id, sport_id) PK; `skill_level` enum (beginner/intermediate/amateur/advanced/professional); per-user per-sport; advisory only |
-| **City** | `cities` | id, key (e.g. 'baku'), name; lookup table seeded with major Azerbaijani cities |
-| **Venue** | `venues` (+ `venue_sports`) | id, owner_id, name, supported sports (via `venue_sports`), address, contact_info, description |
-| **Game** | `games` | id, organizer_id, optional venue_id, sport_id (→ `sports` lookup), title, starts_at, `ends_at` (nullable, CHECK > starts_at), `skill_level` (nullable = all levels), `city_id`, capacity, location_text, notes, status, share_token |
-| **Participation** | `participations` | id, game_id, player_id, status (`requested`\|`approved`\|`declined`\|`cancelled`); `UNIQUE(game_id, player_id)` |
+| Object            | Table(s)                                                 | Key fields                                                                                                                                                                                                                                                                                               |
+| ----------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Identity**      | `profiles` (+ `client_profiles`, `venue_owner_profiles`) | profiles: `id` (= auth.users.id), `full_name` (NOT NULL), `display_name` (nullable, optional public handle), `city_id` · client_profiles: client-surface marker (no role flags — any client can organize and play) · venue_owner_profiles: business_name, contact · **phone lives in `auth.users` only** |
+| **Skill**         | `client_sport_skills`                                    | (profile_id, sport_id) PK; `skill_level` enum (beginner/intermediate/amateur/advanced/professional); per-user per-sport; advisory only                                                                                                                                                                   |
+| **City**          | `cities`                                                 | id, key (e.g. 'baku'), name; lookup table seeded with major Azerbaijani cities                                                                                                                                                                                                                           |
+| **Venue**         | `venues` (+ `venue_sports`)                              | id, owner_id, name, supported sports (via `venue_sports`), address, contact_info, description                                                                                                                                                                                                            |
+| **Game**          | `games`                                                  | id, organizer_id, optional venue_id, sport_id (→ `sports` lookup), title, starts_at, `ends_at` (nullable, CHECK > starts_at), `skill_level` (nullable = all levels), `city_id`, capacity, location_text, notes, status, share_token                                                                      |
+| **Participation** | `participations`                                         | id, game_id, player_id, status (`requested`\|`approved`\|`declined`\|`cancelled`); `UNIQUE(game_id, player_id)`                                                                                                                                                                                          |
 
 ## Tech stack
 
-| Layer | Choice |
-|---|---|
-| Framework | **Next.js** (single app, two route groups: `app/(client)`, `app/(venue)`) |
-| Language | TypeScript |
-| UI | **Tailwind CSS + shadcn/ui** |
-| DB | **Supabase Postgres**, accessed via **Drizzle ORM**; SQL **migrations are the schema source of truth** |
-| Auth | **Supabase Auth** (one auth system + an account-surface field — do not build separate-vs-unified accounts yet) |
-| Hosting | **Vercel** |
-| Config | typed **Zod** module, validated at boot (fail-fast) |
-| CI/CD | **GitHub Actions** |
-| IaC | **Terraform** (Vercel + Supabase + GitHub providers); remote state on HCP Terraform |
-| Tests | **Vitest** (unit/integration on an ephemeral Postgres) + **Playwright** (core-loop E2E) |
+| Layer     | Choice                                                                                                         |
+| --------- | -------------------------------------------------------------------------------------------------------------- |
+| Framework | **Next.js** (single app, two route groups: `app/(client)`, `app/(venue)`)                                      |
+| Language  | TypeScript                                                                                                     |
+| UI        | **Tailwind CSS + shadcn/ui**                                                                                   |
+| DB        | **Supabase Postgres**, accessed via **Drizzle ORM**; SQL **migrations are the schema source of truth**         |
+| Auth      | **Supabase Auth** (one auth system + an account-surface field — do not build separate-vs-unified accounts yet) |
+| Hosting   | **Vercel**                                                                                                     |
+| Config    | typed **Zod** module, validated at boot (fail-fast)                                                            |
+| CI/CD     | **GitHub Actions**                                                                                             |
+| IaC       | **Terraform** (Vercel + Supabase + GitHub providers); remote state on HCP Terraform                            |
+| Tests     | **Vitest** (unit/integration on an ephemeral Postgres) + **Playwright** (core-loop E2E)                        |
 
 > Do not pin or assume library versions/APIs from memory — **verify them with the Context7 MCP** before writing or upgrading code (standing directive). See [Standing directives](#standing-directives).
 
@@ -62,7 +62,7 @@ Identity uses **split profiles** (one auth account → a base `profiles` row + o
 
 The app ships on managed platforms now but must be portable later **without a rewrite**. Full rationale in `docs/context/architecture.md`. The discipline:
 
-- **The Seam Rule:** app code **never imports a vendor SDK directly.** Each vendor touchpoint lives behind *one* adapter implementing *our* interface. A vendor swap then touches one file.
+- **The Seam Rule:** app code **never imports a vendor SDK directly.** Each vendor touchpoint lives behind _one_ adapter implementing _our_ interface. A vendor swap then touches one file.
 - Vendor-specific features (Supabase RLS, Vercel edge) may be used but must **never be load-bearing** — the app stays correct without them.
 - **`lib/config/` is the only place `process.env` is read.** App code imports `config.<x>`.
 - **Migrations own the schema** — not Terraform, not the dashboard.
@@ -121,7 +121,7 @@ Configured visual system; canonical files in `docs/context/design/` (`DESIGN.md`
 - **Brand:** SQUAD. One color — SQUAD red `#EE4721` — used **≤2× per screen**. Dark-first cool slate; light mode only for marketing + venue CRM.
 - **Type:** Inter Tight (italic 800 display / upright 700 in-product), Inter (body), JetBrains Mono (all numbers, `tabular-nums`).
 - **Sport-state colors** (functional only): live=green, slot=blue, win=yellow, loss/danger=crimson (≠ brand). Elevation via surface tone, not shadows. One italic hero per page.
-- **Tokens:** paste the `:root` block from `docs/context/design/DESIGN.md` into global CSS. **Integration:** SQUAD is CSS-vars + vanilla classes, *not* Tailwind/shadcn — plan 01 must bridge the tokens into the chosen stack (don't mix vocabularies).
+- **Tokens:** paste the `:root` block from `docs/context/design/DESIGN.md` into global CSS. **Integration:** SQUAD is CSS-vars + vanilla classes, _not_ Tailwind/shadcn — plan 01 must bridge the tokens into the chosen stack (don't mix vocabularies).
 - **Scope guard:** SQUAD is a superset (scores, leaderboards, teams, payments vocabulary all exist). v1 ships only the subset the product scope allows — no payments/scores/leaderboards/teams/live-match. A component existing ≠ the feature is in v1.
 - **Voice (use):** Create game, Request spot, Approve, Decline, Spots left, Pending requests, Confirmed, Cancelled, Venue details. Short verbs, present tense; numbers carry the claim; one verb per CTA.
 - **Voice (avoid in v1 — no payments/booking yet):** Book now, Checkout, Pay, Deposit, Wallet, Ticket, Reserve court, League, Tournament.

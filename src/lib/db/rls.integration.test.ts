@@ -7,10 +7,7 @@ import { clientProfiles, games, participations, sports } from "./schema";
 // Run `fn` as the Supabase `authenticated` role with auth.uid() = userId, using
 // transaction-local settings. Postgres enforces policies because `authenticated`
 // is neither a superuser nor the table owner.
-async function asUser<T>(
-  userId: string,
-  fn: (tx: typeof client) => Promise<T>,
-): Promise<T> {
+async function asUser<T>(userId: string, fn: (tx: typeof client) => Promise<T>): Promise<T> {
   // postgres.js `begin` has a return type of `UnwrapPromiseArray<T>` which doesn't
   // satisfy `Promise<T>` in TypeScript's variance checks — cast at the call site.
   return client.begin(async (tx) => {
@@ -83,10 +80,16 @@ describe("participations RLS: read isolation", () => {
     });
     await db.insert(participations).values({ id: newId(), gameId, playerId: playerA });
 
-    const seenByA = await asUser(playerA, (tx) => tx`select id from participations where game_id = ${gameId}`);
+    const seenByA = await asUser(
+      playerA,
+      (tx) => tx`select id from participations where game_id = ${gameId}`,
+    );
     expect(seenByA.length).toBeGreaterThanOrEqual(1);
 
-    const seenByB = await asUser(playerB, (tx) => tx`select id from participations where game_id = ${gameId}`);
+    const seenByB = await asUser(
+      playerB,
+      (tx) => tx`select id from participations where game_id = ${gameId}`,
+    );
     expect(seenByB).toHaveLength(0);
   });
 });
@@ -97,11 +100,14 @@ describe("client-role RLS: any client user can create and join games", () => {
     const host = await createAuthUser("Host");
     await db.insert(clientProfiles).values({ profileId: host });
 
-    const created = await asUser(host, (tx) => tx`
+    const created = await asUser(
+      host,
+      (tx) => tx`
       insert into games (id, organizer_id, sport_id, title, starts_at, capacity)
       values (${newId()}, ${host}, ${fid}, 'Hosted', now() + interval '1 day', 8)
       returning id
-    `);
+    `,
+    );
     expect(created).toHaveLength(1);
   });
 
@@ -121,11 +127,14 @@ describe("client-role RLS: any client user can create and join games", () => {
 
     const joiner = await createAuthUser("Joiner");
     await db.insert(clientProfiles).values({ profileId: joiner });
-    const joined = await asUser(joiner, (tx) => tx`
+    const joined = await asUser(
+      joiner,
+      (tx) => tx`
       insert into participations (id, game_id, player_id)
       values (${newId()}, ${gameId}, ${joiner})
       returning id
-    `);
+    `,
+    );
     expect(joined).toHaveLength(1);
   });
 
@@ -133,10 +142,13 @@ describe("client-role RLS: any client user can create and join games", () => {
     const fid = await footballId();
     const outsider = await createAuthUser("Outsider");
     await expect(
-      asUser(outsider, (tx) => tx`
+      asUser(
+        outsider,
+        (tx) => tx`
         insert into games (id, organizer_id, sport_id, title, starts_at, capacity)
         values (${newId()}, ${outsider}, ${fid}, 'Nope', now() + interval '1 day', 8)
-      `),
+      `,
+      ),
     ).rejects.toThrow(/row-level security/i);
   });
 });
@@ -150,23 +162,32 @@ describe("client_sport_skills RLS: self-write, broad read", () => {
     await db.insert(clientProfiles).values({ profileId: b });
 
     // A can insert their own skill.
-    await asUser(a, (tx) => tx`
+    await asUser(
+      a,
+      (tx) => tx`
       insert into client_sport_skills (profile_id, sport_id, skill_level)
       values (${a}, ${sport}, 'amateur')
-    `);
+    `,
+    );
 
     // A cannot insert a skill row for B.
     await expect(
-      asUser(a, (tx) => tx`
+      asUser(
+        a,
+        (tx) => tx`
         insert into client_sport_skills (profile_id, sport_id, skill_level)
         values (${b}, ${sport}, 'advanced')
-      `),
+      `,
+      ),
     ).rejects.toThrow(/row-level security/i);
 
     // B can read A's skill (broad read).
-    const seen = await asUser(b, (tx) => tx`
+    const seen = await asUser(
+      b,
+      (tx) => tx`
       select skill_level from client_sport_skills where profile_id = ${a} and sport_id = ${sport}
-    `);
+    `,
+    );
     expect(seen).toHaveLength(1);
   });
 });

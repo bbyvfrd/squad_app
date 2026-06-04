@@ -24,14 +24,15 @@ After this plan the foundation is complete. **Next is application-feature work**
 ## Refinements & Decisions (read before starting)
 
 1. **`deploy.yml` triggers on `workflow_run` after `CI` succeeds — not on raw `push`.** The design says "merge to main → [ci.yml gates pass] → deploy." `workflow_run: { workflows: ["CI"], types: [completed], branches: [main] }` with `if: github.event.workflow_run.conclusion == 'success'` is exactly that gate. Jobs check out `github.event.workflow_run.head_sha` (the merged commit).
-2. **One Vercel project per environment, deployed with `--prod`, Git auto-deploy disabled.** Plan 3 created separate `sport-app-{dev,staging,prod}` Vercel projects (data isolation). Each is deployed to its *own* production via the CLI; "blue-green / atomic alias swap" happens within each project (Vercel keeps the previous deployment warm). **Only the prod project is Git-linked** (Plan 3 sets `git_repo` for prod only), so the committed `vercel.json` (`deploymentEnabled.main=false`) and PR previews apply there; dev/staging are CLI-deploy-only — which also avoids the same repo spawning duplicate preview deploys across three projects.
-3. **Deploy secrets are repo-level, named per environment.** The `production` GitHub *environment* is used purely as the approval gate; secrets are repo-level (`VERCEL_PROJECT_ID_STAGING`/`_PROD`, etc.). This decouples the gate from secret scoping and avoids an approval deadlock on `rollback` (auto-rollback must run without waiting for a human). Environment-scoped secrets are noted as a later hardening.
+2. **One Vercel project per environment, deployed with `--prod`, Git auto-deploy disabled.** Plan 3 created separate `sport-app-{dev,staging,prod}` Vercel projects (data isolation). Each is deployed to its _own_ production via the CLI; "blue-green / atomic alias swap" happens within each project (Vercel keeps the previous deployment warm). **Only the prod project is Git-linked** (Plan 3 sets `git_repo` for prod only), so the committed `vercel.json` (`deploymentEnabled.main=false`) and PR previews apply there; dev/staging are CLI-deploy-only — which also avoids the same repo spawning duplicate preview deploys across three projects.
+3. **Deploy secrets are repo-level, named per environment.** The `production` GitHub _environment_ is used purely as the approval gate; secrets are repo-level (`VERCEL_PROJECT_ID_STAGING`/`_PROD`, etc.). This decouples the gate from secret scoping and avoids an approval deadlock on `rollback` (auto-rollback must run without waiting for a human). Environment-scoped secrets are noted as a later hardening.
 4. **Migrations are forward-only and run before each deploy; rollback reverts the app, not the schema.** `drizzle-kit migrate` runs against the target env's Supabase (session-pooler URL) before the Vercel deploy. `vercel rollback` reverts the running app to the previous deployment; it does **not** revert migrations. Keep migrations backward-compatible (expand/contract) — this is called out in the runbook.
 5. **`dev` is provisioned but not in the promotion flow.** `deploy.yml` promotes `staging → production`. The `dev` Vercel/Supabase project (Plan 3) is the cloud-dev fallback from §7; it is not auto-deployed.
 
 ## Staying Current With Context7 (per project directive)
 
 Verified via Context7 on 2026-05-29; **re-verify before running**:
+
 - **Vercel CLI** (`/websites/vercel`) — token auth via `--token`/`VERCEL_TOKEN`; CI flow = `vercel pull --environment=production` → `vercel build --prod` → `vercel deploy --prebuilt --prod` (the `--prebuilt` flag skips the Vercel-side build); `vercel rollback` "instantly restores the previous production deployment."
 - **GitHub Actions** (`/websites/github_en_actions`) — reusable workflow via `on: workflow_call` (with `inputs`/`secrets`), callable from a job with `uses:` + `secrets: inherit`; manual approval via a job-level `environment:` with required reviewers.
 - **NOT verified this session:** the Terraform `hashicorp/tfe` provider and its `tfe_outputs` data source (Context7's resolve did not return it). **Before applying Task 3, verify the current `hashicorp/tfe` version and that `data.tfe_outputs.<x>.values.<output>` is the correct accessor** (`resolve-library-id "Terraform Cloud tfe provider"` → `query-docs`). The pin below (`~> 0.60`) is a best-effort default.
@@ -40,24 +41,25 @@ Verified via Context7 on 2026-05-29; **re-verify before running**:
 
 - **Runs in the app repo (Plans 1–3), not the vault.**
 - **Plans 1–3 must be applied:** CI is green on `main`; Terraform `envs/repo` (branch protection + the `staging`/`production` environments) and `envs/{dev,staging,prod}` (Supabase + Vercel projects) are applied.
-- **`main` is protected (Plan 3): no direct pushes.** Every change in this plan lands via a PR that passes the 9 required checks; the PR *merge* is the push-to-`main` that triggers `deploy.yml`. (The per-task `git commit`s below are local — push a branch and open a PR to land them.)
+- **`main` is protected (Plan 3): no direct pushes.** Every change in this plan lands via a PR that passes the 9 required checks; the PR _merge_ is the push-to-`main` that triggers `deploy.yml`. (The per-task `git commit`s below are local — push a branch and open a PR to land them.)
 - **Credentials:** the Plan 3 set, plus a **Vercel token** and your **Vercel org id** (`VERCEL_ORG_ID`). Get the org id: `vercel teams ls` / project settings. For the TF deploy-secrets root, a **TFE token** (`TFE_TOKEN`) to read workspace outputs.
 - **⚠️ This plan deploys to real environments.** YAML authoring + `terraform validate` are offline; the actual deploy/rollback (Task 8) is outward-facing and credential-gated — confirm the target Vercel projects before pushing to `main`.
 
 ## File Structure (created/modified by this plan)
 
-| File | Responsibility |
-|---|---|
-| `.github/workflows/deploy.yml` | Promotion flow: staging → approval → production + post-deploy health gate (created across Tasks 5, 7) |
-| `.github/workflows/rollback.yml` | Reusable + manual rollback via `vercel rollback` |
-| `vercel.json` | Disable Vercel Git auto-deploy on `main` |
-| `infra/terraform/modules/data/outputs.tf` | Add `database_session_url` output (modify) |
-| `infra/terraform/envs/{dev,staging,prod}/outputs.tf` | Expose `vercel_project_id` + `database_session_url` (create) |
-| `infra/terraform/envs/deploy-secrets/*` | New root: read env outputs via `tfe_outputs`, write GitHub deploy secrets |
-| `playwright.config.ts` | Allow targeting a deployed URL via `PLAYWRIGHT_BASE_URL` (modify) |
-| `infra/terraform/README.md` + `README.md` | Deploy/rollback runbook (modify) |
+| File                                                 | Responsibility                                                                                        |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `.github/workflows/deploy.yml`                       | Promotion flow: staging → approval → production + post-deploy health gate (created across Tasks 5, 7) |
+| `.github/workflows/rollback.yml`                     | Reusable + manual rollback via `vercel rollback`                                                      |
+| `vercel.json`                                        | Disable Vercel Git auto-deploy on `main`                                                              |
+| `infra/terraform/modules/data/outputs.tf`            | Add `database_session_url` output (modify)                                                            |
+| `infra/terraform/envs/{dev,staging,prod}/outputs.tf` | Expose `vercel_project_id` + `database_session_url` (create)                                          |
+| `infra/terraform/envs/deploy-secrets/*`              | New root: read env outputs via `tfe_outputs`, write GitHub deploy secrets                             |
+| `playwright.config.ts`                               | Allow targeting a deployed URL via `PLAYWRIGHT_BASE_URL` (modify)                                     |
+| `infra/terraform/README.md` + `README.md`            | Deploy/rollback runbook (modify)                                                                      |
 
 **Canonical names (do not rename):**
+
 - Workflows: `deploy.yml` (`name: Deploy`), `rollback.yml` (`name: Rollback`). Caller of CI: the `CI` workflow name from Plan 2.
 - Jobs: `staging`, `production`, `rollback` (in `deploy.yml`); `rollback-production` (in `rollback.yml`).
 - Deploy secrets (GitHub Actions, repo-level): `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID_STAGING`, `VERCEL_PROJECT_ID_PROD`, `MIGRATION_DATABASE_URL_STAGING`, `MIGRATION_DATABASE_URL_PROD`. Repo **variable**: `PROD_URL` (the production URL, used by health checks).
@@ -70,12 +72,14 @@ Verified via Context7 on 2026-05-29; **re-verify before running**:
 `deploy.yml` needs each env's Vercel project id and a migration-capable DB URL. Surface them as workspace outputs so Task 3 can read them.
 
 **Files:**
+
 - Modify: `infra/terraform/modules/data/outputs.tf`
 - Create: `infra/terraform/envs/dev/outputs.tf`, `infra/terraform/envs/staging/outputs.tf`, `infra/terraform/envs/prod/outputs.tf`
 
 - [ ] **Step 1: Add a session-pooler URL output to the data module**
 
 Append to `infra/terraform/modules/data/outputs.tf`:
+
 ```hcl
 output "database_session_url" {
   # VERIFY the pooler `url` map keys for your provider version (expected
@@ -92,6 +96,7 @@ output "database_session_url" {
 - [ ] **Step 2: Add identical root outputs to all three envs (parity preserved)**
 
 Create the **same** file at `infra/terraform/envs/dev/outputs.tf`, `infra/terraform/envs/staging/outputs.tf`, and `infra/terraform/envs/prod/outputs.tf`:
+
 ```hcl
 output "vercel_project_id" {
   value = module.app.project_id
@@ -106,12 +111,14 @@ output "database_session_url" {
 - [ ] **Step 3: Validate the changed module and envs (offline)**
 
 Run:
+
 ```bash
 for dir in modules/data envs/dev envs/staging envs/prod; do
   ( cd "infra/terraform/$dir" && terraform fmt -check && terraform init -backend=false && terraform validate ); done
 diff infra/terraform/envs/dev/outputs.tf infra/terraform/envs/staging/outputs.tf && \
 diff infra/terraform/envs/dev/outputs.tf infra/terraform/envs/prod/outputs.tf && echo "outputs-parity-ok"
 ```
+
 Expected: each validates "Success!"; both `diff`s are empty and print `outputs-parity-ok`.
 
 - [ ] **Step 4: Commit**
@@ -126,11 +133,13 @@ git commit -m "feat(infra): expose vercel_project_id and session DB URL per env"
 ## Task 2: Disable Vercel Git auto-deploy on `main`
 
 **Files:**
+
 - Create: `vercel.json`
 
 - [ ] **Step 1: Create `vercel.json`**
 
 Create `vercel.json` at the repo root (CLI deploys are unaffected; this only stops Vercel's automatic build-on-push for `main`, so the gated workflow is the sole deploy path):
+
 ```json
 {
   "git": {
@@ -164,11 +173,13 @@ A dedicated root that reads the staging/prod workspace outputs and writes the Gi
 > **Simpler solo alternative:** instead of this root, set the six secrets + `PROD_URL` variable once with `gh secret set` / `gh variable set` (values from `terraform output`). The workflows are identical either way. The Terraform route keeps them versioned IaC (§7).
 
 **Files:**
+
 - Create: `infra/terraform/envs/deploy-secrets/{backend,providers,variables,main}.tf` + `terraform.tfvars`
 
 - [ ] **Step 1: Backend + providers**
 
 Create `infra/terraform/envs/deploy-secrets/backend.tf`:
+
 ```hcl
 terraform {
   required_version = ">= 1.7"
@@ -182,6 +193,7 @@ terraform {
 ```
 
 Create `infra/terraform/envs/deploy-secrets/providers.tf` (verify the `tfe` version via Context7 first — see the Context7 note above):
+
 ```hcl
 terraform {
   required_providers {
@@ -210,6 +222,7 @@ provider "tfe" {
 - [ ] **Step 2: Variables**
 
 Create `infra/terraform/envs/deploy-secrets/variables.tf`:
+
 ```hcl
 variable "hcp_organization" { type = string }
 variable "github_owner" { type = string }
@@ -228,6 +241,7 @@ variable "vercel_org_id" { type = string }
 - [ ] **Step 3: Read env outputs and write the secrets**
 
 Create `infra/terraform/envs/deploy-secrets/main.tf`:
+
 ```hcl
 data "tfe_outputs" "staging" {
   organization = var.hcp_organization
@@ -282,6 +296,7 @@ resource "github_actions_secret" "migration_db_prod" {
 - [ ] **Step 4: tfvars**
 
 Create `infra/terraform/envs/deploy-secrets/terraform.tfvars`:
+
 ```hcl
 hcp_organization  = "REPLACE_WITH_HCP_ORG"
 github_owner      = "REPLACE_OWNER"
@@ -292,6 +307,7 @@ vercel_org_id     = "REPLACE_WITH_VERCEL_ORG_ID"
 - [ ] **Step 5: Validate offline**
 
 Run:
+
 ```bash
 cd infra/terraform/envs/deploy-secrets
 terraform fmt -check
@@ -299,6 +315,7 @@ terraform init -backend=false
 terraform validate
 cd -
 ```
+
 Expected: providers install; `validate` prints "Success!". (If `data.tfe_outputs … .values` is rejected, the provider accessor changed — fix per the Context7-verified schema.)
 
 - [ ] **Step 6: Commit**
@@ -315,11 +332,13 @@ git commit -m "feat(infra): add deploy-secrets root wiring TF outputs to GitHub 
 So `deploy.yml`'s staging smoke can run Plan 2's smoke specs against the live staging deployment.
 
 **Files:**
+
 - Modify: `playwright.config.ts`
 
 - [ ] **Step 1: Replace `playwright.config.ts` to honor `PLAYWRIGHT_BASE_URL`**
 
 Replace `playwright.config.ts` with:
+
 ```ts
 import { defineConfig, devices } from "@playwright/test";
 
@@ -352,9 +371,11 @@ export default defineConfig({
 - [ ] **Step 2: Verify the local path still works**
 
 Run (local Supabase running, schema applied, per Plan 2):
+
 ```bash
 pnpm build && pnpm test:e2e
 ```
+
 Expected: 3 passed (the `webServer` path is unchanged when `PLAYWRIGHT_BASE_URL` is unset).
 
 - [ ] **Step 3: Verify the remote path is wired (against any reachable URL)**
@@ -374,11 +395,13 @@ git commit -m "test: allow Playwright to target a deployed URL via PLAYWRIGHT_BA
 ## Task 5: `deploy.yml` — staging job
 
 **Files:**
+
 - Create: `.github/workflows/deploy.yml`
 
 - [ ] **Step 1: Create `deploy.yml` with the workflow header and the staging job**
 
 Create `.github/workflows/deploy.yml`:
+
 ```yaml
 name: Deploy
 
@@ -454,11 +477,13 @@ git commit -m "ci: add deploy.yml staging job (migrate, deploy, smoke)"
 ## Task 6: `rollback.yml` — reusable + manual rollback
 
 **Files:**
+
 - Create: `.github/workflows/rollback.yml`
 
 - [ ] **Step 1: Create `rollback.yml`**
 
 Create `.github/workflows/rollback.yml`:
+
 ```yaml
 name: Rollback
 
@@ -503,9 +528,11 @@ jobs:
 - [ ] **Step 2: Validate the YAML and confirm both triggers are present**
 
 Run:
+
 ```bash
 python3 -c "import yaml; d=yaml.safe_load(open('.github/workflows/rollback.yml')); print('triggers:', sorted(d[True].keys()))"
 ```
+
 Expected: `triggers: ['workflow_call', 'workflow_dispatch']` (PyYAML parses the `on:` key as the boolean `True`).
 
 - [ ] **Step 3: Commit**
@@ -520,51 +547,53 @@ git commit -m "ci: add rollback.yml (reusable + manual vercel rollback)"
 ## Task 7: `deploy.yml` — production job + auto-rollback
 
 **Files:**
+
 - Modify: `.github/workflows/deploy.yml`
 
 - [ ] **Step 1: Add the `production` job under `jobs:` in `.github/workflows/deploy.yml`**
 
 Append (the `environment: production` line is the manual approval gate — reviewers come from Plan 3's `github_repository_environment.production`):
+
 ```yaml
-  production:
-    needs: staging
-    runs-on: ubuntu-latest
-    environment: production
-    env:
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_PROD }}
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Apply migrations (production)
-        run: pnpm exec drizzle-kit migrate
-        env:
-          DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL_PROD }}
-      - name: Install Vercel CLI
-        run: npm install -g vercel@latest
-      - name: Pull production env from Vercel
-        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
-      - name: Build
-        run: vercel build --prod --token="$VERCEL_TOKEN"
-      - name: Deploy to production (atomic alias swap)
-        run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
-      - name: Post-deploy health gate
-        run: |
-          for i in $(seq 1 5); do
-            if curl -fsS "${{ vars.PROD_URL }}/api/health" | grep -q '"status":"ok"'; then
-              echo "production health ok"; exit 0
-            fi
-            echo "attempt $i: not healthy yet"; sleep 10
-          done
-          echo "production health gate FAILED"; exit 1
+production:
+  needs: staging
+  runs-on: ubuntu-latest
+  environment: production
+  env:
+    VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+    VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_PROD }}
+  steps:
+    - uses: actions/checkout@v5
+      with:
+        ref: ${{ github.event.workflow_run.head_sha }}
+    - uses: pnpm/action-setup@v4
+    - uses: actions/setup-node@v5
+      with:
+        node-version: 20
+        cache: pnpm
+    - run: pnpm install --frozen-lockfile
+    - name: Apply migrations (production)
+      run: pnpm exec drizzle-kit migrate
+      env:
+        DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL_PROD }}
+    - name: Install Vercel CLI
+      run: npm install -g vercel@latest
+    - name: Pull production env from Vercel
+      run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+    - name: Build
+      run: vercel build --prod --token="$VERCEL_TOKEN"
+    - name: Deploy to production (atomic alias swap)
+      run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+    - name: Post-deploy health gate
+      run: |
+        for i in $(seq 1 5); do
+          if curl -fsS "${{ vars.PROD_URL }}/api/health" | grep -q '"status":"ok"'; then
+            echo "production health ok"; exit 0
+          fi
+          echo "attempt $i: not healthy yet"; sleep 10
+        done
+        echo "production health gate FAILED"; exit 1
 ```
 
 > **Core-loop placeholder:** when the `signup → create game → request → approve` routes exist, add one core-loop assertion to the health gate (e.g. a Playwright run with `PLAYWRIGHT_BASE_URL=${{ vars.PROD_URL }}`), per §5's "/api/health + 1 core-loop check".
@@ -572,22 +601,25 @@ Append (the `environment: production` line is the manual approval gate — revie
 - [ ] **Step 2: Add the auto-rollback caller job (runs only if production failed)**
 
 Append:
+
 ```yaml
-  rollback:
-    needs: production
-    if: failure() && needs.production.result == 'failure'
-    uses: ./.github/workflows/rollback.yml
-    secrets: inherit
-    with:
-      reason: "auto: production deploy/health gate failed for ${{ github.event.workflow_run.head_sha }}"
+rollback:
+  needs: production
+  if: failure() && needs.production.result == 'failure'
+  uses: ./.github/workflows/rollback.yml
+  secrets: inherit
+  with:
+    reason: "auto: production deploy/health gate failed for ${{ github.event.workflow_run.head_sha }}"
 ```
 
 - [ ] **Step 3: Validate the assembled workflow**
 
 Run:
+
 ```bash
 python3 -c "import yaml; d=yaml.safe_load(open('.github/workflows/deploy.yml')); print('jobs:', sorted(d['jobs']))"
 ```
+
 Expected: `jobs: ['production', 'rollback', 'staging']`.
 
 - [ ] **Step 4: Commit**
@@ -604,22 +636,26 @@ git commit -m "ci: add production deploy with approval gate, health gate, and au
 **⚠️ Outward-facing and credential-gated.** Steps 1–2 are offline/setup; Steps 3+ deploy to real environments — confirm the targets first.
 
 **Files:**
+
 - Modify: `infra/terraform/README.md`, `README.md`
 
 - [ ] **Step 1: Apply the deploy-secrets root (after dev/staging/prod are applied) and set `PROD_URL`**
 
 Run (credentials per Plan 3 + `TFE_TOKEN` + `TF_VAR_vercel_token`):
+
 ```bash
 terraform -chdir=infra/terraform/envs/deploy-secrets init
 terraform -chdir=infra/terraform/envs/deploy-secrets apply
 # Set the production URL variable used by the health checks (use your prod domain):
 gh variable set PROD_URL --body "https://sport-app.example"
 ```
+
 Expected: apply creates the six secrets; `gh secret list` shows them; `gh variable get PROD_URL` returns the URL.
 
 - [ ] **Step 2: Document the promotion + rollback flow**
 
 Append to `README.md`:
+
 ```markdown
 ## Deploy & rollback
 
@@ -636,14 +672,17 @@ A failed production deploy/health gate auto-calls `rollback.yml`.
 ```
 
 Append the apply order to `infra/terraform/README.md`:
+
 ```markdown
 ## Apply order (updated for Plan 4)
-1. envs/repo  2. envs/dev, envs/staging, envs/prod  3. **envs/deploy-secrets** (reads staging/prod outputs)
+
+1. envs/repo 2. envs/dev, envs/staging, envs/prod 3. **envs/deploy-secrets** (reads staging/prod outputs)
 ```
 
 - [ ] **Step 3: Trigger the flow and verify staging deploys**
 
 `main` is protected (Plan 3), so land these changes via a PR — the merge is the push-to-`main` that runs CI and then triggers `deploy.yml`:
+
 ```bash
 git checkout -b deploy/foundation-plan-4
 git push -u origin deploy/foundation-plan-4
@@ -652,23 +691,28 @@ gh pr checks --watch          # the 9 required checks must pass
 gh pr merge --squash --delete-branch
 gh run watch "$(gh run list --workflow=Deploy --limit 1 --json databaseId --jq '.[0].databaseId')"
 ```
+
 Expected: once the PR merges and `CI` goes green on `main`, `Deploy` starts; the `staging` job migrates, deploys, and the Playwright smoke passes against the staging URL.
 
 - [ ] **Step 4: Approve production and verify the health gate**
 
 In the GitHub UI, approve the pending `production` deployment. Then:
+
 ```bash
 curl -fsS "$(gh variable get PROD_URL)/api/health"
 ```
+
 Expected: production deploys after approval; the post-deploy health gate passes; `curl` returns `{"status":"ok","db":"up"}`.
 
 - [ ] **Step 5: Verify manual rollback works**
 
 Run:
+
 ```bash
 gh workflow run rollback.yml -f reason="verify rollback path"
 gh run watch "$(gh run list --workflow=Rollback --limit 1 --json databaseId --jq '.[0].databaseId')"
 ```
+
 Expected: `vercel rollback` restores the previous production deployment; the post-rollback health check passes.
 
 - [ ] **Step 6: Commit**

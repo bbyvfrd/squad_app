@@ -2,7 +2,15 @@ import { afterAll, describe, expect, it } from "vitest";
 import { and, count, eq } from "drizzle-orm";
 import { client, db } from "./client";
 import { newId } from "./id";
-import { cities, clientProfiles, clientSportSkills, games, participations, profiles, sports } from "./schema";
+import {
+  cities,
+  clientProfiles,
+  clientSportSkills,
+  games,
+  participations,
+  profiles,
+  sports,
+} from "./schema";
 
 // Create a Supabase auth user by inserting directly into auth.users (the
 // integration DB connects as the `postgres` superuser, which may write the auth
@@ -32,7 +40,14 @@ describe("sports seed", () => {
     const rows = await db.select().from(sports);
     expect(rows).toHaveLength(8);
     expect(rows.map((s) => s.key).sort()).toEqual([
-      "basketball", "football", "gym", "padel", "running", "swimming", "tennis", "volleyball",
+      "basketball",
+      "football",
+      "gym",
+      "padel",
+      "running",
+      "swimming",
+      "tennis",
+      "volleyball",
     ]);
   });
 });
@@ -112,8 +127,12 @@ describe("derived spots-remaining", () => {
     const p2 = await createAuthUser("P2");
     await db.insert(clientProfiles).values({ profileId: p2 });
 
-    await db.insert(participations).values({ id: newId(), gameId, playerId: p1, status: "approved" });
-    await db.insert(participations).values({ id: newId(), gameId, playerId: p2, status: "requested" });
+    await db
+      .insert(participations)
+      .values({ id: newId(), gameId, playerId: p1, status: "approved" });
+    await db
+      .insert(participations)
+      .values({ id: newId(), gameId, playerId: p2, status: "requested" });
 
     const [{ approved }] = await db
       .select({ approved: count() })
@@ -144,7 +163,9 @@ describe("client_sport_skills", () => {
     const u = await createAuthUser("Skilled");
     await db.insert(clientProfiles).values({ profileId: u });
     const sport = await footballId();
-    await db.insert(clientSportSkills).values({ profileId: u, sportId: sport, skillLevel: "amateur" });
+    await db
+      .insert(clientSportSkills)
+      .values({ profileId: u, sportId: sport, skillLevel: "amateur" });
     await expect(
       db.insert(clientSportSkills).values({ profileId: u, sportId: sport, skillLevel: "advanced" }),
     ).rejects.toThrow();
@@ -159,19 +180,34 @@ describe("games timing + skill", () => {
     const starts = new Date(Date.now() + 86_400_000);
     await expect(
       db.insert(games).values({
-        id: newId(), organizerId: organizer, sportId: sport, title: "Bad end",
-        startsAt: starts, endsAt: new Date(starts.getTime() - 3_600_000), capacity: 8,
+        id: newId(),
+        organizerId: organizer,
+        sportId: sport,
+        title: "Bad end",
+        startsAt: starts,
+        endsAt: new Date(starts.getTime() - 3_600_000),
+        capacity: 8,
       }),
     ).rejects.toThrow();
     await expect(
       db.insert(games).values({
-        id: newId(), organizerId: organizer, sportId: sport, title: "Equal end",
-        startsAt: starts, endsAt: starts, capacity: 8,
+        id: newId(),
+        organizerId: organizer,
+        sportId: sport,
+        title: "Equal end",
+        startsAt: starts,
+        endsAt: starts,
+        capacity: 8,
       }),
     ).rejects.toThrow();
     await db.insert(games).values({
-      id: newId(), organizerId: organizer, sportId: sport, title: "Good end",
-      startsAt: starts, endsAt: new Date(starts.getTime() + 3_600_000), capacity: 8,
+      id: newId(),
+      organizerId: organizer,
+      sportId: sport,
+      title: "Good end",
+      startsAt: starts,
+      endsAt: new Date(starts.getTime() + 3_600_000),
+      capacity: 8,
       skillLevel: "advanced",
     });
   });
@@ -184,13 +220,20 @@ describe("skill is advisory (no DB gate)", () => {
     const sport = await footballId();
     const gameId = newId();
     await db.insert(games).values({
-      id: gameId, organizerId: organizer, sportId: sport, title: "Advanced game",
-      startsAt: new Date(Date.now() + 86_400_000), capacity: 8, skillLevel: "advanced",
+      id: gameId,
+      organizerId: organizer,
+      sportId: sport,
+      title: "Advanced game",
+      startsAt: new Date(Date.now() + 86_400_000),
+      capacity: 8,
+      skillLevel: "advanced",
     });
 
     const player = await createAuthUser("Beginner");
     await db.insert(clientProfiles).values({ profileId: player });
-    await db.insert(clientSportSkills).values({ profileId: player, sportId: sport, skillLevel: "beginner" });
+    await db
+      .insert(clientSportSkills)
+      .values({ profileId: player, sportId: sport, skillLevel: "beginner" });
 
     // No DB constraint compares skill — the request is allowed; the organizer decides.
     await db.insert(participations).values({ id: newId(), gameId, playerId: player });
