@@ -1,0 +1,9 @@
+environment            = "prod"
+project_slug           = "squad-app"
+git_repo               = "bbyvfrd/squad_app" # only prod links Git (PR previews)
+supabase_org_id        = "REPLACE_WITH_ORG_SLUG"
+supabase_region        = "eu-central-1"
+supabase_instance_size = "small"
+app_site_url           = "https://squad-app.example"
+app_domain             = "squad-app.example"
+vercel_team            = null
