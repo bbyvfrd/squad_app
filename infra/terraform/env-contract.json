@@ -1,0 +1,9 @@
+{
+  "tf_managed": [
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "DATABASE_URL",
+    "SUPABASE_SERVICE_ROLE_KEY"
+  ],
+  "platform_managed": ["NODE_ENV"]
+}
