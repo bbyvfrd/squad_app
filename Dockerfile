@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM node:24-alpine AS deps
+FROM node:26-alpine AS deps
 WORKDIR /app
 RUN npm install -g pnpm@10
 # pnpm-workspace.yaml carries pnpm config (ignoredBuiltDependencies) — copy it so
@@ -7,7 +7,7 @@ RUN npm install -g pnpm@10
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
-FROM node:24-alpine AS builder
+FROM node:26-alpine AS builder
 WORKDIR /app
 RUN npm install -g pnpm@10
 COPY --from=deps /app/node_modules ./node_modules
@@ -22,7 +22,7 @@ ENV NODE_ENV=production \
     NEXT_PUBLIC_SUPABASE_ANON_KEY="placeholder-anon-key"
 RUN pnpm build
 
-FROM node:24-alpine AS runner
+FROM node:26-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 # Run as an unprivileged user (Trivy DS002; standard for standalone images).
