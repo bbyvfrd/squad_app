@@ -124,3 +124,28 @@ The data model is the 8-table SQUAD schema from `docs/context/db-schema-and-back
   (`src/lib/db/id.ts`) — no DB default. `sports` uses a generated `smallint` identity.
 - **Authorization:** the app talks to Postgres as `postgres` via Drizzle; RLS is defense-in-depth.
 - **Reset the local DB after schema changes:** `supabase db reset && pnpm dotenv -e .env.local -- drizzle-kit migrate`.
+
+## Continuous Integration
+
+`.github/workflows/ci.yml` runs on every PR and push to `main`. It is portable
+(no Vercel/vendor deploy specifics — that lives in `deploy.yml`, Plan 4); the
+`test` and `e2e` jobs use the Supabase CLI to provision a Postgres with the
+`auth` schema/roles the migrations require.
+
+| Job           | What it gates                                                                                         |
+| ------------- | ----------------------------------------------------------------------------------------------------- |
+| `secret-scan` | gitleaks — blocks any committed secret                                                                |
+| `lint`        | Prettier + ESLint + `tsc`                                                                             |
+| `test`        | Vitest unit/contract + integration against a Supabase-provisioned Postgres (migrations applied first) |
+| `sast`        | Semgrep OSS (SAST)                                                                                    |
+| `vuln-scan`   | Trivy filesystem (deps/secrets) + config (IaC/Dockerfile)                                             |
+| `build-image` | Build → Trivy-scan image → push to GHCR by commit SHA (push to `main` only)                           |
+| `e2e`         | Playwright smoke (health 200 + both route-group surfaces) against the app booted in CI                |
+
+No external secrets are required; GHCR uses the built-in `GITHUB_TOKEN`.
+Dependabot (`.github/dependabot.yml`) keeps npm deps, action pins, and the
+Docker base image current.
+
+Reproduce a job locally with Docker (gitleaks/semgrep/trivy) or the matching
+`pnpm` script (`format:check`, `lint`, `typecheck`, `test`, `test:integration`,
+`test:e2e`).
