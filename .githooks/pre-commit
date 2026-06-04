@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+# Local secret pre-flight for SQUAD — the free, on-your-machine equivalent of
+# GitHub push protection (which needs paid Secret Protection on a private repo).
+# Blocks a commit whose STAGED changes contain a secret. CI's `gitleaks` job
+# (.github/workflows/ci.yml) remains the authoritative gate; this just catches
+# leaks earlier, before they ever leave your machine.
+#
+# Enable once per clone:   git config core.hooksPath .githooks
+# Emergency bypass:        git commit --no-verify   (CI will still block secrets)
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "⚠  gitleaks not installed — skipping local secret scan (CI still scans)."
+  echo "   Install it for local protection:  brew install gitleaks"
+  exit 0
+fi
+
+if ! gitleaks git --staged --redact --no-banner; then
+  echo ""
+  echo "❌ Potential secret found in staged changes (redacted above) — commit blocked."
+  echo "   Fix: remove the secret. False positive? add an allowlist entry to .gitleaks.toml."
+  echo "   Bypass (discouraged): git commit --no-verify"
+  exit 1
+fi
