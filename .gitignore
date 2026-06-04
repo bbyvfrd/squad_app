@@ -53,3 +53,13 @@ next-env.d.ts
 # Plain .env may hold real secrets; .env.example is the tracked exception
 .env
 !.env.example
+
+# Terraform
+infra/terraform/**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.secret.tfvars
+infra/terraform/.env
+# Keep committed: .terraform.lock.hcl and non-secret terraform.tfvars
