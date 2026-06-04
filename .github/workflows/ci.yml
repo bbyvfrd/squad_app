@@ -145,3 +145,41 @@ jobs:
           docker tag ${{ env.IMAGE }}:${{ github.sha }} ${{ env.IMAGE }}:latest
           docker push ${{ env.IMAGE }}:${{ github.sha }}
           docker push ${{ env.IMAGE }}:latest
+
+  # Stage 6 — Playwright E2E smoke against the app booted inside CI (Supabase-provisioned DB).
+  # No NODE_ENV here: next build/start set it. The app reads DATABASE_URL from this job env,
+  # so the health route reports db-up.
+  e2e:
+    needs: [secret-scan, lint, test, sast, vuln-scan]
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon-key
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: supabase/setup-cli@v2
+        with:
+          version: latest
+      - name: Start Supabase
+        run: supabase start
+      - name: Apply migrations
+        run: pnpm exec drizzle-kit migrate
+      - name: Install Playwright chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Build app
+        run: pnpm build
+      - name: Run E2E smoke
+        run: pnpm test:e2e
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
