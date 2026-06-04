@@ -44,3 +44,33 @@ jobs:
         run: pnpm lint
       - name: Typecheck
         run: pnpm typecheck
+
+  # Stage 3 — unit/contract + integration tests against a real Supabase-provisioned
+  # Postgres. The migrations need Supabase's auth schema, roles, and auth.uid(), so CI
+  # boots the local Supabase stack (same as dev) rather than a bare Postgres.
+  test:
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon-key
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: supabase/setup-cli@v2
+        with:
+          version: latest
+      - name: Start Supabase (provides auth schema, roles, auth.uid())
+        run: supabase start
+      - name: Apply migrations (proves migrations apply cleanly)
+        run: pnpm exec drizzle-kit migrate
+      - name: Unit + contract tests
+        run: pnpm test
+      - name: Integration tests
+        run: pnpm test:integration
