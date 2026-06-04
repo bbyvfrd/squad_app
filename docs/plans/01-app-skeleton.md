@@ -17,7 +17,7 @@ This is **Plan 1 of 4** in the foundation series derived from `output/2026-05-29
 1. **Plan 1 (this doc):** App skeleton + portable seams + local data layer → spec §2, §3, §4, §7, and the substrate for §5/§6.
 2. Plan 2: CI pipeline (`ci.yml`) → spec §5.
 3. Plan 3: IaC (Terraform modules + envs + state) → spec §6.
-4. Plan 4: Deploy + rollback (`deploy.yml`, `rollback.yml`, health gate) → spec §5, §8. *(The config parity-check job actually lands in Plan 3.)*
+4. Plan 4: Deploy + rollback (`deploy.yml`, `rollback.yml`, health gate) → spec §5, §8. _(The config parity-check job actually lands in Plan 3.)_
 
 ## Boundary & Prerequisites
 
@@ -29,32 +29,32 @@ This is **Plan 1 of 4** in the foundation series derived from `output/2026-05-29
 
 ## File Structure (created by this plan)
 
-| File | Responsibility |
-|---|---|
-| `next.config.ts` | Next config; enables `output: 'standalone'` for the portable container |
-| `vitest.config.ts` | Test runner config (node environment, path aliases) |
-| `src/lib/config/index.ts` | The ONLY place env vars are read; Zod schema + `parseEnv` + `config` |
-| `src/lib/config/config.test.ts` | Tests for env parsing + fail-fast behavior |
-| `src/lib/config/env-parity.test.ts` | Asserts `.env.example` keys == Zod schema keys |
-| `.env.example` | The documented env-var contract (committed) |
-| `src/lib/db/schema.ts` | Drizzle schema for User, Venue, Game, GameParticipant |
-| `src/lib/db/client.ts` | Postgres connection + Drizzle `db` instance (only module that knows it's Supabase/PG) |
-| `src/lib/db/ping.ts` | `pingDb()` connectivity check (used by health endpoint; mockable) |
-| `src/lib/db/db.integration.test.ts` | Migration-applies + insert/select integration test |
-| `drizzle.config.ts` | drizzle-kit config (migration generation) |
-| `migrations/` | Generated SQL migrations = schema source of truth |
-| `src/lib/auth/types.ts` | `AuthUser` type + `AuthProvider` interface |
-| `src/lib/auth/fake.ts` | `InMemoryAuthProvider` for tests |
-| `src/lib/auth/supabase.ts` | `SupabaseAuthProvider` (wraps `@supabase/supabase-js`) |
-| `src/lib/auth/index.ts` | `getAuthProvider()` factory |
-| `src/lib/auth/auth.contract.test.ts` | Contract test run against the in-memory provider |
-| `src/app/api/health/route.ts` | `GET /api/health` — returns ok/503 based on `pingDb()` |
-| `src/app/api/health/health.test.ts` | Health handler tests (db up → 200, db down → 503) |
-| `src/app/(client)/page.tsx` | Client-surface placeholder route |
-| `src/app/(venue)/venue/page.tsx` | Venue-surface placeholder route |
-| `Dockerfile` | Multi-stage build producing a standalone runnable image |
-| `.dockerignore` | Keeps build context small |
-| `README.md` | Local-dev runbook for the app repo |
+| File                                 | Responsibility                                                                        |
+| ------------------------------------ | ------------------------------------------------------------------------------------- |
+| `next.config.ts`                     | Next config; enables `output: 'standalone'` for the portable container                |
+| `vitest.config.ts`                   | Test runner config (node environment, path aliases)                                   |
+| `src/lib/config/index.ts`            | The ONLY place env vars are read; Zod schema + `parseEnv` + `config`                  |
+| `src/lib/config/config.test.ts`      | Tests for env parsing + fail-fast behavior                                            |
+| `src/lib/config/env-parity.test.ts`  | Asserts `.env.example` keys == Zod schema keys                                        |
+| `.env.example`                       | The documented env-var contract (committed)                                           |
+| `src/lib/db/schema.ts`               | Drizzle schema for User, Venue, Game, GameParticipant                                 |
+| `src/lib/db/client.ts`               | Postgres connection + Drizzle `db` instance (only module that knows it's Supabase/PG) |
+| `src/lib/db/ping.ts`                 | `pingDb()` connectivity check (used by health endpoint; mockable)                     |
+| `src/lib/db/db.integration.test.ts`  | Migration-applies + insert/select integration test                                    |
+| `drizzle.config.ts`                  | drizzle-kit config (migration generation)                                             |
+| `migrations/`                        | Generated SQL migrations = schema source of truth                                     |
+| `src/lib/auth/types.ts`              | `AuthUser` type + `AuthProvider` interface                                            |
+| `src/lib/auth/fake.ts`               | `InMemoryAuthProvider` for tests                                                      |
+| `src/lib/auth/supabase.ts`           | `SupabaseAuthProvider` (wraps `@supabase/supabase-js`)                                |
+| `src/lib/auth/index.ts`              | `getAuthProvider()` factory                                                           |
+| `src/lib/auth/auth.contract.test.ts` | Contract test run against the in-memory provider                                      |
+| `src/app/api/health/route.ts`        | `GET /api/health` — returns ok/503 based on `pingDb()`                                |
+| `src/app/api/health/health.test.ts`  | Health handler tests (db up → 200, db down → 503)                                     |
+| `src/app/(client)/page.tsx`          | Client-surface placeholder route                                                      |
+| `src/app/(venue)/venue/page.tsx`     | Venue-surface placeholder route                                                       |
+| `Dockerfile`                         | Multi-stage build producing a standalone runnable image                               |
+| `.dockerignore`                      | Keeps build context small                                                             |
+| `README.md`                          | Local-dev runbook for the app repo                                                    |
 
 **Canonical names used across tasks (do not rename):** `parseEnv`, `config`, `db`, `client`, `pingDb`, `AuthUser`, `AuthProvider`, `InMemoryAuthProvider`, `SupabaseAuthProvider`, `getAuthProvider`, tables `users`/`venues`/`games`/`gameParticipants`.
 
@@ -63,17 +63,20 @@ This is **Plan 1 of 4** in the foundation series derived from `output/2026-05-29
 ## Task 1: Initialize the app repo and Next.js skeleton
 
 **Files:**
+
 - Create: whole repo, `next.config.ts`, `src/app/(client)/page.tsx`, `src/app/(venue)/venue/page.tsx`
 
 - [ ] **Step 1: Scaffold the Next.js app**
 
 Run (in the parent directory where the new repo should live):
+
 ```bash
 pnpm create next-app@latest sport-app \
   --ts --app --src-dir --eslint --tailwind --use-pnpm \
   --import-alias "@/*"
 cd sport-app
 ```
+
 Expected: a `sport-app/` directory with a Next.js + TypeScript + Tailwind project; `pnpm` used as package manager. If prompted for any unset option, accept the default.
 
 - [ ] **Step 2: Verify the baseline build passes**
@@ -84,6 +87,7 @@ Expected: "Compiled successfully" with a route list, exit code 0.
 - [ ] **Step 3: Enable standalone output for the portable container**
 
 Replace `next.config.ts` with:
+
 ```ts
 import type { NextConfig } from "next";
 
@@ -97,6 +101,7 @@ export default nextConfig;
 - [ ] **Step 4: Create the two route-group placeholder pages**
 
 Create `src/app/(client)/page.tsx`:
+
 ```tsx
 export default function ClientHome() {
   return <main>Client surface (player / organizer)</main>;
@@ -104,6 +109,7 @@ export default function ClientHome() {
 ```
 
 Create `src/app/(venue)/venue/page.tsx`:
+
 ```tsx
 export default function VenueHome() {
   return <main>Venue owner surface</main>;
@@ -111,6 +117,7 @@ export default function VenueHome() {
 ```
 
 Delete the default `src/app/page.tsx` if it conflicts with the `(client)` group root:
+
 ```bash
 rm -f src/app/page.tsx
 ```
@@ -132,20 +139,24 @@ git commit -m "chore: scaffold Next.js app with two route groups and standalone 
 ## Task 2: Test runner and quality baseline
 
 **Files:**
+
 - Create: `vitest.config.ts`, `src/lib/sanity.test.ts`
 - Modify: `package.json` (scripts)
 
 - [ ] **Step 1: Install test dependencies**
 
 Run:
+
 ```bash
 pnpm add -D vitest vite-tsconfig-paths @types/node
 ```
+
 Expected: packages added to `devDependencies`.
 
 - [ ] **Step 2: Create the Vitest config**
 
 Create `vitest.config.ts`:
+
 ```ts
 import { defineConfig } from "vitest/config";
 import tsconfigPaths from "vite-tsconfig-paths";
@@ -163,6 +174,7 @@ export default defineConfig({
 - [ ] **Step 3: Add scripts to `package.json`**
 
 In the `"scripts"` block add:
+
 ```json
 "test": "vitest run",
 "test:watch": "vitest",
@@ -173,6 +185,7 @@ In the `"scripts"` block add:
 - [ ] **Step 4: Write a sanity test (proves the runner works)**
 
 Create `src/lib/sanity.test.ts`:
+
 ```ts
 import { describe, it, expect } from "vitest";
 
@@ -200,6 +213,7 @@ git commit -m "test: add vitest with node environment and path aliases"
 ## Task 3: Typed config seam (`lib/config`)
 
 **Files:**
+
 - Create: `src/lib/config/index.ts`, `src/lib/config/config.test.ts`
 
 - [ ] **Step 1: Install Zod**
@@ -210,6 +224,7 @@ Expected: `zod` added to `dependencies`.
 - [ ] **Step 2: Write the failing test**
 
 Create `src/lib/config/config.test.ts`:
+
 ```ts
 import { describe, it, expect } from "vitest";
 import { parseEnv } from "./index";
@@ -247,6 +262,7 @@ Expected: FAIL — "Cannot find module './index'" / `parseEnv` is not a function
 - [ ] **Step 4: Implement the config module**
 
 Create `src/lib/config/index.ts`:
+
 ```ts
 import { z } from "zod";
 
@@ -269,9 +285,7 @@ export type Config = {
 export function parseEnv(env: Record<string, string | undefined>): Config {
   const parsed = envSchema.safeParse(env);
   if (!parsed.success) {
-    const issues = parsed.error.issues
-      .map((i) => `${i.path.join(".")}: ${i.message}`)
-      .join("; ");
+    const issues = parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");
     throw new Error(`Invalid environment configuration: ${issues}`);
   }
   const e = parsed.data;
@@ -305,11 +319,13 @@ git commit -m "feat: add fail-fast Zod config seam"
 ## Task 4: Env-var contract and parity test
 
 **Files:**
+
 - Create: `.env.example`, `src/lib/config/env-parity.test.ts`
 
 - [ ] **Step 1: Create the `.env.example` contract**
 
 Create `.env.example`:
+
 ```bash
 # NODE_ENV — runtime mode. secret: no. envs: all
 NODE_ENV=development
@@ -326,16 +342,19 @@ SUPABASE_SERVICE_ROLE_KEY=replace-me
 - [ ] **Step 2: Guarantee `.env.example` is tracked but `.env*.local` is ignored**
 
 `create-next-app` ignore patterns vary by version. Make the intent explicit and robust:
+
 ```bash
 grep -qxF '.env*.local' .gitignore || echo '.env*.local' >> .gitignore
 grep -qxF '!.env.example' .gitignore || echo '!.env.example' >> .gitignore
 ```
+
 Verify: `git check-ignore .env.example || echo "tracked-ok"`
 Expected: prints `tracked-ok` (the example is NOT ignored). The `!.env.example` negation guarantees this even if a blanket `.env*` rule exists.
 
 - [ ] **Step 3: Write the failing parity test**
 
 Create `src/lib/config/env-parity.test.ts`:
+
 ```ts
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
@@ -383,6 +402,7 @@ git commit -m "feat: add .env.example contract with schema parity test"
 ## Task 5: Local Supabase data platform
 
 **Files:**
+
 - Create: `supabase/config.toml` (generated), `.env.local` (gitignored, NOT committed)
 
 - [ ] **Step 1: Initialize Supabase**
@@ -417,29 +437,26 @@ git commit -m "chore: add local Supabase configuration"
 ## Task 6: Database seam — Drizzle schema, client, and migration
 
 **Files:**
+
 - Create: `src/lib/db/schema.ts`, `src/lib/db/client.ts`, `src/lib/db/ping.ts`, `drizzle.config.ts`, `vitest.integration.config.ts`, `src/lib/db/db.integration.test.ts`, `migrations/` (generated)
 
 - [ ] **Step 1: Install database dependencies**
 
 Run:
+
 ```bash
 pnpm add drizzle-orm postgres
 pnpm add -D drizzle-kit dotenv-cli
 ```
+
 Expected: `drizzle-orm` + `postgres` in dependencies; `drizzle-kit` + `dotenv-cli` in devDependencies. (`dotenv-cli` provides the `dotenv` binary used in later steps to load `.env.local`.)
 
 - [ ] **Step 2: Define the schema (the 4 product objects)**
 
 Create `src/lib/db/schema.ts`:
+
 ```ts
-import {
-  pgTable,
-  uuid,
-  text,
-  integer,
-  timestamp,
-  pgEnum,
-} from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, integer, timestamp, pgEnum } from "drizzle-orm/pg-core";
 
 export const participantStatus = pgEnum("participant_status", [
   "requested",
@@ -457,7 +474,9 @@ export const users = pgTable("users", {
 
 export const venues = pgTable("venues", {
   id: uuid("id").defaultRandom().primaryKey(),
-  ownerUserId: uuid("owner_user_id").references(() => users.id).notNull(),
+  ownerUserId: uuid("owner_user_id")
+    .references(() => users.id)
+    .notNull(),
   name: text("name").notNull(),
   locationText: text("location_text").notNull(),
   contactInfo: text("contact_info"),
@@ -467,7 +486,9 @@ export const venues = pgTable("venues", {
 
 export const games = pgTable("games", {
   id: uuid("id").defaultRandom().primaryKey(),
-  organizerUserId: uuid("organizer_user_id").references(() => users.id).notNull(),
+  organizerUserId: uuid("organizer_user_id")
+    .references(() => users.id)
+    .notNull(),
   venueId: uuid("venue_id").references(() => venues.id),
   sport: text("sport").notNull(),
   title: text("title").notNull(),
@@ -480,8 +501,12 @@ export const games = pgTable("games", {
 
 export const gameParticipants = pgTable("game_participants", {
   id: uuid("id").defaultRandom().primaryKey(),
-  gameId: uuid("game_id").references(() => games.id).notNull(),
-  userId: uuid("user_id").references(() => users.id).notNull(),
+  gameId: uuid("game_id")
+    .references(() => games.id)
+    .notNull(),
+  userId: uuid("user_id")
+    .references(() => users.id)
+    .notNull(),
   status: participantStatus("status").default("requested").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
@@ -490,6 +515,7 @@ export const gameParticipants = pgTable("game_participants", {
 - [ ] **Step 3: Create the database client**
 
 Create `src/lib/db/client.ts`:
+
 ```ts
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
@@ -503,6 +529,7 @@ export const db = drizzle(client, { schema });
 - [ ] **Step 4: Create the connectivity check**
 
 Create `src/lib/db/ping.ts`:
+
 ```ts
 import { sql } from "drizzle-orm";
 import { db } from "./client";
@@ -520,6 +547,7 @@ export async function pingDb(): Promise<boolean> {
 - [ ] **Step 5: Configure drizzle-kit**
 
 Create `drizzle.config.ts`:
+
 ```ts
 import { defineConfig } from "drizzle-kit";
 
@@ -546,6 +574,7 @@ Expected: "migrations applied" with no error.
 - [ ] **Step 8: Write the integration config and failing integration test**
 
 Create `vitest.integration.config.ts`:
+
 ```ts
 import { defineConfig } from "vitest/config";
 import tsconfigPaths from "vite-tsconfig-paths";
@@ -560,6 +589,7 @@ export default defineConfig({
 ```
 
 Create `src/lib/db/db.integration.test.ts`:
+
 ```ts
 import { describe, it, expect, afterAll } from "vitest";
 import { db, client } from "./client";
@@ -604,11 +634,13 @@ git commit -m "feat: add Drizzle db seam, schema, migration, and integration tes
 ## Task 7: Auth seam (`lib/auth`)
 
 **Files:**
+
 - Create: `src/lib/auth/types.ts`, `src/lib/auth/fake.ts`, `src/lib/auth/supabase.ts`, `src/lib/auth/index.ts`, `src/lib/auth/auth.contract.test.ts`
 
 - [ ] **Step 1: Define the auth interface**
 
 Create `src/lib/auth/types.ts`:
+
 ```ts
 export type AuthUser = {
   id: string;
@@ -625,6 +657,7 @@ export interface AuthProvider {
 - [ ] **Step 2: Write the failing contract test against an in-memory provider**
 
 Create `src/lib/auth/auth.contract.test.ts`:
+
 ```ts
 import { describe, it, expect } from "vitest";
 import { InMemoryAuthProvider } from "./fake";
@@ -662,6 +695,7 @@ Expected: FAIL — "Cannot find module './fake'".
 - [ ] **Step 4: Implement the in-memory provider**
 
 Create `src/lib/auth/fake.ts`:
+
 ```ts
 import type { AuthProvider, AuthUser } from "./types";
 
@@ -708,6 +742,7 @@ Expected: 2 passed.
 Run: `pnpm add @supabase/supabase-js`
 
 Create `src/lib/auth/supabase.ts`:
+
 ```ts
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { AuthProvider, AuthUser } from "./types";
@@ -745,6 +780,7 @@ export class SupabaseAuthProvider implements AuthProvider {
 ```
 
 Create `src/lib/auth/index.ts`:
+
 ```ts
 import { config } from "@/lib/config";
 import type { AuthProvider } from "./types";
@@ -774,11 +810,13 @@ git commit -m "feat: add auth seam with in-memory and Supabase providers"
 ## Task 8: Health endpoint
 
 **Files:**
+
 - Create: `src/app/api/health/route.ts`, `src/app/api/health/health.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 Create `src/app/api/health/health.test.ts`:
+
 ```ts
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
@@ -813,6 +851,7 @@ Expected: FAIL — "Cannot find module './route'".
 - [ ] **Step 3: Implement the route**
 
 Create `src/app/api/health/route.ts`:
+
 ```ts
 import { NextResponse } from "next/server";
 import { pingDb } from "@/lib/db/ping";
@@ -822,10 +861,9 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   const up = await pingDb();
-  return NextResponse.json(
-    up ? { status: "ok", db: "up" } : { status: "degraded", db: "down" },
-    { status: up ? 200 : 503 },
-  );
+  return NextResponse.json(up ? { status: "ok", db: "up" } : { status: "degraded", db: "down" }, {
+    status: up ? 200 : 503,
+  });
 }
 ```
 
@@ -846,11 +884,13 @@ git commit -m "feat: add /api/health endpoint backed by db ping"
 ## Task 9: Portable container
 
 **Files:**
+
 - Create: `Dockerfile`, `.dockerignore`
 
 - [ ] **Step 1: Create `.dockerignore`**
 
 Create `.dockerignore`:
+
 ```
 node_modules
 .next
@@ -863,6 +903,7 @@ supabase
 - [ ] **Step 2: Create the multi-stage Dockerfile**
 
 Create `Dockerfile`:
+
 ```dockerfile
 # syntax=docker/dockerfile:1
 FROM node:20-alpine AS deps
@@ -906,12 +947,14 @@ Expected: build completes with "naming to docker.io/library/sport-app:dev"; exit
 - [ ] **Step 4: Run the container and verify it serves the health endpoint**
 
 Run (Supabase must be running; `--network host` lets the container reach local Supabase on 127.0.0.1):
+
 ```bash
 docker run --rm -d --name sport-app-test --network host --env-file .env.local sport-app:dev
 sleep 3
 curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3000/api/health
 docker stop sport-app-test
 ```
+
 Expected: prints `200` (the containerized app booted, validated config, and reached the database). On Docker Desktop (macOS/Windows) where `--network host` is limited, instead map the port with `-p 3000:3000` and set `DATABASE_URL`/`NEXT_PUBLIC_SUPABASE_URL` to `host.docker.internal`; expect `200` the same way.
 
 - [ ] **Step 5: Commit**
@@ -926,11 +969,13 @@ git commit -m "feat: add multi-stage Dockerfile for portable standalone image"
 ## Task 10: App-repo README (local-dev runbook)
 
 **Files:**
+
 - Modify: `README.md`
 
 - [ ] **Step 1: Replace `README.md` with the runbook**
 
 Create/replace `README.md`:
+
 ```markdown
 # sport-app
 
@@ -941,9 +986,11 @@ adapters so the managed stack (Vercel + Supabase) can be swapped without an
 app rewrite.
 
 ## Prerequisites
+
 - Node 20+, pnpm 9+, Docker, Supabase CLI
 
 ## Local development
+
 1. `pnpm install`
 2. `supabase start` — starts local Postgres + auth
 3. `cp .env.example .env.local` and fill keys from `supabase start` output
@@ -951,11 +998,13 @@ app rewrite.
 5. `pnpm dev` — run the app at http://localhost:3000
 
 ## Testing
+
 - `pnpm test` — unit/contract tests
 - `pnpm dotenv -e .env.local -- pnpm test:integration` — DB integration tests (needs `supabase start`)
 - `pnpm typecheck` — TypeScript
 
 ## Layout
+
 - `src/lib/config` — typed, fail-fast env (only place env vars are read)
 - `src/lib/db` — Drizzle schema + client; `migrations/` is the schema source of truth
 - `src/lib/auth` — `AuthProvider` interface + Supabase adapter + in-memory fake

@@ -23,18 +23,18 @@ Recreational sports coordination for Azerbaijan. It replaces messy chat/call coo
 
 ## Locked scope
 
-| Area | Decision |
-|---|---|
-| Hero user | Organizer |
-| Launch geography | Azerbaijan-wide (don't hard-code geo) |
-| First UI language | English |
-| Sports | football, basketball, tennis, volleyball, padel, running, gym/fitness, swimming |
-| Surfaces | Client app (players + organizers); venue owner app (venue owners) |
-| Client onboarding | player, organizer, or both |
-| Venue owner role | manage listings only |
-| Participation | requests require organizer approval |
-| Confirmation | approval immediately confirms the spot (no extra step) |
-| Cancellation/dropout | basic status tracking only |
+| Area                 | Decision                                                                        |
+| -------------------- | ------------------------------------------------------------------------------- |
+| Hero user            | Organizer                                                                       |
+| Launch geography     | Azerbaijan-wide (don't hard-code geo)                                           |
+| First UI language    | English                                                                         |
+| Sports               | football, basketball, tennis, volleyball, padel, running, gym/fitness, swimming |
+| Surfaces             | Client app (players + organizers); venue owner app (venue owners)               |
+| Client onboarding    | player, organizer, or both                                                      |
+| Venue owner role     | manage listings only                                                            |
+| Participation        | requests require organizer approval                                             |
+| Confirmation         | approval immediately confirms the spot (no extra step)                          |
+| Cancellation/dropout | basic status tracking only                                                      |
 
 ## Surfaces & screens
 
@@ -45,14 +45,14 @@ Recreational sports coordination for Azerbaijan. It replaces messy chat/call coo
 
 Identity is implemented as **split profiles** (`profiles` + optional `client_profiles` / `venue_owner_profiles`); the conceptual `User` below maps onto that. See the schema doc for tables, keys, indexing, and RLS.
 
-| Object | Key fields |
-|---|---|
+| Object              | Key fields                                                                                                                                                                                                                                                       |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **User (identity)** | account = `profiles` (id, `full_name`, optional `display_name`, optional `city_id`); client surface = `client_profiles` (marker — any client can organize and play); venue surface = `venue_owner_profiles` (business_name, contact); phone in `auth.users` only |
-| **Skill** | `client_sport_skills` — per-user per-sport `skill_level` (5-tier: beginner/intermediate/amateur/advanced/professional); advisory — never gates joining, drives organizer indicator only |
-| **City** | `cities` lookup (key, name); used on `profiles.city_id` (home city) and `games.city_id` (discovery dimension) |
-| **Venue** | id, owner_id, name, supported_sports[] (via `venue_sports`), location_text, contact_info, description |
-| **Game** | id, organizer_id, optional venue_id, sport (→ `sports`), title, starts_at, optional ends_at (CHECK > starts_at), optional skill_level (null = all levels), optional city_id, capacity, location_text, notes, status |
-| **Participation** | id, game_id, player_id, status (`requested`\|`approved`\|`declined`\|`cancelled`); unique `(game_id, player_id)` |
+| **Skill**           | `client_sport_skills` — per-user per-sport `skill_level` (5-tier: beginner/intermediate/amateur/advanced/professional); advisory — never gates joining, drives organizer indicator only                                                                          |
+| **City**            | `cities` lookup (key, name); used on `profiles.city_id` (home city) and `games.city_id` (discovery dimension)                                                                                                                                                    |
+| **Venue**           | id, owner_id, name, supported_sports[] (via `venue_sports`), location_text, contact_info, description                                                                                                                                                            |
+| **Game**            | id, organizer_id, optional venue_id, sport (→ `sports`), title, starts_at, optional ends_at (CHECK > starts_at), optional skill_level (null = all levels), optional city_id, capacity, location_text, notes, status                                              |
+| **Participation**   | id, game_id, player_id, status (`requested`\|`approved`\|`declined`\|`cancelled`); unique `(game_id, player_id)`                                                                                                                                                 |
 
 ## States
 

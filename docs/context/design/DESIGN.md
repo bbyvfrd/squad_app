@@ -11,60 +11,60 @@
 ```css
 :root {
   /* ── brand ─────────────────────────────────────────────────────── */
-  --brand-500:     #EE4721;                  /* SQUAD red — logo source of truth */
-  --brand-400:     oklch(70% 0.20 32);       /* hover */
-  --brand-600:     oklch(58% 0.22 32);       /* active / pressed */
-  --brand-soft:    color-mix(in oklch, var(--brand-500) 16%, transparent);
-  --brand-on-text: oklch(16% 0.08 32);       /* dark warm — text/icon on brand fills (AA at 15px) */
+  --brand-500: #ee4721; /* SQUAD red — logo source of truth */
+  --brand-400: oklch(70% 0.2 32); /* hover */
+  --brand-600: oklch(58% 0.22 32); /* active / pressed */
+  --brand-soft: color-mix(in oklch, var(--brand-500) 16%, transparent);
+  --brand-on-text: oklch(16% 0.08 32); /* dark warm — text/icon on brand fills (AA at 15px) */
 
   /* ── sport state (functional, never decorative) ────────────────── */
-  --live-500: oklch(72% 0.21 145);  /* pitch green — game is LIVE NOW */
+  --live-500: oklch(72% 0.21 145); /* pitch green — game is LIVE NOW */
   --live-soft: color-mix(in oklch, var(--live-500) 18%, transparent);
-  --slot-500: oklch(70% 0.16 230);  /* court blue — slots open, squad chip, info */
+  --slot-500: oklch(70% 0.16 230); /* court blue — slots open, squad chip, info */
   --slot-soft: color-mix(in oklch, var(--slot-500) 16%, transparent);
-  --win-500:  oklch(85% 0.17 90);   /* floodlight yellow — streak, MVP, score */
+  --win-500: oklch(85% 0.17 90); /* floodlight yellow — streak, MVP, score */
   --win-soft: color-mix(in oklch, var(--win-500) 16%, transparent);
-  --loss-500: oklch(56% 0.21 12);   /* crimson — destructive, errors (hue 12 ≠ brand hue 32) */
-  --loss-400: oklch(64% 0.20 12);   /* hover on destructive */
-  --loss-600: oklch(48% 0.22 12);   /* destructive button fill */
+  --loss-500: oklch(56% 0.21 12); /* crimson — destructive, errors (hue 12 ≠ brand hue 32) */
+  --loss-400: oklch(64% 0.2 12); /* hover on destructive */
+  --loss-600: oklch(48% 0.22 12); /* destructive button fill */
   --loss-soft: color-mix(in oklch, var(--loss-500) 18%, transparent);
 
   /* ── semantic aliases — generic UI reads from these ────────────── */
-  --color-brand:   var(--brand-500);
+  --color-brand: var(--brand-500);
   --color-success: var(--live-500);
-  --color-info:    var(--slot-500);
+  --color-info: var(--slot-500);
   --color-warning: var(--win-500);
-  --color-danger:  var(--loss-500);
+  --color-danger: var(--loss-500);
 
   /* ── neutrals — DARK (default canvas) ──────────────────────────── */
   /* cool slate, chroma 0.012–0.020 — above perceptual threshold so the
      cool cast is visible. Surfaces step the slate (15→19→23); no shadows
      on content. Off-white fg (96%) — no screen glare. */
-  --bg:            oklch(15% 0.016 240);
-  --surface:       oklch(19% 0.018 240);
-  --surface-2:     oklch(23% 0.020 240);
-  --border:        oklch(28% 0.014 240);
+  --bg: oklch(15% 0.016 240);
+  --surface: oklch(19% 0.018 240);
+  --surface-2: oklch(23% 0.02 240);
+  --border: oklch(28% 0.014 240);
   --border-strong: oklch(38% 0.012 240);
-  --fg:            oklch(96% 0.007 240);
-  --muted:         oklch(72% 0.012 240);
-  --subtle:        oklch(60% 0.014 240);     /* tertiary — passes AA at 12px */
+  --fg: oklch(96% 0.007 240);
+  --muted: oklch(72% 0.012 240);
+  --subtle: oklch(60% 0.014 240); /* tertiary — passes AA at 12px */
 
   /* ── interaction states ────────────────────────────────────────── */
-  --surface-hover:   oklch(21% 0.019 240);
-  --surface-pressed: oklch(25% 0.020 240);
-  --ring:            color-mix(in oklch, var(--brand-500) 60%, transparent);
-  --ring-offset:     var(--bg);
-  --disabled-fg:     oklch(42% 0.012 240);
-  --disabled-bg:     oklch(21% 0.016 240);
+  --surface-hover: oklch(21% 0.019 240);
+  --surface-pressed: oklch(25% 0.02 240);
+  --ring: color-mix(in oklch, var(--brand-500) 60%, transparent);
+  --ring-offset: var(--bg);
+  --disabled-fg: oklch(42% 0.012 240);
+  --disabled-bg: oklch(21% 0.016 240);
 
   /* ── type ──────────────────────────────────────────────────────── */
-  --font-display: 'Inter Tight', 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --font-body:    'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
-  --font-mono:    'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --font-display: "Inter Tight", "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   /* ── scale ─────────────────────────────────────────────────────── */
-  --fs-d1: clamp(64px, 9vw, 128px);   /* page-defining italic display */
-  --fs-d2: clamp(40px, 5vw, 64px);    /* section openers */
+  --fs-d1: clamp(64px, 9vw, 128px); /* page-defining italic display */
+  --fs-d2: clamp(40px, 5vw, 64px); /* section openers */
   --fs-h1: clamp(28px, 3.2vw, 40px);
   --fs-h2: 22px;
   --fs-h3: 17px;
@@ -74,54 +74,50 @@
 
   /* ── spacing — 8pt grid ────────────────────────────────────────── */
   --gap-2xs: 4px;
-  --gap-xs:  8px;
-  --gap-sm:  12px;
-  --gap-md:  20px;
-  --gap-lg:  32px;
-  --gap-xl:  56px;
+  --gap-xs: 8px;
+  --gap-sm: 12px;
+  --gap-md: 20px;
+  --gap-lg: 32px;
+  --gap-xl: 56px;
   --gap-2xl: 96px;
 
   --container: 1280px;
-  --gutter:    clamp(20px, 4vw, 48px);
+  --gutter: clamp(20px, 4vw, 48px);
 
   /* ── radii ─────────────────────────────────────────────────────── */
-  --r-sm:   6px;
-  --r-md:   8px;
-  --r-lg:   16px;
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 16px;
   --r-pill: 999px;
 
   /* ── elevation — overlays only; content stays flat ─────────────── */
-  --shadow-sm:      0 1px 2px 0 oklch(0% 0 0 / 0.10),
-                    0 1px 3px 0 oklch(0% 0 0 / 0.06);
-  --shadow-md:      0 4px 8px -2px oklch(0% 0 0 / 0.22),
-                    0 2px 4px -1px oklch(0% 0 0 / 0.12);
-  --shadow-lg:      0 12px 24px -6px oklch(0% 0 0 / 0.32),
-                    0 6px 12px -3px oklch(0% 0 0 / 0.18);
-  --shadow-overlay: 0 24px 48px -12px oklch(0% 0 0 / 0.55),
-                    0 12px 24px -6px oklch(0% 0 0 / 0.32);
+  --shadow-sm: 0 1px 2px 0 oklch(0% 0 0 / 0.1), 0 1px 3px 0 oklch(0% 0 0 / 0.06);
+  --shadow-md: 0 4px 8px -2px oklch(0% 0 0 / 0.22), 0 2px 4px -1px oklch(0% 0 0 / 0.12);
+  --shadow-lg: 0 12px 24px -6px oklch(0% 0 0 / 0.32), 0 6px 12px -3px oklch(0% 0 0 / 0.18);
+  --shadow-overlay: 0 24px 48px -12px oklch(0% 0 0 / 0.55), 0 12px 24px -6px oklch(0% 0 0 / 0.32);
 
   /* ── motion — 3 durations, 2 easings ───────────────────────────── */
-  --dur-fast:    120ms;   /* state echo (hover, focus) */
-  --dur-base:    180ms;   /* surface transition (drawer open) */
-  --dur-slow:    280ms;   /* orchestrated entry (modal, toast) */
-  --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 120ms; /* state echo (hover, focus) */
+  --dur-base: 180ms; /* surface transition (drawer open) */
+  --dur-slow: 280ms; /* orchestrated entry (modal, toast) */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 /* ── light-mode swap (marketing + venue CRM only) ─────────────────── */
 .light {
-  --bg:              oklch(97% 0.008 240);    /* soft slate wash */
-  --surface:         oklch(99.4% 0.004 240);  /* off-white card, not monitor-pure */
-  --surface-2:       oklch(95% 0.010 240);
-  --surface-hover:   oklch(94% 0.012 240);
+  --bg: oklch(97% 0.008 240); /* soft slate wash */
+  --surface: oklch(99.4% 0.004 240); /* off-white card, not monitor-pure */
+  --surface-2: oklch(95% 0.01 240);
+  --surface-hover: oklch(94% 0.012 240);
   --surface-pressed: oklch(91% 0.014 240);
-  --border:          oklch(89% 0.012 240);
-  --border-strong:   oklch(77% 0.014 240);
-  --fg:              oklch(18% 0.014 240);    /* committed slate ink, not black */
-  --muted:           oklch(46% 0.014 240);
-  --subtle:          oklch(56% 0.014 240);
-  --disabled-fg:     oklch(62% 0.010 240);
-  --disabled-bg:     oklch(92% 0.010 240);
+  --border: oklch(89% 0.012 240);
+  --border-strong: oklch(77% 0.014 240);
+  --fg: oklch(18% 0.014 240); /* committed slate ink, not black */
+  --muted: oklch(46% 0.014 240);
+  --subtle: oklch(56% 0.014 240);
+  --disabled-fg: oklch(62% 0.01 240);
+  --disabled-bg: oklch(92% 0.01 240);
 }
 ```
 
@@ -130,32 +126,35 @@
 ## System constants
 
 ### Breakpoints
+
 The working reference uses three thresholds across every responsive grid — name them so a new file doesn't reinvent the numbers.
 
 ```css
 :root {
-  --bp-sm: 540px;   /* phone landscape → small tablet */
-  --bp-md: 820px;   /* tablet → laptop split */
-  --bp-lg: 920px;   /* product grid breakpoint (gamecards, stats, duo layouts) */
+  --bp-sm: 540px; /* phone landscape → small tablet */
+  --bp-md: 820px; /* tablet → laptop split */
+  --bp-lg: 920px; /* product grid breakpoint (gamecards, stats, duo layouts) */
 }
 ```
 
 Use `--bp-md` for chrome reflow (topnav collapse, sheet vs. modal swap). Use `--bp-lg` for product grids (gamecards going single-column). Use `--bp-sm` for the densest specimens (state-demo grids, radii samples).
 
 ### z-index scale
+
 ```css
 :root {
-  --z-base:    0;     /* content plane */
-  --z-sticky:  10;    /* sticky page elements (in-screen pill-tabs, top-tabs underline) */
-  --z-nav:     20;    /* topnav, tabbar */
-  --z-popover: 40;    /* dropdowns, autocomplete, tooltips */
-  --z-modal:   60;    /* modal + frosted backdrop */
-  --z-sheet:   70;    /* bottom sheet (must sit above modal on phone) */
-  --z-toast:   80;    /* toasts — always on top of every surface */
+  --z-base: 0; /* content plane */
+  --z-sticky: 10; /* sticky page elements (in-screen pill-tabs, top-tabs underline) */
+  --z-nav: 20; /* topnav, tabbar */
+  --z-popover: 40; /* dropdowns, autocomplete, tooltips */
+  --z-modal: 60; /* modal + frosted backdrop */
+  --z-sheet: 70; /* bottom sheet (must sit above modal on phone) */
+  --z-toast: 80; /* toasts — always on top of every surface */
 }
 ```
 
 ### Animation names (reuse, don't redefine)
+
 - `pulse` — 2.4s ease-in-out infinite. Soft halo expand-and-fade on the live-strip dot (topnav, header strips). Larger, slower, ambient.
 - `pulse-dot` — 2s ease-in-out infinite. Opacity 1 → 0.45 → 1 on a 6–8px live dot (status pills, scorebox clock, live toasts). Tight, urgent.
 - `sk` — 1.6s linear infinite. Background-position shimmer on `.skeleton` / `.sk-line` / `.sk-block`. Loading state only.
@@ -163,6 +162,7 @@ Use `--bp-md` for chrome reflow (topnav collapse, sheet vs. modal swap). Use `--
 A global `prefers-reduced-motion: reduce` guard collapses all three to `animation: none`; the live dot degrades to a static halo via `box-shadow: 0 0 0 2px var(--live-soft)`. Never invent a fourth ambient animation — if you need a new motion, define it as a one-shot transition on the component, not an infinite keyframe.
 
 ### Light-mode trigger
+
 The `.light` class swap applies in exactly two contexts:
 
 1. **Marketing pages** — public site, landing, press, careers.
@@ -171,6 +171,7 @@ The `.light` class swap applies in exactly two contexts:
 Player apps and product UI stay dark-first; do not auto-swap on `prefers-color-scheme: light`. The brand voice (athletic, evening floodlight, broadcast) lives in dark. When the user explicitly toggles light mode inside a player app, honour it, but do not opt in by default.
 
 ### Sport tokens in light mode
+
 Sport tokens (`--live-500`, `--slot-500`, `--win-500`, `--loss-500`) **do not shift** under `.light`. Pitch green stays pitch green, court blue stays court blue. The dark→light swap only re-tunes neutrals and surface chrome — functional sport color is a constant so a "live" badge reads the same in both modes. The `*-soft` variants automatically re-tune because they're `color-mix` blends against transparent.
 
 ---
@@ -200,39 +201,39 @@ Sport tokens (`--live-500`, `--slot-500`, `--win-500`, `--loss-500`) **do not sh
 
 The full reference lives in `design-system.html`. Canonical classes a builder should reach for first:
 
-| Need | Class | Notes |
-|---|---|---|
-| Primary action | `.btn .btn-primary` | brand fill, `--brand-on-text` label, hover → `--brand-400` |
-| Quiet action | `.btn .btn-secondary` | transparent + `--border-strong` |
-| Tertiary | `.btn .btn-ghost` | text-only, hover → `--surface-hover` |
-| Destructive | `.btn .btn-danger` | `--loss-600` fill |
-| Status pills | `.pill .pill-live` / `-scheduled` / `-slot` / `-full` / `-win` / `-brand` / `-danger` | mono uppercase 11px, dot 6px when live |
-| Sport selector | `.sport-pill` (+ `.is-selected`) | brand-soft fill when selected |
-| Form input | `.input` / `.textarea` / `.select` | `--surface-2` fill, focus → brand-500 border + `--ring` halo |
-| Search | `.search-bar` | pill-radius, mono inside |
-| Segmented | `.segmented` (+ `button.is-active`) | brand fill on active |
-| Game card | `.gamecard` (+ `.is-live` / `.is-full`) | `is-live` lifts border to live-500 mix; live ALWAYS wins over hover |
-| Venue card | `.venuecard` | uses `.ph` branded skeleton placeholder |
-| Team card | `.teamcard` (+ `.crest`) | brand-gradient crest, italic display stats |
-| Score module | `.scorebox` | italic d2 numbers, mono live clock |
-| Player chip | `.player-chip` | pill-radius, mono rating in win-500 |
-| Toasts | `.toast` (+ `-success` / `-danger` / `-info` / `-live`) | left-border semantic, `--shadow-md` |
-| Modal | `.modal` | `--shadow-overlay`, frosted backdrop |
-| Bottom sheet | `.sheet` | brand-default phone idiom |
-| Leaderboard | `.dt` | hairline rows, no zebra, `is-self` brand-soft, mono deltas |
-| KPI block | `.stat-grid` | italic d2 numbers, sparkline trend |
-| Sparkline | `.spark` (+ `.up` / `.down` / `.muted`) | currentColor strokes |
-| Progress | `.progress` (+ `.live` / `.win`) | brand-500 fill + glow |
-| Skeleton | `.skeleton` + `.sk-line` / `.sk-block` | shimmer via background-position |
-| Branded image slot | `.ph` (`data-label="…"`) | slate gradient + half-bled logomark — drop on any container awaiting real photography |
-| Top navigation (web) | `.topnav` + `.topnav-inner` | sticky `z-index: var(--z-nav)`, frosted blur, mono meta-strip on the right; collapses below `--bp-md` |
-| Bottom tab bar (mobile) | `.tabbar` + `.tab` (+ `.is-active` / `.create`) | five-slot phone nav; `.create` is the centred FAB-style tab; wrap icon in `.tab-icon-wrap` to attach a `.badge` |
-| In-screen tabs — compact | `.pill-tabs` (+ `button.is-active`, `.count`) | segmented pill row for filter strips and sheet headers; 2–4 short labels |
-| In-screen tabs — page level | `.top-tabs` (+ `button.is-active`, `.count`) | underline row, horizontally scrolls on mobile; 5+ tabs or page-level switches |
-| Venue CRM sidebar | _reserved_ | not yet built. Use `.topnav` chrome tokens (`--z-nav`, frosted surface, mono meta) as the base when defining the operator-facing nav |
-| Progress meter (circular) | `.meter` (+ `.win` / `.live` / `.muted`) | SVG ring, rounded caps, fill driven by `--p` (0–100). `.muted` strips the glow |
-| Match clock | `.clock` (+ `.halftime` / `.full-time`) | shares `.meter` geometry, live-green fill, centre count has a `′` suffix; `.halftime` freezes at 50% muted, `.full-time` at 100% live |
-| Badge primitive | `.badge` (+ `.dot` / `.live` / `.danger` / `.soft`) | smallest carrier of state; sits in a 2px `--surface` ring so it cuts cleanly out of any nav surface |
+| Need                        | Class                                                                                 | Notes                                                                                                                                 |
+| --------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Primary action              | `.btn .btn-primary`                                                                   | brand fill, `--brand-on-text` label, hover → `--brand-400`                                                                            |
+| Quiet action                | `.btn .btn-secondary`                                                                 | transparent + `--border-strong`                                                                                                       |
+| Tertiary                    | `.btn .btn-ghost`                                                                     | text-only, hover → `--surface-hover`                                                                                                  |
+| Destructive                 | `.btn .btn-danger`                                                                    | `--loss-600` fill                                                                                                                     |
+| Status pills                | `.pill .pill-live` / `-scheduled` / `-slot` / `-full` / `-win` / `-brand` / `-danger` | mono uppercase 11px, dot 6px when live                                                                                                |
+| Sport selector              | `.sport-pill` (+ `.is-selected`)                                                      | brand-soft fill when selected                                                                                                         |
+| Form input                  | `.input` / `.textarea` / `.select`                                                    | `--surface-2` fill, focus → brand-500 border + `--ring` halo                                                                          |
+| Search                      | `.search-bar`                                                                         | pill-radius, mono inside                                                                                                              |
+| Segmented                   | `.segmented` (+ `button.is-active`)                                                   | brand fill on active                                                                                                                  |
+| Game card                   | `.gamecard` (+ `.is-live` / `.is-full`)                                               | `is-live` lifts border to live-500 mix; live ALWAYS wins over hover                                                                   |
+| Venue card                  | `.venuecard`                                                                          | uses `.ph` branded skeleton placeholder                                                                                               |
+| Team card                   | `.teamcard` (+ `.crest`)                                                              | brand-gradient crest, italic display stats                                                                                            |
+| Score module                | `.scorebox`                                                                           | italic d2 numbers, mono live clock                                                                                                    |
+| Player chip                 | `.player-chip`                                                                        | pill-radius, mono rating in win-500                                                                                                   |
+| Toasts                      | `.toast` (+ `-success` / `-danger` / `-info` / `-live`)                               | left-border semantic, `--shadow-md`                                                                                                   |
+| Modal                       | `.modal`                                                                              | `--shadow-overlay`, frosted backdrop                                                                                                  |
+| Bottom sheet                | `.sheet`                                                                              | brand-default phone idiom                                                                                                             |
+| Leaderboard                 | `.dt`                                                                                 | hairline rows, no zebra, `is-self` brand-soft, mono deltas                                                                            |
+| KPI block                   | `.stat-grid`                                                                          | italic d2 numbers, sparkline trend                                                                                                    |
+| Sparkline                   | `.spark` (+ `.up` / `.down` / `.muted`)                                               | currentColor strokes                                                                                                                  |
+| Progress                    | `.progress` (+ `.live` / `.win`)                                                      | brand-500 fill + glow                                                                                                                 |
+| Skeleton                    | `.skeleton` + `.sk-line` / `.sk-block`                                                | shimmer via background-position                                                                                                       |
+| Branded image slot          | `.ph` (`data-label="…"`)                                                              | slate gradient + half-bled logomark — drop on any container awaiting real photography                                                 |
+| Top navigation (web)        | `.topnav` + `.topnav-inner`                                                           | sticky `z-index: var(--z-nav)`, frosted blur, mono meta-strip on the right; collapses below `--bp-md`                                 |
+| Bottom tab bar (mobile)     | `.tabbar` + `.tab` (+ `.is-active` / `.create`)                                       | five-slot phone nav; `.create` is the centred FAB-style tab; wrap icon in `.tab-icon-wrap` to attach a `.badge`                       |
+| In-screen tabs — compact    | `.pill-tabs` (+ `button.is-active`, `.count`)                                         | segmented pill row for filter strips and sheet headers; 2–4 short labels                                                              |
+| In-screen tabs — page level | `.top-tabs` (+ `button.is-active`, `.count`)                                          | underline row, horizontally scrolls on mobile; 5+ tabs or page-level switches                                                         |
+| Venue CRM sidebar           | _reserved_                                                                            | not yet built. Use `.topnav` chrome tokens (`--z-nav`, frosted surface, mono meta) as the base when defining the operator-facing nav  |
+| Progress meter (circular)   | `.meter` (+ `.win` / `.live` / `.muted`)                                              | SVG ring, rounded caps, fill driven by `--p` (0–100). `.muted` strips the glow                                                        |
+| Match clock                 | `.clock` (+ `.halftime` / `.full-time`)                                               | shares `.meter` geometry, live-green fill, centre count has a `′` suffix; `.halftime` freezes at 50% muted, `.full-time` at 100% live |
+| Badge primitive             | `.badge` (+ `.dot` / `.live` / `.danger` / `.soft`)                                   | smallest carrier of state; sits in a 2px `--surface` ring so it cuts cleanly out of any nav surface                                   |
 
 ---
 
@@ -241,7 +242,7 @@ The full reference lives in `design-system.html`. Canonical classes a builder sh
 Three surfaces, one rulebook — never mix vocabularies inside a single shell.
 
 1. **`.topnav` (desktop web).** Sticky, frosted, mono meta-strip on the right (status / city / clock). Brand mark + wordmark on the left, primary action button on the far right. Below `--bp-md`, the meta-strip collapses and only the brand + primary action remain; secondary destinations move into a sheet behind a single icon button.
-2. **`.tabbar` + `.tab` (mobile app).** Five slots maximum; the centre slot is `.tab.create` (FAB-style, brand fill). Attention is drawn *only* by dropping a `.badge` into `.tab-icon-wrap` — never by recoloring an icon, never by adding a second active state. `.badge.dot.live` for live events, neutral `.badge` for counts, `.badge.danger` for action-required.
+2. **`.tabbar` + `.tab` (mobile app).** Five slots maximum; the centre slot is `.tab.create` (FAB-style, brand fill). Attention is drawn _only_ by dropping a `.badge` into `.tab-icon-wrap` — never by recoloring an icon, never by adding a second active state. `.badge.dot.live` for live events, neutral `.badge` for counts, `.badge.danger` for action-required.
 3. **Venue CRM sidebar** is the third surface and is **not yet built in `design-system.html`**. When the first venue-CRM screen lands, the sidebar must inherit `--z-nav`, the frosted-surface treatment, and the mono uppercase meta voice from `.topnav` — do not invent a new chrome language for it.
 
 In-screen switching inside any of these shells uses `.pill-tabs` (compact, segmented, lives inside a card) or `.top-tabs` (full-bleed underline, page-level). Bottom-nav is always for **global destinations**; in-screen tabs are always for **scoped views of one destination**. Don't blur the two.
@@ -251,12 +252,14 @@ In-screen switching inside any of these shells uses `.pill-tabs` (compact, segme
 ## Iconography & imagery
 
 **Icons**
+
 - Inline SVG only. `fill="none" stroke="currentColor" stroke-width="1.6"`.
 - Three sizes via classes: `.ic-sm` (16px), `.ic` (20px), `.ic-lg` (24px).
 - Color modifiers: `.ic--muted`, `.ic--brand`. Default inherits `currentColor`.
 - Never use emoji as feature icons. Never use coloured stock icon sets.
 
 **Imagery**
+
 - **Athletic photography is the only positive direction.** Players mid-action, floodlit pitches, locker-room interiors, scoreboards, kit detail. Cool color cast preferred — matches the dark slate canvas.
 - **Default placeholder is `.ph`** (`<div class="ph" data-label="venue · floodlit"></div>`) — a stage-lit slate gradient with a half-bled SQUAD logomark anchored bottom-right and a mono caption pill top-left. Use it on every card, hero, and venue tile that is awaiting real photography. Do **not** substitute stock photography, generic gradient blocks, or AI-generated faces while waiting.
 - **No SVG humans, faces, or hand-drawn scenery.** No isometric illustration packs. No floating 3D blobs.
@@ -275,6 +278,7 @@ In-screen switching inside any of these shells uses `.pill-tabs` (compact, segme
 ## Voice & numerics
 
 ### Copy register
+
 The brand persona is **athletic product designer** — write like a coach calling a play, not like a marketing department.
 
 - **Short verbs, present tense.** "Find a game. Join a squad. Show up." Not "Discover how SQUAD is revolutionising the way amateur athletes connect."
@@ -284,19 +288,20 @@ The brand persona is **athletic product designer** — write like a coach callin
 - **Italic is reserved.** A single `<em>` per display headline, only for the word that carries the lean (`Find a <em>squad</em>.`). Never italicise body copy or whole sentences.
 
 ### Numeric formatting
+
 Tabular mono is set up in the type rules; these are the formatting conventions on top of it.
 
-| Quantity | Format | Example |
-|---|---|---|
-| Score (final / live) | digits + en-dash + digits, single spaces | `3 – 1` |
-| Capacity | filled / total, slash | `8/12` |
-| Delta (rank, form, score change) | sign + digits | `+3` / `−2` |
-| Distance | digits + unit, single space | `2.4 km` / `850 m` |
-| Time of day | 12h lowercase, no leading zero | `6.30pm` |
-| Match clock | digits + prime, no space | `72′` / `90+3′` |
-| Duration | digits + unit, no space | `90min` / `15s` |
-| Rating (player) | one decimal | `7.8` |
-| Currency | symbol + integer for whole, two decimals for fractional | `£12` / `£12.50` |
+| Quantity                         | Format                                                  | Example            |
+| -------------------------------- | ------------------------------------------------------- | ------------------ |
+| Score (final / live)             | digits + en-dash + digits, single spaces                | `3 – 1`            |
+| Capacity                         | filled / total, slash                                   | `8/12`             |
+| Delta (rank, form, score change) | sign + digits                                           | `+3` / `−2`        |
+| Distance                         | digits + unit, single space                             | `2.4 km` / `850 m` |
+| Time of day                      | 12h lowercase, no leading zero                          | `6.30pm`           |
+| Match clock                      | digits + prime, no space                                | `72′` / `90+3′`    |
+| Duration                         | digits + unit, no space                                 | `90min` / `15s`    |
+| Rating (player)                  | one decimal                                             | `7.8`              |
+| Currency                         | symbol + integer for whole, two decimals for fractional | `£12` / `£12.50`   |
 
 Always use the en-dash (`–`) for score, never the hyphen (`-`). Always use the minus sign (`−`, U+2212) for negative deltas, never the hyphen. These are tabular-mono characters — column alignment depends on it.
 

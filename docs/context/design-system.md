@@ -18,23 +18,23 @@
 
 ## Integration notes (build — plan 01)
 
-- **Delivery format:** SQUAD ships as **CSS custom properties + vanilla component classes** (OKLCH + `color-mix`), *not* Tailwind/shadcn. The planned stack is Tailwind + shadcn/ui, so plan 01 must choose the bridge: **(a)** map the `:root` tokens into the Tailwind theme + theme shadcn via CSS variables, or **(b)** ship SQUAD's CSS layer as-is and use its classes. Pick one before building components — never mix the two vocabularies.
+- **Delivery format:** SQUAD ships as **CSS custom properties + vanilla component classes** (OKLCH + `color-mix`), _not_ Tailwind/shadcn. The planned stack is Tailwind + shadcn/ui, so plan 01 must choose the bridge: **(a)** map the `:root` tokens into the Tailwind theme + theme shadcn via CSS variables, or **(b)** ship SQUAD's CSS layer as-is and use its classes. Pick one before building components — never mix the two vocabularies.
 - **Fonts:** Inter Tight, Inter, JetBrains Mono (Google Fonts; see the `<link>` in `design-system.html`).
 - **Assets:** move `design/assets/*.png` to the repo's `public/` (or root); update the logo paths in `DESIGN.md`/`brand-spec.md` if you rename them.
 
 ## v1 scope vs the system (important)
 
-SQUAD is a **full athletic-product** system — it carries vocabulary for scores (`.scorebox`), live match clocks (`.clock`), leaderboards (`.dt`), teams (`.teamcard`), ratings, and **payments** (`.btn-danger`, a `Pay` CTA verb). **v1 uses only a subset.** The product scope still governs *what we build*: no payments, scores, leaderboards, teams, live-match, or ratings in v1 (see `product.md` / `decisions.md`). A component existing in the system is **not** permission to ship that feature.
+SQUAD is a **full athletic-product** system — it carries vocabulary for scores (`.scorebox`), live match clocks (`.clock`), leaderboards (`.dt`), teams (`.teamcard`), ratings, and **payments** (`.btn-danger`, a `Pay` CTA verb). **v1 uses only a subset.** The product scope still governs _what we build_: no payments, scores, leaderboards, teams, live-match, or ratings in v1 (see `product.md` / `decisions.md`). A component existing in the system is **not** permission to ship that feature.
 
 - The v1 voice-avoid list (no "Pay/Checkout/Book now") still holds for v1, even though SQUAD's general voice permits "Pay" — because v1 has no payments.
 
 ## Status mapping (v1)
 
-| Participation status | SQUAD token | Reads as |
-|---|---|---|
-| requested | `--color-info` (court blue) | neutral/info |
-| approved | `--color-success` (pitch green) | positive/confirmed |
-| declined | neutral / `--muted` | clear, not aggressive |
-| cancelled | `--color-warning` (muted) / `--loss-soft` | muted warning |
+| Participation status | SQUAD token                               | Reads as              |
+| -------------------- | ----------------------------------------- | --------------------- |
+| requested            | `--color-info` (court blue)               | neutral/info          |
+| approved             | `--color-success` (pitch green)           | positive/confirmed    |
+| declined             | neutral / `--muted`                       | clear, not aggressive |
+| cancelled            | `--color-warning` (muted) / `--loss-soft` | muted warning         |
 
 (Reserve `--color-danger` / crimson for destructive actions, not for "declined".)

@@ -25,9 +25,7 @@ export function parseEnv(env: Record<string, string | undefined>): Config {
   if (!parsed.success) {
     // Surface only path + message — never i.input, which may hold secret
     // values (DATABASE_URL, service-role key) that must not leak into logs.
-    const issues = parsed.error.issues
-      .map((i) => `${i.path.join(".")}: ${i.message}`)
-      .join("; ");
+    const issues = parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");
     throw new Error(`Invalid environment configuration: ${issues}`);
   }
   const e = parsed.data;

@@ -6,8 +6,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   const up = await pingDb();
-  return NextResponse.json(
-    up ? { status: "ok", db: "up" } : { status: "degraded", db: "down" },
-    { status: up ? 200 : 503 },
-  );
+  return NextResponse.json(up ? { status: "ok", db: "up" } : { status: "degraded", db: "down" }, {
+    status: up ? 200 : 503,
+  });
 }

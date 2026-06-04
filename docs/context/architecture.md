@@ -19,16 +19,17 @@ This is the foundation / DevOps design for the **sport app's separate code repos
 
 - **Driver:** future-proof for scale/team. v1 ships on managed platforms, but the foundation must not require a rewrite when a team and real load arrive.
 - **Constraints (locked earlier):** solo founder + AI-assisted; optimize for fast/cheap validation; responsive web; one Next.js app with two route groups (`/app` client, `/venue` venue owner); Supabase + Vercel proposed as the managed platforms.
-- **Strategy:** *portable seams.* Build on managed infra now; place clean abstractions so a later move to containers/cloud-native is a migration measured in days, not a rewrite.
+- **Strategy:** _portable seams._ Build on managed infra now; place clean abstractions so a later move to containers/cloud-native is a migration measured in days, not a rewrite.
 - **Boundary:** this plans the separate app repo. Do **not** add app scaffolding to this brainstorm vault.
 
 This design deliberately **right-sizes** the original enterprise-grade request (blue-green/canary, container orchestration, multi-env IaC, secrets management). Most of that is delivered through managed-platform features now, with a documented upgrade path to the heavy version later. See §9 for what is intentionally deferred.
 
 ## 2. Guiding Principle: The Seam Rule
 
-**App code never imports a vendor SDK directly.** Each vendor touchpoint lives behind *one* adapter module implementing *our* interface. A vendor swap then touches one file, not the codebase.
+**App code never imports a vendor SDK directly.** Each vendor touchpoint lives behind _one_ adapter module implementing _our_ interface. A vendor swap then touches one file, not the codebase.
 
 Every concern is one of:
+
 - **Abstracted** — load-bearing, hidden behind our interface (compute, database, auth, storage, config).
 - **Commodity** — swappable by configuration (CI runner, provisioning provider).
 
@@ -36,15 +37,15 @@ Vendor-specific features (e.g., Supabase RLS, Vercel edge middleware) may be use
 
 ## 3. Seam Map
 
-| Concern | v1 (now) | The seam | Swap to later |
-|---|---|---|---|
-| Compute / hosting | Vercel | `Dockerfile` + plain Next.js (no Vercel-only APIs in app code) | Cloud Run, Fly, ECS, K8s |
-| Database | Supabase Postgres | Connection string + **Drizzle ORM** + SQL migrations | RDS, Cloud SQL, self-hosted PG |
-| Auth | Supabase Auth | `AuthProvider` interface + one adapter | Auth0, Cognito, Clerk, self-hosted |
-| File storage *(if needed)* | Supabase Storage | `Storage` interface (S3-shaped); interface defined, adapter wired only when a feature needs uploads | S3, R2, GCS |
-| Secrets / config | Vercel + Supabase + GitHub env | Typed `config` module — single read point | Doppler, Vault, cloud SM |
-| CI | GitHub Actions | Portable stages; vendor only in the deploy job | Same pipeline, new deploy target |
-| Provisioning | Terraform (Vercel + Supabase + GitHub providers) | Modular TF + per-env vars | Add AWS/GCP modules |
+| Concern                    | v1 (now)                                         | The seam                                                                                            | Swap to later                      |
+| -------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| Compute / hosting          | Vercel                                           | `Dockerfile` + plain Next.js (no Vercel-only APIs in app code)                                      | Cloud Run, Fly, ECS, K8s           |
+| Database                   | Supabase Postgres                                | Connection string + **Drizzle ORM** + SQL migrations                                                | RDS, Cloud SQL, self-hosted PG     |
+| Auth                       | Supabase Auth                                    | `AuthProvider` interface + one adapter                                                              | Auth0, Cognito, Clerk, self-hosted |
+| File storage _(if needed)_ | Supabase Storage                                 | `Storage` interface (S3-shaped); interface defined, adapter wired only when a feature needs uploads | S3, R2, GCS                        |
+| Secrets / config           | Vercel + Supabase + GitHub env                   | Typed `config` module — single read point                                                           | Doppler, Vault, cloud SM           |
+| CI                         | GitHub Actions                                   | Portable stages; vendor only in the deploy job                                                      | Same pipeline, new deploy target   |
+| Provisioning               | Terraform (Vercel + Supabase + GitHub providers) | Modular TF + per-env vars                                                                           | Add AWS/GCP modules                |
 
 The two highest-leverage future-proofing moves: the **`lib/` adapter boundary** (app logic stays vendor-agnostic) and the **`Dockerfile` built in CI from day one** (the app is a portable container long before one is needed).
 
@@ -80,18 +81,20 @@ Dockerfile            # built in CI from day one, even while deploying to Vercel
 `ci.yml` is 100% portable (carries to any platform unchanged); only `deploy.yml` knows about Vercel.
 
 ### `ci.yml` — every PR and push
-| Stage | Tooling (free, CI-agnostic) | Gate |
-|---|---|---|
-| 1. Secret scan | `gitleaks` + GitHub push-protection | Block on any committed secret |
-| 2. Lint + typecheck | ESLint + Prettier + `tsc` | Block on error |
-| 3. Test | Vitest unit/integration against an **ephemeral Postgres service container** (also runs migrations → proves they apply) | Block on failure |
-| 4. Security scan | `Semgrep OSS` (SAST) · `Trivy` (deps + IaC) · Dependabot (ongoing dep PRs) | Block on high/critical |
-| 5. Build + containerize | Build Next.js → build Docker image → Trivy-scan image → push to **GHCR**, tagged by commit SHA | Block on image vuln |
-| 6. E2E smoke | Playwright on the **core loop** (signup → create game → request → approve) against the PR preview URL | Block on failure |
 
-*Why build the container even though Vercel builds its own:* it keeps the portability seam honest and tested — the day you leave Vercel, you already have a working, scanned image.
+| Stage                   | Tooling (free, CI-agnostic)                                                                                            | Gate                          |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| 1. Secret scan          | `gitleaks` + GitHub push-protection                                                                                    | Block on any committed secret |
+| 2. Lint + typecheck     | ESLint + Prettier + `tsc`                                                                                              | Block on error                |
+| 3. Test                 | Vitest unit/integration against an **ephemeral Postgres service container** (also runs migrations → proves they apply) | Block on failure              |
+| 4. Security scan        | `Semgrep OSS` (SAST) · `Trivy` (deps + IaC) · Dependabot (ongoing dep PRs)                                             | Block on high/critical        |
+| 5. Build + containerize | Build Next.js → build Docker image → Trivy-scan image → push to **GHCR**, tagged by commit SHA                         | Block on image vuln           |
+| 6. E2E smoke            | Playwright on the **core loop** (signup → create game → request → approve) against the PR preview URL                  | Block on failure              |
+
+_Why build the container even though Vercel builds its own:_ it keeps the portability seam honest and tested — the day you leave Vercel, you already have a working, scanned image.
 
 ### `deploy.yml` — promotion flow
+
 ```
 merge to main → [ci.yml gates pass]
   → deploy to STAGING (Vercel staging project + Supabase staging)
@@ -103,35 +106,39 @@ merge to main → [ci.yml gates pass]
 ```
 
 ### Deployment strategy & rollback
+
 - **Blue-green is native:** Vercel deploys atomically (new build goes live by instant alias swap; old build stays warm). No infra needed.
 - **Canary (% traffic shifting) is deferred** to the container-host phase (Argo Rollouts / Flagger). Premature before there is traffic to split.
-- **Automated rollback:** every prior deployment is retained. `rollback.yml` (manual dispatch **and** auto-triggered by the failed health gate) re-promotes the last-known-good deployment. The pattern — *health-check → promote-previous-on-failure* — is platform-agnostic and carries to the container-host phase unchanged.
+- **Automated rollback:** every prior deployment is retained. `rollback.yml` (manual dispatch **and** auto-triggered by the failed health gate) re-promotes the last-known-good deployment. The pattern — _health-check → promote-previous-on-failure_ — is platform-agnostic and carries to the container-host phase unchanged.
 
 ## 6. Infrastructure as Code
 
-Terraform, structured so **parity is guaranteed by construction**: all three environments instantiate the *same module* with different variables.
+Terraform, structured so **parity is guaranteed by construction**: all three environments instantiate the _same module_ with different variables.
 
-| Deliverable (original ask) | v1 reality on Approach A |
-|---|---|
-| Environment provisioning (dev/staging/prod) | Terraform via Vercel + Supabase + GitHub providers. Three envs = same module, different vars → parity by construction. **DB schema is not in TF** — it is owned by `migrations/` (TF = infra, migrations = schema). |
-| Container orchestration setup | **Intentionally deferred** (the point of Approach A). Ship the `Dockerfile` + `modules/compute/` placeholder + an ADR documenting the Cloud Run / ECS / K8s path. Nothing stood up until serverless is outgrown. |
-| Network & security config | Codified, not deferred: branch protection + required checks + prod approval gate (GitHub provider); Supabase SSL enforcement, allowed origins/CORS, RLS posture; security headers in `next.config`; **least-privilege scoped CI tokens** (deploy tokens as GitHub Actions secrets, not personal tokens). |
+| Deliverable (original ask)                  | v1 reality on Approach A                                                                                                                                                                                                                                                                                 |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Environment provisioning (dev/staging/prod) | Terraform via Vercel + Supabase + GitHub providers. Three envs = same module, different vars → parity by construction. **DB schema is not in TF** — it is owned by `migrations/` (TF = infra, migrations = schema).                                                                                      |
+| Container orchestration setup               | **Intentionally deferred** (the point of Approach A). Ship the `Dockerfile` + `modules/compute/` placeholder + an ADR documenting the Cloud Run / ECS / K8s path. Nothing stood up until serverless is outgrown.                                                                                         |
+| Network & security config                   | Codified, not deferred: branch protection + required checks + prod approval gate (GitHub provider); Supabase SSL enforcement, allowed origins/CORS, RLS posture; security headers in `next.config`; **least-privilege scoped CI tokens** (deploy tokens as GitHub Actions secrets, not personal tokens). |
 
 **State management:** remote state with locking from day one (team-ready) via **HCP Terraform free tier** — no backend infra to run. Alternative: S3-compatible bucket backend (e.g., Cloudflare R2).
 
 ## 7. Environment Configuration
 
 ### `lib/config/` — single source of truth
+
 Every env var is declared in one **Zod schema** and validated at boot. App code imports `config.<x>`, never `process.env`. The app **refuses to start** if a required var is missing or malformed (fail-fast). Moving to Doppler/Vault later changes only this module's loader.
 
 ### Config in three tiers, by sensitivity
-| Tier | Examples | Where it lives |
-|---|---|---|
-| Public / build-time | `NEXT_PUBLIC_*`, feature flags | Committed per-env defaults + `.env.example` |
-| Secrets / runtime | DB URL, service keys, deploy tokens | Local: `.env.local` (gitignored) · CI: GitHub Actions secrets (scoped) · staging/prod: Vercel + Supabase per-env stores |
-| The seam | — | Documented path to a dedicated secrets manager (Doppler/Vault/cloud SM) for when the team grows |
+
+| Tier                | Examples                            | Where it lives                                                                                                          |
+| ------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Public / build-time | `NEXT_PUBLIC_*`, feature flags      | Committed per-env defaults + `.env.example`                                                                             |
+| Secrets / runtime   | DB URL, service keys, deploy tokens | Local: `.env.local` (gitignored) · CI: GitHub Actions secrets (scoped) · staging/prod: Vercel + Supabase per-env stores |
+| The seam            | —                                   | Documented path to a dedicated secrets manager (Doppler/Vault/cloud SM) for when the team grows                         |
 
 ### Secrets management
+
 - **`.env.example` is the contract** — every var documented (purpose, secret?, which envs); the Zod schema mirrors it one-to-one.
 - Per-env values are set **through Terraform** (`modules/app`) → env vars are versioned IaC, not dashboard-clicked.
 - **Least-privilege everywhere:** CI uses deploy-scoped tokens, never owner PATs. Service-role keys never reach the client (only anon / `NEXT_PUBLIC_` client-side).
@@ -139,6 +146,7 @@ Every env var is declared in one **Zod schema** and validated at boot. App code 
 - **Secrets manager stays a documented seam** in v1 (YAGNI); wiring Doppler/Vault is the team-growth upgrade.
 
 ### Multi-environment parity — enforced, not hoped-for
+
 - **Infra parity:** same Terraform module across dev/staging/prod.
 - **Config-shape parity:** same Zod schema in every env; a CI **parity-check job** diffs declared env keys across environments and fails if they diverge.
 - **Data isolation:** a **separate Supabase project per environment** — no shared data across dev/staging/prod.

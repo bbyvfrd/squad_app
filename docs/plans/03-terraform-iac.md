@@ -17,15 +17,15 @@ This is **Plan 3 of 4** in the foundation series derived from `output/2026-05-29
 1. Plan 1 (done): App skeleton + portable seams + local data layer → spec §2, §3, §4, §7.
 2. Plan 2 (done): CI pipeline (`ci.yml`) → spec §5.
 3. **Plan 3 (this doc):** IaC — Terraform modules + per-env roots + state + repo config + the config parity-check job → spec §6 and the infra half of §7.
-4. Plan 4: Deploy + rollback (`deploy.yml`, `rollback.yml`, post-deploy health gate) → spec §5, §8. **Picks up:** the GitHub Actions *deploy* secrets (Vercel deploy token, etc., consuming this plan's Terraform outputs via remote state), the staging→approval→prod flow that uses the environments created here, and the full core-loop E2E against a live preview.
+4. Plan 4: Deploy + rollback (`deploy.yml`, `rollback.yml`, post-deploy health gate) → spec §5, §8. **Picks up:** the GitHub Actions _deploy_ secrets (Vercel deploy token, etc., consuming this plan's Terraform outputs via remote state), the staging→approval→prod flow that uses the environments created here, and the full core-loop E2E against a live preview.
 
 ## Refinements From The Source Design (read before starting)
 
 The design §4 sketches `envs/{dev,staging,prod}`. Implementing it faithfully requires three corrections, each recorded as a deliberate decision (not a silent change):
 
 1. **A dedicated `envs/repo` root owns repo-global GitHub config.** Branch protection on `main`, required status checks, and the `staging`/`production` environments are **repository-global**, not per-environment. If `envs/dev`, `envs/staging`, and `envs/prod` each managed them, three workspaces would fight over the same `main`-branch protection rule and the same environment resources — guaranteed state conflicts. So repo-global config lives in one `envs/repo` root/workspace, applied once. The per-env roots own only what is genuinely per-environment: a Supabase project + a Vercel project. "Parity by construction" therefore applies to the `data` + `app` modules — exactly the things that differ per environment.
-2. **Per-env GitHub Actions *deploy* secrets are deferred to Plan 4.** §7's "per-env values via Terraform" is satisfied here by the **Vercel project env vars** (the app's runtime config, set by `modules/app`). The GitHub Actions *deploy* secrets (Vercel deploy token, CI's Supabase keys) are consumed only by `deploy.yml`, which is Plan 4 — so they are created there, next to their consumer, reading this plan's Terraform outputs via remote state.
-3. **No schema, no RLS policies in Terraform.** Per §6, the database schema is owned by `migrations/` (Plan 1) and RLS policies live in those migrations. `modules/data` configures only *project-level* settings (network restrictions, auth `site_url`, exposed API schemas). This keeps "TF = infra, migrations = schema" honest.
+2. **Per-env GitHub Actions _deploy_ secrets are deferred to Plan 4.** §7's "per-env values via Terraform" is satisfied here by the **Vercel project env vars** (the app's runtime config, set by `modules/app`). The GitHub Actions _deploy_ secrets (Vercel deploy token, CI's Supabase keys) are consumed only by `deploy.yml`, which is Plan 4 — so they are created there, next to their consumer, reading this plan's Terraform outputs via remote state.
+3. **No schema, no RLS policies in Terraform.** Per §6, the database schema is owned by `migrations/` (Plan 1) and RLS policies live in those migrations. `modules/data` configures only _project-level_ settings (network restrictions, auth `site_url`, exposed API schemas). This keeps "TF = infra, migrations = schema" honest.
 4. **Security headers stay app-layer.** §6 also lists "security headers in `next.config`" — that is application code (`next.config.ts`), not infrastructure. It belongs to app hardening (Plan 1's territory), is tracked there, and is intentionally out of scope for this Terraform plan.
 
 ## Staying Current With Context7 (per project directive)
@@ -50,24 +50,25 @@ The committed `.terraform.lock.hcl` files (Task 1) pin exact provider versions f
 
 ## File Structure (created by this plan)
 
-| File | Responsibility |
-|---|---|
-| `infra/terraform/modules/data/{main,variables,outputs}.tf` | Supabase project + settings; outputs anon/service keys + DB URL |
-| `infra/terraform/modules/app/{main,variables,outputs}.tf` | Vercel project + env vars (wired from `data`) + optional domain |
-| `infra/terraform/modules/app/tests/app.tftest.hcl` | `terraform test` (mocked provider) for the domain-count logic |
-| `infra/terraform/modules/repo/{main,variables,outputs}.tf` | GitHub branch protection + required checks + environments + approval gate |
-| `infra/terraform/modules/compute/{main,variables,outputs,README}.tf/.md` | Deferred container-host SEAM (no resources in v1) |
-| `infra/terraform/envs/dev/{backend,providers,variables,main}.tf` + `terraform.tfvars` | dev root: `data` + `app` |
-| `infra/terraform/envs/staging/…`, `infra/terraform/envs/prod/…` | staging/prod roots — `main.tf`/`providers.tf` identical to dev (parity) |
-| `infra/terraform/envs/repo/{backend,providers,variables,main}.tf` + `terraform.tfvars` | repo-global GitHub config root |
-| `infra/terraform/env-contract.json` | Single source of truth for the app's env-var key set |
-| `infra/terraform/scripts/check-env-parity.mjs` | Asserts the contract == app `.env.example` keys |
-| `infra/terraform/README.md` | Terraform runbook (apply order, creds, state) |
-| `docs/adr/0001-container-host-migration-path.md` | ADR for the deferred compute seam |
-| `.github/workflows/ci.yml` | Add `tf-check` + `parity` jobs (modify Plan 2's file) |
-| `.gitignore` | Ignore Terraform state/`.terraform/`; keep lock files + non-secret tfvars (modify) |
+| File                                                                                   | Responsibility                                                                     |
+| -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `infra/terraform/modules/data/{main,variables,outputs}.tf`                             | Supabase project + settings; outputs anon/service keys + DB URL                    |
+| `infra/terraform/modules/app/{main,variables,outputs}.tf`                              | Vercel project + env vars (wired from `data`) + optional domain                    |
+| `infra/terraform/modules/app/tests/app.tftest.hcl`                                     | `terraform test` (mocked provider) for the domain-count logic                      |
+| `infra/terraform/modules/repo/{main,variables,outputs}.tf`                             | GitHub branch protection + required checks + environments + approval gate          |
+| `infra/terraform/modules/compute/{main,variables,outputs,README}.tf/.md`               | Deferred container-host SEAM (no resources in v1)                                  |
+| `infra/terraform/envs/dev/{backend,providers,variables,main}.tf` + `terraform.tfvars`  | dev root: `data` + `app`                                                           |
+| `infra/terraform/envs/staging/…`, `infra/terraform/envs/prod/…`                        | staging/prod roots — `main.tf`/`providers.tf` identical to dev (parity)            |
+| `infra/terraform/envs/repo/{backend,providers,variables,main}.tf` + `terraform.tfvars` | repo-global GitHub config root                                                     |
+| `infra/terraform/env-contract.json`                                                    | Single source of truth for the app's env-var key set                               |
+| `infra/terraform/scripts/check-env-parity.mjs`                                         | Asserts the contract == app `.env.example` keys                                    |
+| `infra/terraform/README.md`                                                            | Terraform runbook (apply order, creds, state)                                      |
+| `docs/adr/0001-container-host-migration-path.md`                                       | ADR for the deferred compute seam                                                  |
+| `.github/workflows/ci.yml`                                                             | Add `tf-check` + `parity` jobs (modify Plan 2's file)                              |
+| `.gitignore`                                                                           | Ignore Terraform state/`.terraform/`; keep lock files + non-secret tfvars (modify) |
 
 **Canonical names (do not rename):**
+
 - Modules: `data`, `app`, `repo`, `compute`. Roots/workspaces: `sport-app-dev`, `sport-app-staging`, `sport-app-prod`, `sport-app-repo`.
 - App env-var keys (must equal Plan 1's Zod schema / `.env.example`): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `DATABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (TF-managed) + `NODE_ENV` (platform-managed).
 - Required-status-check contexts = the CI job names: `secret-scan`, `lint`, `test`, `sast`, `vuln-scan`, `build-image`, `e2e` (Plan 2) + `tf-check`, `parity` (this plan).
@@ -78,6 +79,7 @@ The committed `.terraform.lock.hcl` files (Task 1) pin exact provider versions f
 ## Task 1: Bootstrap — state backend, tokens, repo hygiene
 
 **Files:**
+
 - Create: `infra/terraform/README.md` (stub), `infra/terraform/scripts/` (dir)
 - Modify: `.gitignore`
 
@@ -90,6 +92,7 @@ Verify: `terraform login` then the four workspaces are listed in the HCP UI.
 - [ ] **Step 2: Collect the provider credentials as local env vars**
 
 Export (add to your shell profile or a gitignored `infra/terraform/.env` you `source`):
+
 ```bash
 export VERCEL_API_TOKEN=...          # vercel.com/account/tokens (deploy-scoped)
 export SUPABASE_ACCESS_TOKEN=...     # supabase.com/dashboard/account/tokens
@@ -97,12 +100,14 @@ export TF_VAR_vercel_api_token="$VERCEL_API_TOKEN"
 export TF_VAR_github_token=...        # fine-grained PAT, admin on this repo only
 export TF_VAR_supabase_db_password=...# strong password; reused as the project DB password
 ```
+
 Verify: `vercel whoami && supabase projects list >/dev/null && echo "creds-ok"`
 Expected: prints your Vercel user and `creds-ok`.
 
 - [ ] **Step 3: Add Terraform ignores to `.gitignore`**
 
 Append to `.gitignore`:
+
 ```gitignore
 # Terraform
 infra/terraform/**/.terraform/*
@@ -118,6 +123,7 @@ infra/terraform/.env
 - [ ] **Step 4: Create the runbook stub**
 
 Create `infra/terraform/README.md`:
+
 ```markdown
 # Terraform — sport-app infrastructure
 
@@ -125,15 +131,18 @@ Provisions per-environment Supabase + Vercel projects and repo-global GitHub
 config. Schema is NOT here (it lives in `migrations/`).
 
 ## Apply order
-1. `envs/repo`   — branch protection, required checks, environments (once)
-2. `envs/dev`    — Supabase + Vercel for dev
+
+1. `envs/repo` — branch protection, required checks, environments (once)
+2. `envs/dev` — Supabase + Vercel for dev
 3. `envs/staging`, `envs/prod` — same modules, env-specific vars
 
 ## Credentials
+
 Set `VERCEL_API_TOKEN`, `SUPABASE_ACCESS_TOKEN`, `TF_VAR_vercel_api_token`,
 `TF_VAR_github_token`, `TF_VAR_supabase_db_password` (see this repo's onboarding).
 
 ## State
+
 Remote state on HCP Terraform (workspaces `sport-app-{repo,dev,staging,prod}`,
 Local execution mode). Alternative: an S3-compatible (R2) backend.
 ```
@@ -150,11 +159,13 @@ git commit -m "chore(infra): bootstrap terraform runbook and ignores"
 ## Task 2: `modules/data` — Supabase project + settings
 
 **Files:**
+
 - Create: `infra/terraform/modules/data/variables.tf`, `infra/terraform/modules/data/main.tf`, `infra/terraform/modules/data/outputs.tf`
 
 - [ ] **Step 1: Define inputs**
 
 Create `infra/terraform/modules/data/variables.tf`:
+
 ```hcl
 variable "organization_id" {
   type        = string
@@ -201,6 +212,7 @@ variable "site_url" {
 - [ ] **Step 2: Create the project and settings**
 
 Create `infra/terraform/modules/data/main.tf`:
+
 ```hcl
 terraform {
   required_providers {
@@ -255,6 +267,7 @@ data "supabase_pooler" "this" {
 - [ ] **Step 3: Export the values the app needs**
 
 Create `infra/terraform/modules/data/outputs.tf`:
+
 ```hcl
 output "project_ref" {
   value       = supabase_project.this.id
@@ -281,6 +294,7 @@ output "database_url" {
 - [ ] **Step 4: Format and validate the module (offline)**
 
 Run:
+
 ```bash
 cd infra/terraform/modules/data
 terraform fmt -check
@@ -288,6 +302,7 @@ terraform init -backend=false
 terraform validate
 cd -
 ```
+
 Expected: `fmt -check` prints nothing (exit 0); `init` installs the supabase provider; `validate` prints "Success! The configuration is valid."
 
 - [ ] **Step 5: Commit**
@@ -302,11 +317,13 @@ git commit -m "feat(infra): add Supabase data module"
 ## Task 3: `modules/app` — Vercel project + env vars + domain
 
 **Files:**
+
 - Create: `infra/terraform/modules/app/variables.tf`, `infra/terraform/modules/app/main.tf`, `infra/terraform/modules/app/outputs.tf`, `infra/terraform/modules/app/tests/app.tftest.hcl`
 
 - [ ] **Step 1: Define inputs**
 
 Create `infra/terraform/modules/app/variables.tf`:
+
 ```hcl
 variable "project_name" {
   type        = string
@@ -344,6 +361,7 @@ variable "domain" {
 - [ ] **Step 2: Create the project, env vars, and optional domain**
 
 Create `infra/terraform/modules/app/main.tf` (the Vercel default team comes from the provider block, so no `team_id` here):
+
 ```hcl
 terraform {
   required_providers {
@@ -383,6 +401,7 @@ resource "vercel_project_domain" "this" {
 - [ ] **Step 3: Export the project id**
 
 Create `infra/terraform/modules/app/outputs.tf`:
+
 ```hcl
 output "project_id" {
   value = vercel_project.this.id
@@ -396,6 +415,7 @@ output "project_name" {
 - [ ] **Step 4: Write a `terraform test` for the domain-count logic (runs offline via a mocked provider)**
 
 Create `infra/terraform/modules/app/tests/app.tftest.hcl`:
+
 ```hcl
 mock_provider "vercel" {}
 
@@ -436,6 +456,7 @@ run "one_domain_resource_when_set" {
 - [ ] **Step 5: Format, validate, and run the test**
 
 Run:
+
 ```bash
 cd infra/terraform/modules/app
 terraform fmt -check
@@ -444,6 +465,7 @@ terraform validate
 terraform test
 cd -
 ```
+
 Expected: `validate` succeeds; `terraform test` prints `2 passed, 0 failed` (the mocked provider means no Vercel API calls and no credentials needed).
 
 - [ ] **Step 6: Commit**
@@ -458,11 +480,13 @@ git commit -m "feat(infra): add Vercel app module with mocked terraform test"
 ## Task 4: `modules/repo` — branch protection, required checks, approval gate
 
 **Files:**
+
 - Create: `infra/terraform/modules/repo/variables.tf`, `infra/terraform/modules/repo/main.tf`, `infra/terraform/modules/repo/outputs.tf`
 
 - [ ] **Step 1: Define inputs (required-check contexts default to the real CI job names)**
 
 Create `infra/terraform/modules/repo/variables.tf`:
+
 ```hcl
 variable "github_owner" {
   type = string
@@ -512,6 +536,7 @@ variable "prevent_self_review" {
 - [ ] **Step 2: Create branch protection + environments**
 
 Create `infra/terraform/modules/repo/main.tf`:
+
 ```hcl
 terraform {
   required_providers {
@@ -574,6 +599,7 @@ resource "github_repository_environment" "production" {
 - [ ] **Step 3: Outputs**
 
 Create `infra/terraform/modules/repo/outputs.tf`:
+
 ```hcl
 output "staging_environment" {
   value = github_repository_environment.staging.environment
@@ -587,6 +613,7 @@ output "production_environment" {
 - [ ] **Step 4: Format and validate (offline)**
 
 Run:
+
 ```bash
 cd infra/terraform/modules/repo
 terraform fmt -check
@@ -594,6 +621,7 @@ terraform init -backend=false
 terraform validate
 cd -
 ```
+
 Expected: `validate` prints "Success! The configuration is valid."
 
 - [ ] **Step 5: Commit**
@@ -608,11 +636,13 @@ git commit -m "feat(infra): add GitHub repo module (branch protection, env appro
 ## Task 5: `modules/compute` seam + ADR
 
 **Files:**
+
 - Create: `infra/terraform/modules/compute/variables.tf`, `infra/terraform/modules/compute/main.tf`, `infra/terraform/modules/compute/outputs.tf`, `infra/terraform/modules/compute/README.md`, `docs/adr/0001-container-host-migration-path.md`
 
 - [ ] **Step 1: Create the empty seam module**
 
 Create `infra/terraform/modules/compute/variables.tf`:
+
 ```hcl
 variable "enabled" {
   type        = bool
@@ -622,6 +652,7 @@ variable "enabled" {
 ```
 
 Create `infra/terraform/modules/compute/main.tf`:
+
 ```hcl
 # SEAM MODULE — intentionally has no resources in v1.
 #
@@ -637,6 +668,7 @@ terraform {
 ```
 
 Create `infra/terraform/modules/compute/outputs.tf`:
+
 ```hcl
 output "enabled" {
   value = var.enabled
@@ -644,6 +676,7 @@ output "enabled" {
 ```
 
 Create `infra/terraform/modules/compute/README.md`:
+
 ```markdown
 # compute (seam, deferred)
 
@@ -655,6 +688,7 @@ Rationale and migration path: `docs/adr/0001-container-host-migration-path.md`.
 - [ ] **Step 2: Write the ADR**
 
 Create `docs/adr/0001-container-host-migration-path.md`:
+
 ```markdown
 # ADR 0001 — Container-host migration path (compute seam)
 
@@ -662,12 +696,15 @@ Create `docs/adr/0001-container-host-migration-path.md`:
 - Date: 2026-05-29
 
 ## Context
+
 v1 hosts on Vercel for speed and zero ops. The portable-seams design requires
 that leaving serverless later is a migration, not a rewrite. Container
 orchestration (K8s/ECS/Cloud Run) is premature before there is real load.
 
 ## Decision
+
 Defer container orchestration. Keep the seam ready:
+
 - The app builds to a standalone container (Dockerfile, Plan 1), built and
   vulnerability-scanned in CI (Plan 2).
 - `infra/terraform/modules/compute/` exists as an empty, interface-only module.
@@ -675,6 +712,7 @@ Defer container orchestration. Keep the seam ready:
   runtime is swappable.
 
 ## Consequences
+
 - Now: no orchestration cost or complexity; Vercel atomic deploys serve as
   blue-green (Plan 4).
 - Later: implement `modules/compute` (e.g. Cloud Run), point DNS at it, and
@@ -685,6 +723,7 @@ Defer container orchestration. Keep the seam ready:
 - [ ] **Step 3: Format and validate**
 
 Run:
+
 ```bash
 cd infra/terraform/modules/compute
 terraform fmt -check
@@ -693,6 +732,7 @@ terraform validate
 cd -
 test -f docs/adr/0001-container-host-migration-path.md && echo "adr-ok"
 ```
+
 Expected: `validate` succeeds; prints `adr-ok`.
 
 - [ ] **Step 4: Commit**
@@ -709,11 +749,13 @@ git commit -m "feat(infra): scaffold deferred compute seam module + ADR 0001"
 This is the per-environment shape. It calls `data` + `app`, deriving the Vercel env-var **keys** from the shared `env-contract.json` so they cannot drift from the app schema.
 
 **Files:**
+
 - Create: `infra/terraform/env-contract.json`, `infra/terraform/envs/dev/backend.tf`, `infra/terraform/envs/dev/providers.tf`, `infra/terraform/envs/dev/variables.tf`, `infra/terraform/envs/dev/main.tf`, `infra/terraform/envs/dev/terraform.tfvars`
 
 - [ ] **Step 1: Create the env-var contract (single source of truth)**
 
 Create `infra/terraform/env-contract.json`:
+
 ```json
 {
   "tf_managed": [
@@ -722,15 +764,14 @@ Create `infra/terraform/env-contract.json`:
     "DATABASE_URL",
     "SUPABASE_SERVICE_ROLE_KEY"
   ],
-  "platform_managed": [
-    "NODE_ENV"
-  ]
+  "platform_managed": ["NODE_ENV"]
 }
 ```
 
 - [ ] **Step 2: Backend (HCP workspace) and providers**
 
 Create `infra/terraform/envs/dev/backend.tf` (replace the org name with yours from Task 1):
+
 ```hcl
 terraform {
   required_version = ">= 1.7"
@@ -744,6 +785,7 @@ terraform {
 ```
 
 Create `infra/terraform/envs/dev/providers.tf` (per-env roots need only Vercel + Supabase; GitHub lives in `envs/repo`):
+
 ```hcl
 terraform {
   required_providers {
@@ -770,6 +812,7 @@ provider "supabase" {}
 - [ ] **Step 3: Variables**
 
 Create `infra/terraform/envs/dev/variables.tf`:
+
 ```hcl
 variable "environment" { type = string }
 variable "project_slug" { type = string }
@@ -805,6 +848,7 @@ variable "app_domain" {
 - [ ] **Step 4: Wire `data` → `app`, building env vars from the contract**
 
 Create `infra/terraform/envs/dev/main.tf`:
+
 ```hcl
 module "data" {
   source = "../../modules/data"
@@ -853,6 +897,7 @@ module "app" {
 - [ ] **Step 5: Non-secret tfvars**
 
 Create `infra/terraform/envs/dev/terraform.tfvars` (replace owner/org placeholders):
+
 ```hcl
 environment            = "dev"
 project_slug           = "sport-app"
@@ -868,6 +913,7 @@ vercel_team            = null
 - [ ] **Step 6: Validate offline (no credentials, no state)**
 
 Run:
+
 ```bash
 cd infra/terraform/envs/dev
 terraform fmt -check
@@ -875,6 +921,7 @@ terraform init -backend=false
 terraform validate
 cd -
 ```
+
 Expected: providers install; `validate` prints "Success! The configuration is valid." (`file()` reads the committed contract; module outputs are unknown at validate, which is fine.)
 
 - [ ] **Step 7: Commit**
@@ -891,12 +938,14 @@ git commit -m "feat(infra): add dev env root and env-var contract"
 staging and prod are the **same** `main.tf` + `providers.tf` as dev — only `backend.tf` (workspace) and `terraform.tfvars` (values) differ. Copying the files verbatim is what guarantees parity.
 
 **Files:**
+
 - Create: `infra/terraform/envs/staging/{backend,providers,variables,main}.tf` + `terraform.tfvars`
 - Create: `infra/terraform/envs/prod/{backend,providers,variables,main}.tf` + `terraform.tfvars`
 
 - [ ] **Step 1: Copy the dev root into staging and prod**
 
 Run:
+
 ```bash
 for env in staging prod; do
   mkdir -p infra/terraform/envs/$env
@@ -909,6 +958,7 @@ done
 - [ ] **Step 2: Create each backend with its own workspace**
 
 Create `infra/terraform/envs/staging/backend.tf`:
+
 ```hcl
 terraform {
   required_version = ">= 1.7"
@@ -922,6 +972,7 @@ terraform {
 ```
 
 Create `infra/terraform/envs/prod/backend.tf`:
+
 ```hcl
 terraform {
   required_version = ">= 1.7"
@@ -937,6 +988,7 @@ terraform {
 - [ ] **Step 3: Per-env tfvars (the only place values differ)**
 
 Create `infra/terraform/envs/staging/terraform.tfvars`:
+
 ```hcl
 environment            = "staging"
 project_slug           = "sport-app"
@@ -950,6 +1002,7 @@ vercel_team            = null
 ```
 
 Create `infra/terraform/envs/prod/terraform.tfvars`:
+
 ```hcl
 environment            = "prod"
 project_slug           = "sport-app"
@@ -965,6 +1018,7 @@ vercel_team            = null
 - [ ] **Step 4: Assert parity (the module wiring is identical) and validate**
 
 Run:
+
 ```bash
 diff infra/terraform/envs/dev/main.tf infra/terraform/envs/staging/main.tf && \
 diff infra/terraform/envs/dev/main.tf infra/terraform/envs/prod/main.tf && \
@@ -972,6 +1026,7 @@ echo "parity-ok"
 for env in staging prod; do
   ( cd infra/terraform/envs/$env && terraform fmt -check && terraform init -backend=false && terraform validate ); done
 ```
+
 Expected: both `diff`s produce no output (identical) and print `parity-ok`; each env validates "Success!". If a `diff` shows changes, the envs have drifted — revert the difference; only `terraform.tfvars`/`backend.tf` may differ.
 
 - [ ] **Step 5: Commit**
@@ -986,11 +1041,13 @@ git commit -m "feat(infra): add staging and prod env roots (identical wiring, en
 ## Task 8: `envs/repo` — apply repo-global GitHub config once
 
 **Files:**
+
 - Create: `infra/terraform/envs/repo/{backend,providers,variables,main}.tf` + `terraform.tfvars`
 
 - [ ] **Step 1: Backend + GitHub provider**
 
 Create `infra/terraform/envs/repo/backend.tf`:
+
 ```hcl
 terraform {
   required_version = ">= 1.7"
@@ -1004,6 +1061,7 @@ terraform {
 ```
 
 Create `infra/terraform/envs/repo/providers.tf`:
+
 ```hcl
 terraform {
   required_providers {
@@ -1023,6 +1081,7 @@ provider "github" {
 - [ ] **Step 2: Variables**
 
 Create `infra/terraform/envs/repo/variables.tf`:
+
 ```hcl
 variable "github_owner" { type = string }
 variable "github_repository" { type = string }
@@ -1039,6 +1098,7 @@ variable "production_reviewer_user_ids" {
 - [ ] **Step 3: Call the repo module**
 
 Create `infra/terraform/envs/repo/main.tf`:
+
 ```hcl
 module "repo" {
   source = "../../modules/repo"
@@ -1052,6 +1112,7 @@ module "repo" {
 - [ ] **Step 4: tfvars**
 
 Create `infra/terraform/envs/repo/terraform.tfvars`:
+
 ```hcl
 github_owner      = "REPLACE_OWNER"
 github_repository = "sport-app"
@@ -1063,6 +1124,7 @@ production_reviewer_user_ids = ["REPLACE_YOUR_GITHUB_USER_ID"]
 - [ ] **Step 5: Validate offline**
 
 Run:
+
 ```bash
 cd infra/terraform/envs/repo
 terraform fmt -check
@@ -1070,6 +1132,7 @@ terraform init -backend=false
 terraform validate
 cd -
 ```
+
 Expected: `validate` prints "Success! The configuration is valid."
 
 - [ ] **Step 6: Commit**
@@ -1086,12 +1149,14 @@ git commit -m "feat(infra): add repo-global GitHub config root"
 Add the §7 cross-config parity check and a Terraform fmt/validate gate to Plan 2's `ci.yml`. Both become required status checks (already in `modules/repo`'s default contexts).
 
 **Files:**
+
 - Create: `infra/terraform/scripts/check-env-parity.mjs`
 - Modify: `.github/workflows/ci.yml`
 
 - [ ] **Step 1: Write the parity script**
 
 Create `infra/terraform/scripts/check-env-parity.mjs`:
+
 ```js
 import { readFileSync } from "node:fs";
 
@@ -1104,9 +1169,7 @@ function exampleKeys() {
     .sort();
 }
 
-const contract = JSON.parse(
-  readFileSync("infra/terraform/env-contract.json", "utf8"),
-);
+const contract = JSON.parse(readFileSync("infra/terraform/env-contract.json", "utf8"));
 const declared = [...contract.tf_managed, ...contract.platform_managed].sort();
 const example = exampleKeys();
 
@@ -1125,60 +1188,67 @@ console.log(`Env-var parity OK — ${declared.length} keys aligned (app schema =
 - [ ] **Step 2: Verify the script passes, then prove it catches drift**
 
 Run:
+
 ```bash
 node infra/terraform/scripts/check-env-parity.mjs
 ```
+
 Expected: prints `Env-var parity OK — 5 keys aligned ...` (the 4 TF-managed + `NODE_ENV`).
 
 Now prove it fails on drift:
+
 ```bash
 node -e "const f='infra/terraform/env-contract.json';const fs=require('fs');const j=JSON.parse(fs.readFileSync(f));j.tf_managed.push('STRIPE_KEY');fs.writeFileSync(f,JSON.stringify(j,null,2));"
 node infra/terraform/scripts/check-env-parity.mjs || echo "caught-drift"
 git checkout -- infra/terraform/env-contract.json
 ```
+
 Expected: the second run exits non-zero and prints `caught-drift`; the contract is then restored.
 
 - [ ] **Step 3: Add the `tf-check` and `parity` jobs under `jobs:` in `.github/workflows/ci.yml`**
 
 Append (siblings of the Plan 2 jobs):
-```yaml
-  # Plan 3 — Terraform formatting + validation gate (offline; no cloud creds).
-  tf-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "1.9.8"
-      - name: terraform fmt
-        run: terraform -chdir=infra/terraform fmt -check -recursive
-      - name: Validate every module and env
-        run: |
-          set -e
-          for dir in infra/terraform/modules/* infra/terraform/envs/*; do
-            echo "== validating $dir =="
-            terraform -chdir="$dir" init -backend=false -input=false
-            terraform -chdir="$dir" validate
-          done
 
-  # Plan 3 — app env-var schema must match the Terraform env contract (§7).
-  parity:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 20
-      - name: Check env-var parity
-        run: node infra/terraform/scripts/check-env-parity.mjs
+```yaml
+# Plan 3 — Terraform formatting + validation gate (offline; no cloud creds).
+tf-check:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v5
+    - uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: "1.9.8"
+    - name: terraform fmt
+      run: terraform -chdir=infra/terraform fmt -check -recursive
+    - name: Validate every module and env
+      run: |
+        set -e
+        for dir in infra/terraform/modules/* infra/terraform/envs/*; do
+          echo "== validating $dir =="
+          terraform -chdir="$dir" init -backend=false -input=false
+          terraform -chdir="$dir" validate
+        done
+
+# Plan 3 — app env-var schema must match the Terraform env contract (§7).
+parity:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v5
+    - uses: actions/setup-node@v5
+      with:
+        node-version: 20
+    - name: Check env-var parity
+      run: node infra/terraform/scripts/check-env-parity.mjs
 ```
 
 - [ ] **Step 4: Validate the workflow still parses and has all nine jobs**
 
 Run:
+
 ```bash
 python3 -c "import yaml; d=yaml.safe_load(open('.github/workflows/ci.yml')); print(sorted(d['jobs']))"
 ```
+
 Expected: `['build-image', 'e2e', 'lint', 'parity', 'sast', 'secret-scan', 'test', 'tf-check', 'vuln-scan']`
 
 - [ ] **Step 5: Commit**
@@ -1195,13 +1265,16 @@ git commit -m "ci: add Terraform validate gate and env-var parity check"
 **⚠️ This task creates real, billable cloud resources and changes GitHub merge rules. Confirm the target HCP org, Vercel team, Supabase org, and GitHub repo before applying.** Steps 1–2 are offline; Steps 3+ require the Task 1 credentials and make real changes.
 
 **Files:**
+
 - Modify: `infra/terraform/README.md`
 
 - [ ] **Step 1: Flesh out the runbook with the apply procedure**
 
 Append to `infra/terraform/README.md`:
-```markdown
+
+````markdown
 ## Apply procedure
+
 Credentials must be exported (Task 1). Apply in this order:
 
 ```bash
@@ -1215,10 +1288,12 @@ for env in dev staging prod; do
   terraform -chdir=infra/terraform/envs/$env apply
 done
 ```
+````
 
 To read an output (e.g. for Plan 4 wiring):
 `terraform -chdir=infra/terraform/envs/dev output -raw database_url`
-```
+
+````
 
 - [ ] **Step 2: Confirm the whole tree formats and validates offline**
 
@@ -1226,35 +1301,42 @@ Run:
 ```bash
 terraform -chdir=infra/terraform fmt -check -recursive && echo "fmt-ok"
 node infra/terraform/scripts/check-env-parity.mjs
-```
+````
+
 Expected: `fmt-ok` and the parity OK line.
 
 - [ ] **Step 3: Plan the repo config and review it (no changes yet)**
 
 Run:
+
 ```bash
 terraform -chdir=infra/terraform/envs/repo init
 terraform -chdir=infra/terraform/envs/repo plan
 ```
+
 Expected: a plan creating `github_branch_protection.main` and the `staging`/`production` environments. Confirm the `required_status_checks.contexts` list shows all nine CI job names.
 
 - [ ] **Step 4: Apply the repo config, then verify branch protection is live**
 
 Run:
+
 ```bash
 terraform -chdir=infra/terraform/envs/repo apply
 gh api "repos/$(gh repo view --json nameWithOwner --jq .nameWithOwner)/branches/main/protection" --jq '.required_status_checks.contexts'
 ```
+
 Expected: apply succeeds; the `gh api` call lists the nine contexts. (Solo note: with `required_approving_review_count = 0` you can still merge your own PRs once checks pass; bump it and add reviewers when a team joins.)
 
 - [ ] **Step 5: Plan and apply `dev` end to end**
 
 Run:
+
 ```bash
 terraform -chdir=infra/terraform/envs/dev init
 terraform -chdir=infra/terraform/envs/dev apply
 terraform -chdir=infra/terraform/envs/dev output project_ref
 ```
+
 Expected: apply creates the Supabase project, sets the Vercel project + its env vars, and prints a `project_ref`. In the Vercel dashboard the `sport-app-dev` project shows `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `DATABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`. (Repeat for staging/prod when ready, per the runbook.)
 
 - [ ] **Step 6: Commit the runbook**

@@ -4,7 +4,7 @@
 
 **Goal:** Replace the Plan-01 placeholder schema with the authoritative 8-table SQUAD data model — split-profile identity, a sports lookup, the games + participations core loop, and venue listings — using app-generated UUIDv7 keys, the documented indexes, RLS on every table, a signup trigger, and a seeded sports table, all verified by integration tests.
 
-**Architecture:** Drizzle ORM defines the tables, constraints, indexes, and RLS policies in `src/lib/db/schema.ts`; `drizzle-kit` generates the schema migration (the source of truth). A hand-written *custom* migration adds the objects Drizzle can't express — a `private` schema, the `handle_new_user` `SECURITY DEFINER` trigger on `auth.users`, and the 8-sport seed. The app reaches Postgres as the `postgres` role via Drizzle, so RLS is strict **defense-in-depth, never load-bearing**.
+**Architecture:** Drizzle ORM defines the tables, constraints, indexes, and RLS policies in `src/lib/db/schema.ts`; `drizzle-kit` generates the schema migration (the source of truth). A hand-written _custom_ migration adds the objects Drizzle can't express — a `private` schema, the `handle_new_user` `SECURITY DEFINER` trigger on `auth.users`, and the 8-sport seed. The app reaches Postgres as the `postgres` role via Drizzle, so RLS is strict **defense-in-depth, never load-bearing**.
 
 **Tech Stack:** Drizzle ORM 0.45 (`pg-core` + `drizzle-orm/supabase`), drizzle-kit 0.31, postgres.js, `uuidv7`, Supabase (local via CLI), Vitest.
 
@@ -17,7 +17,7 @@ This is the **first plan derived from `docs/context/db-schema-and-backend-design
 - **Plan 05 (this doc):** the **data layer** — schema, indexes, RLS, signup trigger, sports seed → spec §2, §3, §4, §5, and the §7 data-integrity layers.
 - **Plan 06 (next):** the **backend API + domain layer** — `lib/booking` write logic (create-game / request / approve / decline / cancel with capacity + state-machine rules) and the `/api/v1` REST handlers + Zod/OpenAPI contracts + route-group surface guards → spec §6.
 
-> **Spec is authoritative; this plan implements it.** Where this plan makes an implementation-detail choice the spec left open (e.g. *where* the UUIDv7 generator lives), it is called out inline with a rationale. Do not re-decide product or architecture here — that lives in the brainstorm vault (see `CLAUDE.md`).
+> **Spec is authoritative; this plan implements it.** Where this plan makes an implementation-detail choice the spec left open (e.g. _where_ the UUIDv7 generator lives), it is called out inline with a rationale. Do not re-decide product or architecture here — that lives in the brainstorm vault (see `CLAUDE.md`).
 
 ## Boundary & Prerequisites
 
@@ -34,19 +34,19 @@ This is the **first plan derived from `docs/context/db-schema-and-backend-design
 
 ## File Structure (touched by this plan)
 
-| File | Responsibility |
-|---|---|
-| `src/lib/db/id.ts` | **Create.** `newId()` — app-generated, time-ordered UUIDv7 primary key |
-| `src/lib/db/id.test.ts` | **Create.** Unit tests for `newId()` (version, ordering, uniqueness) |
-| `src/lib/db/schema.ts` | **Rewrite.** The authoritative 8-table Drizzle schema: enums, columns, FKs, CHECKs, indexes, RLS policies |
-| `drizzle.config.ts` | **Modify.** Add `entities.roles.provider: 'supabase'` so drizzle-kit treats Supabase roles as existing |
-| `migrations/0000_*.sql` | **Replace.** Regenerated schema migration (tables + enums + indexes + RLS) = source of truth |
-| `migrations/0001_*.sql` | **Create** (via `generate --custom`). `private` schema, `handle_new_user` trigger, sports seed |
-| `migrations/meta/*` | **Regenerated** by drizzle-kit (journal + snapshots) |
-| `src/lib/db/db.integration.test.ts` | **Rewrite.** Schema / trigger / constraint / seed integration tests |
-| `src/lib/db/rls.integration.test.ts` | **Create.** RLS-enabled + RLS-enforcement integration tests |
-| `package.json` | **Modify.** Add the `uuidv7` dependency |
-| `README.md` | **Modify.** Document the data-layer schema + workflow |
+| File                                 | Responsibility                                                                                            |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `src/lib/db/id.ts`                   | **Create.** `newId()` — app-generated, time-ordered UUIDv7 primary key                                    |
+| `src/lib/db/id.test.ts`              | **Create.** Unit tests for `newId()` (version, ordering, uniqueness)                                      |
+| `src/lib/db/schema.ts`               | **Rewrite.** The authoritative 8-table Drizzle schema: enums, columns, FKs, CHECKs, indexes, RLS policies |
+| `drizzle.config.ts`                  | **Modify.** Add `entities.roles.provider: 'supabase'` so drizzle-kit treats Supabase roles as existing    |
+| `migrations/0000_*.sql`              | **Replace.** Regenerated schema migration (tables + enums + indexes + RLS) = source of truth              |
+| `migrations/0001_*.sql`              | **Create** (via `generate --custom`). `private` schema, `handle_new_user` trigger, sports seed            |
+| `migrations/meta/*`                  | **Regenerated** by drizzle-kit (journal + snapshots)                                                      |
+| `src/lib/db/db.integration.test.ts`  | **Rewrite.** Schema / trigger / constraint / seed integration tests                                       |
+| `src/lib/db/rls.integration.test.ts` | **Create.** RLS-enabled + RLS-enforcement integration tests                                               |
+| `package.json`                       | **Modify.** Add the `uuidv7` dependency                                                                   |
+| `README.md`                          | **Modify.** Document the data-layer schema + workflow                                                     |
 
 **Canonical names used across tasks (do not rename):**
 
@@ -56,13 +56,14 @@ This is the **first plan derived from `docs/context/db-schema-and-backend-design
 - DB objects: schema `private`; function `private.handle_new_user`; trigger `on_auth_user_created`.
 - Constraints/indexes: `uq_participation`, `chk_client_capability`, `chk_games_capacity`, `games_sport_starts_idx`, `games_open_upcoming_idx`, `games_organizer_idx`, `games_venue_idx`, `games_share_token_uq`, `participations_game_status_idx`, `participations_player_idx`, `venues_owner_active_idx`, `venue_sports_sport_idx`.
 
-> **Seam note.** `src/lib/db/schema.ts` imports `authUsers` / `authenticatedRole` from **`drizzle-orm/supabase`**. That is part of **Drizzle** (our DB-adapter library), *not* the `@supabase/supabase-js` vendor SDK, and it is used only inside the `src/lib/db` seam. This respects the Seam Rule (no vendor SDK in app code). RLS/triggers are Supabase-flavoured but are **never load-bearing**: the app works through Drizzle as the `postgres` role and enforces authorization in `lib/booking` (Plan 06).
+> **Seam note.** `src/lib/db/schema.ts` imports `authUsers` / `authenticatedRole` from **`drizzle-orm/supabase`**. That is part of **Drizzle** (our DB-adapter library), _not_ the `@supabase/supabase-js` vendor SDK, and it is used only inside the `src/lib/db` seam. This respects the Seam Rule (no vendor SDK in app code). RLS/triggers are Supabase-flavoured but are **never load-bearing**: the app works through Drizzle as the `postgres` role and enforces authorization in `lib/booking` (Plan 06).
 
 ---
 
 ## Task 1: UUIDv7 primary-key helper (`lib/db/id.ts`)
 
 **Files:**
+
 - Create: `src/lib/db/id.ts`
 - Test: `src/lib/db/id.test.ts`
 - Modify: `package.json` (add `uuidv7`)
@@ -75,13 +76,13 @@ Expected: `uuidv7` added to `dependencies` in `package.json`.
 - [ ] **Step 2: Write the failing test**
 
 Create `src/lib/db/id.test.ts`:
+
 ```ts
 import { describe, it, expect } from "vitest";
 import { newId } from "./id";
 
 // 8-4-4-4-12 hex, with the version nibble pinned to 7 and the variant nibble to 8–b.
-const UUID_V7_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_V7_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 describe("newId", () => {
   it("returns a valid UUIDv7 (version nibble = 7)", () => {
@@ -109,6 +110,7 @@ Expected: FAIL — "Cannot find module './id'".
 - [ ] **Step 4: Implement the helper**
 
 Create `src/lib/db/id.ts`:
+
 ```ts
 import { uuidv7 } from "uuidv7";
 
@@ -147,16 +149,18 @@ git commit -m "feat(db): add UUIDv7 primary-key helper"
 ## Task 2: Rewrite the Drizzle schema and regenerate the migration
 
 **Files:**
+
 - Rewrite: `src/lib/db/schema.ts`
 - Modify: `drizzle.config.ts`
 - Replace: `migrations/0000_*.sql`, `migrations/meta/*`
 - Delete: `src/lib/db/db.integration.test.ts` (obsolete Plan-01 placeholder test — it imports the removed `users` table; recreated fresh in Task 4)
 
-> This task defines the schema and **statically** regenerates + inspects the migration. The migration is *applied* to the database in Task 3 (one clean `supabase db reset` + `drizzle-kit migrate`), so there is no DB step here.
+> This task defines the schema and **statically** regenerates + inspects the migration. The migration is _applied_ to the database in Task 3 (one clean `supabase db reset` + `drizzle-kit migrate`), so there is no DB step here.
 
 - [ ] **Step 1: Rewrite the schema to the authoritative 8-table model**
 
 Replace the entire contents of `src/lib/db/schema.ts` with:
+
 ```ts
 import { sql } from "drizzle-orm";
 import {
@@ -297,7 +301,9 @@ export const venues = pgTable(
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
   (t) => [
-    index("venues_owner_active_idx").on(t.ownerId).where(sql`deleted_at is null`),
+    index("venues_owner_active_idx")
+      .on(t.ownerId)
+      .where(sql`deleted_at is null`),
     pgPolicy("venues_select", {
       for: "select",
       to: authenticatedRole,
@@ -341,9 +347,15 @@ export const games = pgTable(
     index("games_open_upcoming_idx")
       .on(t.startsAt)
       .where(sql`status = 'open' and deleted_at is null`),
-    index("games_organizer_idx").on(t.organizerId).where(sql`deleted_at is null`),
-    index("games_venue_idx").on(t.venueId).where(sql`venue_id is not null`),
-    uniqueIndex("games_share_token_uq").on(t.shareToken).where(sql`share_token is not null`),
+    index("games_organizer_idx")
+      .on(t.organizerId)
+      .where(sql`deleted_at is null`),
+    index("games_venue_idx")
+      .on(t.venueId)
+      .where(sql`venue_id is not null`),
+    uniqueIndex("games_share_token_uq")
+      .on(t.shareToken)
+      .where(sql`share_token is not null`),
     pgPolicy("games_select", {
       for: "select",
       to: authenticatedRole,
@@ -429,6 +441,7 @@ export const venueSports = pgTable(
 - [ ] **Step 2: Add the Supabase roles entity to drizzle-kit config**
 
 Edit `drizzle.config.ts` — add the `entities` block so drizzle-kit treats `authenticated`/`anon`/`service_role` as **existing** Supabase roles (it will NOT emit `CREATE ROLE`):
+
 ```ts
 import { defineConfig } from "drizzle-kit";
 
@@ -450,24 +463,29 @@ export default defineConfig({
 - [ ] **Step 3: Remove the obsolete placeholder test, then typecheck**
 
 The Plan-01 placeholder `src/lib/db/db.integration.test.ts` imports `users` from `./schema`, which the rewrite removes (it tests the old placeholder schema and is recreated fresh in Task 4). `tsc` typechecks test files, so remove it now to keep the typecheck clean. `git rm` also stages the deletion for the Step 6 commit:
+
 ```bash
 git rm src/lib/db/db.integration.test.ts
 ```
+
 Run: `pnpm typecheck`
 Expected: clean (exit 0). If `drizzle-orm/supabase` types are missing, confirm `drizzle-orm@^0.45` is installed — it ships the `supabase` subpath.
 
 - [ ] **Step 4: Delete the placeholder migration and regenerate from scratch**
 
 Run:
+
 ```bash
 rm -rf migrations
 pnpm dotenv -e .env.local -- drizzle-kit generate
 ```
+
 Expected: drizzle-kit recreates `migrations/` with one new `0000_*.sql` (random suffix) plus `meta/`. The output lists 8 tables, 2 enums, indexes, and policies.
 
 - [ ] **Step 5: Inspect the generated SQL (this is the verification for this task)**
 
 Run each check and confirm the expected result:
+
 ```bash
 # 8 base tables
 grep -c '^CREATE TABLE' migrations/0000_*.sql            # expect: 8
@@ -484,6 +502,7 @@ grep -i 'create role' migrations/0000_*.sql || echo 'OK: no CREATE ROLE'
 # partial indexes carry their WHERE clauses
 grep -iE "where .*(deleted_at is null|status = 'open'|share_token is not null|venue_id is not null)" migrations/0000_*.sql
 ```
+
 Expected: `8`, the two enum types, `8`, `15`, a `REFERENCES "auth"."users"` line, both `OK:` lines, and several partial-index `WHERE` matches. If the table count or policy count is off, fix `schema.ts` and re-run Steps 4–5.
 
 - [ ] **Step 6: Commit the schema + regenerated migration together**
@@ -498,6 +517,7 @@ git commit -m "feat(db): replace placeholder schema with authoritative 8-table m
 ## Task 3: Custom migration — private schema, signup trigger, sports seed
 
 **Files:**
+
 - Create: `migrations/0001_*.sql` (via `drizzle-kit generate --custom`)
 
 - [ ] **Step 1: Generate an empty custom migration**
@@ -508,6 +528,7 @@ Expected: a new empty `migrations/0001_signup_trigger_and_sports_seed.sql` and a
 - [ ] **Step 2: Fill in the custom migration SQL**
 
 Open the new `migrations/0001_signup_trigger_and_sports_seed.sql` and replace its (empty) contents with:
+
 ```sql
 -- Objects Drizzle Kit can't express. Table DDL + RLS policies live in the
 -- generated schema migration (0000); this adds a SECURITY DEFINER trigger in a
@@ -552,18 +573,22 @@ ON CONFLICT (key) DO NOTHING;
 - [ ] **Step 3: Rebuild the local database from the new migrations**
 
 This wipes the local DB (removing the old placeholder tables and the old drizzle migration tracking) and re-applies `0000` + `0001` cleanly:
+
 ```bash
 supabase db reset
 pnpm dotenv -e .env.local -- drizzle-kit migrate
 ```
+
 Expected: `supabase db reset` finishes with a fresh local stack; `drizzle-kit migrate` reports applying 2 migrations with no error. (`supabase db reset` only runs `supabase/migrations/` — empty here — so it gives a clean Supabase base with `auth.users` and the `authenticated` role present, then Drizzle applies our schema.)
 
 - [ ] **Step 4: Verify the trigger, seed, and private schema exist**
 
 Run:
+
 ```bash
 pnpm dotenv -e .env.local -- node -e "const p=require('postgres')(process.env.DATABASE_URL);(async()=>{const s=await p\`select count(*)::int n from sports\`;const t=await p\`select 1 from pg_trigger where tgname='on_auth_user_created'\`;const f=await p\`select 1 from pg_proc pr join pg_namespace n on n.oid=pr.pronamespace where n.nspname='private' and pr.proname='handle_new_user'\`;console.log('sports',s[0].n,'trigger',t.length,'fn',f.length);await p.end();})()"
 ```
+
 Expected: `sports 8 trigger 1 fn 1`.
 
 - [ ] **Step 5: Commit**
@@ -578,6 +603,7 @@ git commit -m "feat(db): add signup trigger and sports seed migration"
 ## Task 4: Schema / trigger / constraint / seed integration tests
 
 **Files:**
+
 - Create: `src/lib/db/db.integration.test.ts` (the Plan-01 placeholder was removed in Task 2)
 
 > Integration tests run against the **real** local Postgres via the `postgres` superuser connection (so they bypass RLS — RLS is exercised separately in Task 5). They create fresh auth users per run (unique emails) and do not clean up; CI uses a fresh ephemeral Postgres each run (Plan 02), and locally the rows are harmless. The "exactly 8 sports" assertion stays stable because the seed is idempotent.
@@ -585,6 +611,7 @@ git commit -m "feat(db): add signup trigger and sports seed migration"
 - [ ] **Step 1: Create the integration test**
 
 Create `src/lib/db/db.integration.test.ts` (removed in Task 2) with:
+
 ```ts
 import { afterAll, describe, expect, it } from "vitest";
 import { and, count, eq } from "drizzle-orm";
@@ -620,7 +647,14 @@ describe("sports seed", () => {
     const rows = await db.select().from(sports);
     expect(rows).toHaveLength(8);
     expect(rows.map((s) => s.key).sort()).toEqual([
-      "basketball", "football", "gym", "padel", "running", "swimming", "tennis", "volleyball",
+      "basketball",
+      "football",
+      "gym",
+      "padel",
+      "running",
+      "swimming",
+      "tennis",
+      "volleyball",
     ]);
   });
 });
@@ -698,8 +732,12 @@ describe("derived spots-remaining", () => {
     const p2 = await createAuthUser("P2");
     await db.insert(clientProfiles).values({ profileId: p2, isPlayer: true });
 
-    await db.insert(participations).values({ id: newId(), gameId, playerId: p1, status: "approved" });
-    await db.insert(participations).values({ id: newId(), gameId, playerId: p2, status: "requested" });
+    await db
+      .insert(participations)
+      .values({ id: newId(), gameId, playerId: p1, status: "approved" });
+    await db
+      .insert(participations)
+      .values({ id: newId(), gameId, playerId: p2, status: "requested" });
 
     const [{ approved }] = await db
       .select({ approved: count() })
@@ -727,6 +765,7 @@ git commit -m "test(db): cover schema, trigger, constraints, and sports seed"
 ## Task 5: RLS enforcement integration tests
 
 **Files:**
+
 - Create: `src/lib/db/rls.integration.test.ts`
 
 > These tests verify the spec's authorization promise: RLS is enabled on every table, and policies actually filter. They run queries **as the `authenticated` role** (via transaction-local `role` + `request.jwt.claims`), the canonical way to exercise Supabase RLS from a direct connection.
@@ -734,6 +773,7 @@ git commit -m "test(db): cover schema, trigger, constraints, and sports seed"
 - [ ] **Step 1: Write the RLS test**
 
 Create `src/lib/db/rls.integration.test.ts`:
+
 ```ts
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { eq } from "drizzle-orm";
@@ -744,10 +784,7 @@ import { clientProfiles, games, participations, sports } from "./schema";
 // Run `fn` as the Supabase `authenticated` role with auth.uid() = userId, using
 // transaction-local settings. Postgres enforces policies because `authenticated`
 // is neither a superuser nor the table owner.
-async function asUser<T>(
-  userId: string,
-  fn: (tx: typeof client) => Promise<T>,
-): Promise<T> {
+async function asUser<T>(userId: string, fn: (tx: typeof client) => Promise<T>): Promise<T> {
   return client.begin(async (tx) => {
     await tx`select set_config('request.jwt.claims', ${JSON.stringify({ sub: userId, role: "authenticated" })}, true)`;
     await tx`select set_config('role', 'authenticated', true)`;
@@ -818,10 +855,16 @@ describe("participations RLS: read isolation", () => {
     });
     await db.insert(participations).values({ id: newId(), gameId, playerId: playerA });
 
-    const seenByA = await asUser(playerA, (tx) => tx`select id from participations where game_id = ${gameId}`);
+    const seenByA = await asUser(
+      playerA,
+      (tx) => tx`select id from participations where game_id = ${gameId}`,
+    );
     expect(seenByA.length).toBeGreaterThanOrEqual(1);
 
-    const seenByB = await asUser(playerB, (tx) => tx`select id from participations where game_id = ${gameId}`);
+    const seenByB = await asUser(
+      playerB,
+      (tx) => tx`select id from participations where game_id = ${gameId}`,
+    );
     expect(seenByB).toHaveLength(0);
   });
 });
@@ -833,19 +876,25 @@ describe("games RLS: insert requires organizer capability", () => {
     const playerOnly = await createAuthUser("PlayerOnly");
     await db.insert(clientProfiles).values({ profileId: playerOnly, isPlayer: true });
     await expect(
-      asUser(playerOnly, (tx) => tx`
+      asUser(
+        playerOnly,
+        (tx) => tx`
         insert into games (id, organizer_id, sport_id, title, starts_at, capacity)
         values (${newId()}, ${playerOnly}, ${fid}, 'Nope', now() + interval '1 day', 8)
-      `),
+      `,
+      ),
     ).rejects.toThrow(/row-level security/i);
 
     const organizer = await createAuthUser("Organizer");
     await db.insert(clientProfiles).values({ profileId: organizer, isOrganizer: true });
-    const created = await asUser(organizer, (tx) => tx`
+    const created = await asUser(
+      organizer,
+      (tx) => tx`
       insert into games (id, organizer_id, sport_id, title, starts_at, capacity)
       values (${newId()}, ${organizer}, ${fid}, 'Yes', now() + interval '1 day', 8)
       returning id
-    `);
+    `,
+    );
     expect(created).toHaveLength(1);
   });
 });
@@ -873,20 +922,25 @@ git commit -m "test(db): verify RLS is enabled and enforced"
 ## Task 6: Document the data layer and run full verification
 
 **Files:**
+
 - Modify: `README.md`
 
 - [ ] **Step 1: Update the README layout note and add a schema section**
 
 In `README.md`, replace the `src/lib/db` bullet under `## Layout`:
+
 ```markdown
 - `src/lib/db` — Drizzle schema + client; `migrations/` is the schema source of truth
 ```
+
 with:
+
 ```markdown
 - `src/lib/db` — Drizzle schema (8-table model + RLS), client, and `newId()` UUIDv7 keys; `migrations/` is the schema source of truth
 ```
 
 Then append this section to the end of `README.md`:
+
 ```markdown
 ## Database schema
 
