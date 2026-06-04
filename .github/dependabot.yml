@@ -27,3 +27,8 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
+    ignore:
+      # Keep the base image on the chosen Node LTS line (24). Move to the next LTS
+      # deliberately, not via an automated major bump (e.g. the 24 -> 26 jump).
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
