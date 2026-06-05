@@ -1,8 +1,0 @@
-# Trivy ignore file — documented, deliberately-accepted findings.
-#
-# GIT-0004 (HIGH): Branch protection does not require signed commits.
-# Accepted: solo-founder repo; signed-commit enforcement is deferred until
-# commit signing (GPG/SSH) is set up. Revisit by setting
-# require_signed_commits = true on github_branch_protection.main and removing
-# this entry. Tracked in infra/terraform/modules/repo/main.tf.
-AVD-GIT-0004

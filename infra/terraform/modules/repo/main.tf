@@ -15,6 +15,7 @@ resource "github_branch_protection" "main" {
   repository_id                   = data.github_repository.this.node_id
   pattern                         = "main"
   enforce_admins                  = true
+  require_signed_commits          = true # Require signed commits (GPG/SSH); GitHub signs PR-merge commits automatically.
   require_conversation_resolution = true
 
   required_status_checks {
