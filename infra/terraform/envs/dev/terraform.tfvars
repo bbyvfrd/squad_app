@@ -1,0 +1,9 @@
+environment            = "dev"
+project_slug           = "squad-app"
+git_repo               = "" # dev deploys via CLI (Plan 4); no Git link
+supabase_org_id        = "REPLACE_WITH_ORG_SLUG"
+supabase_region        = "eu-central-1"
+supabase_instance_size = "micro"
+app_site_url           = "http://localhost:3000"
+app_domain             = ""
+vercel_team            = null

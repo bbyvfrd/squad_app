@@ -187,3 +187,33 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+  # Plan 3 — Terraform formatting + validation gate (offline; no cloud creds).
+  tf-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.15.5"
+      - name: terraform fmt
+        run: terraform -chdir=infra/terraform fmt -check -recursive
+      - name: Validate every module and env
+        run: |
+          set -e
+          for dir in infra/terraform/modules/* infra/terraform/envs/*; do
+            echo "== validating $dir =="
+            terraform -chdir="$dir" init -backend=false -input=false
+            terraform -chdir="$dir" validate
+          done
+
+  # Plan 3 — app env-var schema must match the Terraform env contract (§7).
+  parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+      - name: Check env-var parity
+        run: node infra/terraform/scripts/check-env-parity.mjs
