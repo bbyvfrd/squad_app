@@ -11,7 +11,7 @@ Full scope, personas, and domain model: [`docs/context/product.md`](docs/context
 
 ## Prerequisites
 
-- **Node 20+** (tested on Node 24)
+- **Node 24+** (matches CI and the `node:24-alpine` production image)
 - **pnpm 9+**
 - **Docker** (for the container build and local Supabase)
 - **Supabase CLI** (`brew install supabase/tap/supabase` or see [supabase.com/docs/guides/cli](https://supabase.com/docs/guides/cli))
