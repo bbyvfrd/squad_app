@@ -3,11 +3,11 @@
 Provisions per-environment Supabase + Vercel projects and repo-global GitHub
 config. Schema is NOT here (it lives in `migrations/`).
 
-## Apply order
+## Apply order (updated for Plan 4)
 
 1. `envs/repo` — branch protection, required checks, environments (once)
-2. `envs/dev` — Supabase + Vercel for dev
-3. `envs/staging`, `envs/prod` — same modules, env-specific vars
+2. `envs/dev`, `envs/staging`, `envs/prod` — Supabase + Vercel per-environment
+3. **`envs/deploy-secrets`** (reads staging/prod workspace outputs; needs `TFE_TOKEN`)
 
 ## Credentials
 
@@ -16,7 +16,7 @@ Set `VERCEL_API_TOKEN`, `SUPABASE_ACCESS_TOKEN`, `TF_VAR_vercel_api_token`,
 
 ## State
 
-Remote state on HCP Terraform (workspaces `squad-app-{repo,dev,staging,prod}`,
+Remote state on HCP Terraform (workspaces `squad-app-{repo,dev,staging,prod,deploy-secrets}`,
 Local execution mode). Alternative: an S3-compatible (R2) backend.
 
 ## Before first apply — fill these placeholders
@@ -47,6 +47,11 @@ for env in dev staging prod; do
   terraform -chdir=infra/terraform/envs/$env init
   terraform -chdir=infra/terraform/envs/$env apply
 done
+
+# 3) deploy-secrets (last — reads staging/prod workspace outputs; needs TFE_TOKEN
+#    plus TF_VAR_github_token and TF_VAR_vercel_api_token exported)
+terraform -chdir=infra/terraform/envs/deploy-secrets init
+terraform -chdir=infra/terraform/envs/deploy-secrets apply
 ```
 
 To read an output (e.g. for Plan 4 wiring):

@@ -149,3 +149,19 @@ Docker base image current.
 Reproduce a job locally with Docker (gitleaks/semgrep/trivy) or the matching
 `pnpm` script (`format:check`, `lint`, `typecheck`, `test`, `test:integration`,
 `test:e2e`).
+
+## Deploy & rollback
+
+`deploy.yml` runs after CI succeeds on `main`:
+staging (migrate → deploy → Playwright smoke) → **manual approval** (GitHub
+`production` environment) → production (migrate → atomic deploy → health gate).
+A failed production deploy/health gate auto-calls `rollback.yml`.
+
+- Approve a production deploy: GitHub → the run → "Review deployments" → approve.
+- Manual rollback: `gh workflow run rollback.yml -f reason="<why>"`.
+- Migrations are forward-only; `vercel rollback` reverts the app, not the schema —
+  keep migrations backward-compatible (expand/contract). Every deploy job runs
+  `scripts/verify-migrations.mjs` after migrating (drizzle-kit can fail silently).
+- Smoke/health checks target the stable production domains (`STAGING_URL`/`PROD_URL`
+  repo variables) — per-deployment URLs are auth-protected.
+- Deploy secrets + `STAGING_URL`/`PROD_URL` are managed by `infra/terraform/envs/deploy-secrets`.
