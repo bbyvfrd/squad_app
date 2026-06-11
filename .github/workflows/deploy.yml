@@ -1,0 +1,128 @@
+name: Deploy
+
+# Run only after the CI workflow succeeds on main (the "ci gates pass" gate).
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+
+# Never cancel an in-flight production deploy.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  staging:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_STAGING }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Apply migrations (staging)
+        run: pnpm exec drizzle-kit migrate
+        env:
+          DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL_STAGING }}
+      - name: Verify migrations applied (drizzle-kit can roll back silently)
+        run: node scripts/verify-migrations.mjs
+        env:
+          DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL_STAGING }}
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+      # --environment=production pulls THIS project's production-target env config:
+      # each env is its own Vercel project deployed to its own production (plan §2).
+      - name: Pull staging env from Vercel
+        run: vercel pull --yes --environment=production
+      - name: Build
+        run: vercel build --prod
+      - name: Deploy to staging
+        run: vercel deploy --prebuilt --prod
+      - name: Install Playwright chromium
+        run: pnpm exec playwright install --with-deps chromium
+      # Target the stable production domain (vars.STAGING_URL): the unique URL
+      # `vercel deploy` prints is auth-protected under Standard Protection (401).
+      - name: Smoke test staging
+        run: |
+          if [ -z "$PLAYWRIGHT_BASE_URL" ]; then
+            echo "STAGING_URL repo variable is not set — apply envs/deploy-secrets (Task 8) first"
+            exit 1
+          fi
+          pnpm test:e2e
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ vars.STAGING_URL }}
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report-staging
+          path: playwright-report/
+          retention-days: 7
+
+  # Core-loop placeholder: when signup → create game → request → approve routes exist, add one core-loop assertion to the health gate (Playwright with PLAYWRIGHT_BASE_URL=vars.PROD_URL).
+  production:
+    needs: staging
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_PROD }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Apply migrations (production)
+        run: pnpm exec drizzle-kit migrate
+        env:
+          DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL_PROD }}
+      - name: Verify migrations applied (drizzle-kit can roll back silently)
+        run: node scripts/verify-migrations.mjs
+        env:
+          DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL_PROD }}
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+      - name: Pull production env from Vercel
+        run: vercel pull --yes --environment=production
+      - name: Build
+        run: vercel build --prod
+      - name: Deploy to production (atomic alias swap)
+        run: vercel deploy --prebuilt --prod
+      # vars.PROD_URL is the public production domain; the deployment URL the CLI
+      # prints is auth-protected under Standard Protection — never health-check it.
+      - name: Post-deploy health gate
+        run: |
+          for i in $(seq 1 5); do
+            if curl -fsS "${{ vars.PROD_URL }}/api/health" | grep -q '"status":"ok"'; then
+              echo "production health ok"; exit 0
+            fi
+            echo "attempt $i: not healthy yet"; sleep 10
+          done
+          echo "production health gate FAILED"; exit 1
+
+  rollback:
+    needs: production
+    if: failure() && needs.production.result == 'failure'
+    uses: ./.github/workflows/rollback.yml
+    secrets: inherit
+    with:
+      reason: "auto: production deploy/health gate failed for ${{ github.event.workflow_run.head_sha }}"
