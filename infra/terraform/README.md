@@ -23,8 +23,9 @@ Local execution mode). Alternative: an S3-compatible (R2) backend.
 
 The committed configs intentionally carry placeholders for account-specific values. Fill them before applying:
 
-- `REPLACE_WITH_HCP_ORG` — your HCP Terraform org name, in every `envs/*/backend.tf` (`repo`, `dev`, `staging`, `prod`).
+- `REPLACE_WITH_HCP_ORG` — your HCP Terraform org name, in every `envs/*/backend.tf` (`repo`, `dev`, `staging`, `prod`, `deploy-secrets`) **and** in `envs/deploy-secrets/terraform.tfvars`.
 - `REPLACE_WITH_ORG_SLUG` — your Supabase organization slug, in every `envs/{dev,staging,prod}/terraform.tfvars`.
+- `REPLACE_WITH_VERCEL_ORG_ID` — your Vercel org/team id (`vercel teams ls`), in `envs/deploy-secrets/terraform.tfvars`.
 - Staging + prod domains — `envs/staging/terraform.tfvars` (`app_site_url`) and `envs/prod/terraform.tfvars` (`app_site_url` / `app_domain`); replace the `.example` values with your real URLs.
 
 Secrets are supplied via environment (never committed): `TF_VAR_vercel_api_token`, `TF_VAR_github_token`, `TF_VAR_supabase_db_password`, and `SUPABASE_ACCESS_TOKEN`.

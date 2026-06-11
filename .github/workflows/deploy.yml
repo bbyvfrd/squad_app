@@ -77,6 +77,11 @@ jobs:
     needs: staging
     runs-on: ubuntu-latest
     environment: production
+    # Read by the rollback job: only roll back if a deploy was actually attempted
+    # (outputs set by succeeded steps survive a failed job; an unstarted job — e.g.
+    # a REJECTED approval — has no outputs, so rollback is skipped).
+    outputs:
+      deploy_attempted: ${{ steps.mark.outputs.attempted }}
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -105,6 +110,10 @@ jobs:
         run: vercel pull --yes --environment=production
       - name: Build
         run: vercel build --prod
+      # Everything above leaves prod untouched — a failure there must NOT roll back.
+      - name: Mark deploy attempted
+        id: mark
+        run: echo "attempted=true" >> "$GITHUB_OUTPUT"
       - name: Deploy to production (atomic alias swap)
         run: vercel deploy --prebuilt --prod
       # vars.PROD_URL is the public production domain; the deployment URL the CLI
@@ -121,7 +130,9 @@ jobs:
 
   rollback:
     needs: production
-    if: failure() && needs.production.result == 'failure'
+    # deploy_attempted gate: a rejected approval or a pre-deploy failure (migrate,
+    # build) leaves prod serving a healthy build — rolling back would demote it.
+    if: failure() && needs.production.result == 'failure' && needs.production.outputs.deploy_attempted == 'true'
     uses: ./.github/workflows/rollback.yml
     secrets: inherit
     with:

@@ -155,10 +155,13 @@ Reproduce a job locally with Docker (gitleaks/semgrep/trivy) or the matching
 `deploy.yml` runs after CI succeeds on `main`:
 staging (migrate → deploy → Playwright smoke) → **manual approval** (GitHub
 `production` environment) → production (migrate → atomic deploy → health gate).
-A failed production deploy/health gate auto-calls `rollback.yml`.
+A failed production deploy/health gate auto-calls `rollback.yml` (only after a
+deploy was actually attempted — a rejected approval or pre-deploy failure leaves
+prod untouched and triggers no rollback).
 
 - Approve a production deploy: GitHub → the run → "Review deployments" → approve.
-- Manual rollback: `gh workflow run rollback.yml -f reason="<why>"`.
+- Manual rollback: `gh workflow run rollback.yml -f reason="<why>"` — cancel any
+  in-flight Deploy run first (a dispatched rollback can race one and be re-promoted over).
 - Migrations are forward-only; `vercel rollback` reverts the app, not the schema —
   keep migrations backward-compatible (expand/contract). Every deploy job runs
   `scripts/verify-migrations.mjs` after migrating (drizzle-kit can fail silently).
