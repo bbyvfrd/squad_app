@@ -16,8 +16,7 @@ const expected = journal.entries.length;
 
 const sql = postgres(url, { max: 1, prepare: false });
 try {
-  const [{ count }] =
-    await sql`select count(*)::int as count from drizzle.__drizzle_migrations`;
+  const [{ count }] = await sql`select count(*)::int as count from drizzle.__drizzle_migrations`;
   // "<" not "!==": a DB ahead of the journal (e.g. after a squash) is safe.
   if (count < expected) {
     console.error(

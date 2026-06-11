@@ -37,12 +37,12 @@ After this plan the foundation is complete. **Next is application-feature work**
 
 Re-verified 2026-06-10 against live vercel.com/docs pages and the provider binaries pinned in this repo's `.terraform/` trees:
 
-- **Vercel CLI** — CI flow `vercel pull --yes --environment=production` → `vercel build --prod` → `vercel deploy --prebuilt --prod` is current. Setting `VERCEL_ORG_ID` + `VERCEL_PROJECT_ID` env vars skips project linking (no `vercel link`). **`VERCEL_TOKEN` as an env var is now supported and recommended over `--token` in CI** (keeps the token out of process lists) — the workflows below rely on the job-level `env:` only. `vercel deploy` prints the **unique deployment URL** on stdout; `vercel rollback` with **no argument** rolls back to the previous production deployment (`--yes` is *not* documented for rollback — don't pass it).
+- **Vercel CLI** — CI flow `vercel pull --yes --environment=production` → `vercel build --prod` → `vercel deploy --prebuilt --prod` is current. Setting `VERCEL_ORG_ID` + `VERCEL_PROJECT_ID` env vars skips project linking (no `vercel link`). **`VERCEL_TOKEN` as an env var is now supported and recommended over `--token` in CI** (keeps the token out of process lists) — the workflows below rely on the job-level `env:` only. `vercel deploy` prints the **unique deployment URL** on stdout; `vercel rollback` with **no argument** rolls back to the previous production deployment (`--yes` is _not_ documented for rollback — don't pass it).
 - **Vercel Deployment Protection** — new projects default to Standard Protection (`standard_protection_new` is the provider default in `vercel/vercel` 4.8.2): **generated deployment URLs (incl. the one `vercel deploy` prints) require auth (401 for curl/Playwright); production domains — including the auto-assigned `<project>.vercel.app` — stay public.** Smoke/health checks therefore target the stable production domains (`vars.STAGING_URL` / `vars.PROD_URL`), never the stdout URL. Fallback if a protected URL must ever be tested: the `x-vercel-protection-bypass` header with a project bypass secret.
 - **GitHub Actions** — reusable workflow via `on: workflow_call` (with `inputs`/`secrets`), called from a job with `uses:` + `secrets: inherit`; manual approval via job-level `environment:` with required reviewers. Action versions below mirror the proven set in `ci.yml` (`actions/checkout@v6`, `pnpm/action-setup@v6`, `actions/setup-node@v6`, Node 20).
 - **`integrations/github` v6 (binary v6.12.1 verified)** — `github_actions_secret` takes **`plaintext_value`** (NOT `value`; validate fails otherwise); `github_actions_variable` takes `value`.
 - **`supabase/supabase` v1.9.1 (binary verified)** — `supabase_pooler.url` is a "map of pooler mode to connection string"; default projects typically expose only the `"transaction"` key, so the session URL is derived by port swap (6543 → 5432, same host/credentials). **After the first apply, confirm the actual keys** (`terraform console` → `data.supabase_pooler.this.url`).
-- **`hashicorp/tfe`** — `data "tfe_outputs" { organization, workspace }` with accessor `data.tfe_outputs.<x>.values.<output>` (all values come back **sensitive**; fine for secrets). Auth: provider `token` → `TFE_TOKEN` env → `terraform login` credentials. *Live registry check was unavailable on 2026-06-10* — **before applying Task 3, confirm the latest 0.x version and that no 1.0 exists** (`~> 0.60` = `>= 0.60, < 1.0`).
+- **`hashicorp/tfe`** — `data "tfe_outputs" { organization, workspace }` with accessor `data.tfe_outputs.<x>.values.<output>` (all values come back **sensitive**; fine for secrets). Auth: provider `token` → `TFE_TOKEN` env → `terraform login` credentials. _Live registry check was unavailable on 2026-06-10_ — **before applying Task 3, confirm the latest 0.x version and that no 1.0 exists** (`~> 0.60` = `>= 0.60, < 1.0`).
 
 ## Boundary & Prerequisites
 
@@ -54,17 +54,17 @@ Re-verified 2026-06-10 against live vercel.com/docs pages and the provider binar
 
 ## File Structure (created/modified by this plan)
 
-| File                                                 | Responsibility                                                                                         |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `.github/workflows/deploy.yml`                       | Promotion flow: staging → approval → production + post-deploy health gate (created across Tasks 5, 7)  |
-| `.github/workflows/rollback.yml`                     | Reusable + manual rollback via `vercel rollback`                                                       |
-| `vercel.json`                                        | Disable Vercel Git auto-deploy on `main`                                                               |
-| `scripts/verify-migrations.mjs`                      | Post-migrate guard: journal vs `drizzle.__drizzle_migrations` (created in Task 5)                      |
-| `infra/terraform/modules/data/outputs.tf`            | Add `database_session_url` output (modify)                                                             |
-| `infra/terraform/envs/{dev,staging,prod}/outputs.tf` | Expose `vercel_project_id` + `database_session_url` (create)                                           |
-| `infra/terraform/envs/deploy-secrets/*`              | New root: read env outputs via `tfe_outputs`, write GitHub deploy secrets + URL variables              |
-| `playwright.config.ts`                               | Allow targeting a deployed URL via `PLAYWRIGHT_BASE_URL` (modify; keep the `/api/health` ready-probe)  |
-| `infra/terraform/README.md` + `README.md`            | Deploy/rollback runbook (modify)                                                                       |
+| File                                                 | Responsibility                                                                                        |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `.github/workflows/deploy.yml`                       | Promotion flow: staging → approval → production + post-deploy health gate (created across Tasks 5, 7) |
+| `.github/workflows/rollback.yml`                     | Reusable + manual rollback via `vercel rollback`                                                      |
+| `vercel.json`                                        | Disable Vercel Git auto-deploy on `main`                                                              |
+| `scripts/verify-migrations.mjs`                      | Post-migrate guard: journal vs `drizzle.__drizzle_migrations` (created in Task 5)                     |
+| `infra/terraform/modules/data/outputs.tf`            | Add `database_session_url` output (modify)                                                            |
+| `infra/terraform/envs/{dev,staging,prod}/outputs.tf` | Expose `vercel_project_id` + `database_session_url` (create)                                          |
+| `infra/terraform/envs/deploy-secrets/*`              | New root: read env outputs via `tfe_outputs`, write GitHub deploy secrets + URL variables             |
+| `playwright.config.ts`                               | Allow targeting a deployed URL via `PLAYWRIGHT_BASE_URL` (modify; keep the `/api/health` ready-probe) |
+| `infra/terraform/README.md` + `README.md`            | Deploy/rollback runbook (modify)                                                                      |
 
 **Canonical names (do not rename):**
 
@@ -475,8 +475,7 @@ const expected = journal.entries.length;
 
 const sql = postgres(url, { max: 1, prepare: false });
 try {
-  const [{ count }] =
-    await sql`select count(*)::int as count from drizzle.__drizzle_migrations`;
+  const [{ count }] = await sql`select count(*)::int as count from drizzle.__drizzle_migrations`;
   // "<" not "!==": a DB ahead of the journal (e.g. after a squash) is safe.
   if (count < expected) {
     console.error(
