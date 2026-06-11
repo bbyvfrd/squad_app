@@ -635,7 +635,9 @@ jobs:
       - name: Log reason
         env:
           REASON: ${{ inputs.reason }}
-        run: echo "Rolling back production — reason: $REASON"
+        # Block scalar: the message contains ": ", which YAML forbids in a plain scalar.
+        run: |
+          echo "Rolling back production — reason: $REASON"
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
       # No deployment argument = roll back to the previous production deployment.
