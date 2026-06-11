@@ -1,6 +1,11 @@
 name: Deploy
 
-# Run only after the CI workflow succeeds on main (the "ci gates pass" gate).
+# Run only after the CI workflow succeeds on a push to main (the "ci gates pass" gate).
+# NOTE: the `branches` filter matches the triggering run's HEAD BRANCH NAME — and CI
+# also runs on pull_request, so a fork PR whose head branch is named "main" would
+# match it. The staging `if` therefore also requires the triggering event to be a
+# push, which fork PRs can never produce (pwn-request guard — see
+# https://securitylab.github.com/research/github-actions-preventing-pwn-requests/).
 on:
   workflow_run:
     workflows: ["CI"]
@@ -17,7 +22,7 @@ permissions:
 
 jobs:
   staging:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
     runs-on: ubuntu-latest
     environment: staging
     env:
@@ -25,6 +30,10 @@ jobs:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_STAGING }}
     steps:
+      # head_sha is trusted post-merge code here: the job-level `if` requires the
+      # triggering run to be a push to main, so fork-PR code can never reach this
+      # checkout. The semgrep rule can't see job conditions, hence the suppression.
+      # nosemgrep: yaml.github-actions.security.workflow-run-target-code-checkout.workflow-run-target-code-checkout
       - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
@@ -87,6 +96,9 @@ jobs:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_PROD }}
     steps:
+      # Same trust argument as staging: `needs: staging` means that job's push-to-main
+      # `if` has already held, so head_sha is post-merge code.
+      # nosemgrep: yaml.github-actions.security.workflow-run-target-code-checkout.workflow-run-target-code-checkout
       - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
