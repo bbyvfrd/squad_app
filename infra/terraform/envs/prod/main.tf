@@ -35,10 +35,13 @@ module "app" {
     for key in local.contract.tf_managed : {
       key   = key
       value = local.env_values[key]
-      # Vercel rejects sensitive vars on the `development` target — scope secrets
-      # to production+preview; public NEXT_PUBLIC_* vars stay on all three.
+      # NOT marked sensitive: the deploy builds via `vercel build --prebuilt` in
+      # CI, which runs `vercel pull` — and pull cannot read back Vercel "sensitive"
+      # vars, so a prebuilt build can't see DATABASE_URL / the service-role key and
+      # fails env validation. Vercel project access (yours) is the control. DB +
+      # service-role still skip the unused `development` target.
       target    = contains(local.secret_keys, key) ? ["production", "preview"] : local.env_targets
-      sensitive = contains(local.secret_keys, key)
+      sensitive = false
     }
   ]
 }
