@@ -114,17 +114,18 @@ npm run db:migrate   # apply SQL migrations
 - **`deploy.yml`** (only vendor-aware): merge to `main` → staging → smoke → manual approval gate → prod (atomic alias swap) → post-deploy health gate → auto-rollback on failure.
 - **Branch protection + required checks + prod approval** are codified in Terraform, not clicked in a dashboard.
 
-## Design system — SQUAD
+## Design system — SQUAD (v1.5.0)
 
-Configured visual system; canonical files in `docs/context/design/` (`DESIGN.md` = tokens + spec, `brand-spec.md` = reasoning, `design-system.html` = component reference, `assets/` = logos). Summary + integration notes: `docs/context/design-system.md`.
+Configured visual system; canonical files in `docs/context/design/` (**`colors_and_type.css` = the single source of truth** — tokens, dark theme, every canonical `.sq-*` component; `tokens.json` = generated W3C DTCG mirror; `README.md` = prose rules; `CONTRIBUTING.md` = anti-drift contract; `CHANGELOG.md` = semver history; `preview/` = rendered cards + AA contrast gate; `ui_kits/squad_app/` = reference Home/Games screens; `assets/` = locked logos; `fonts/` = self-hosted fonts). Summary + integration notes: `docs/context/design-system.md`.
 
-- **Brand:** SQUAD. One color — SQUAD red `#EE4721` — used **≤2× per screen**. Dark-first cool slate; light mode only for marketing + venue CRM.
-- **Type:** Inter Tight (italic 800 display / upright 700 in-product), Inter (body), JetBrains Mono (all numbers, `tabular-nums`).
-- **Sport-state colors** (functional only): live=green, slot=blue, win=yellow, loss/danger=crimson (≠ brand). Elevation via surface tone, not shadows. One italic hero per page.
-- **Tokens:** paste the `:root` block from `docs/context/design/DESIGN.md` into global CSS. **Integration:** SQUAD is CSS-vars + vanilla classes, _not_ Tailwind/shadcn — plan 01 must bridge the tokens into the chosen stack (don't mix vocabularies).
-- **Scope guard:** SQUAD is a superset (scores, leaderboards, teams, payments vocabulary all exist). v1 ships only the subset the product scope allows — no payments/scores/leaderboards/teams/live-match. A component existing ≠ the feature is in v1.
-- **Voice (use):** Create game, Request spot, Approve, Decline, Spots left, Pending requests, Confirmed, Cancelled, Venue details. Short verbs, present tense; numbers carry the claim; one verb per CTA.
-- **Voice (avoid in v1 — no payments/booking yet):** Book now, Checkout, Pay, Deposit, Wallet, Ticket, Reserve court, League, Tournament.
+- **Brand:** SQUAD. One accent — Fired Terracotta `#EE4721` — a **spike, not a wash**: one terracotta element per surface, ≤~15%, never body text, **never a status color**. **Light-default** (Warm Linen page; no pure black/white); dark mode is a role-token theme via `data-theme="dark"`, with an in-product toggle.
+- **Type:** **Montserrat** (signage — display/headline/labels/buttons/numbers) + **Karla** (reading — body/forms/metadata). No mono font. **Italic is forbidden** — the color spike is the emphasis device. `tabular-nums` on every digit column.
+- **Status colors** (semantic, ≠ brand): success Turf Green / warning Ochre (dark text) / error Signal Red / info Slate Blue — mapped to product states in `docs/context/design-system.md`. Sport tints (`.sq-sport-*`) and the skill ladder (`.sq-skill.lv-1…5` ↔ the 5-tier `skill_level` enum) are **identity, never status**. Flat surfaces; two named shadows only.
+- **The role-token rule:** components reference role tokens (`--bg-surface`, `--fg-primary`, `--rule-hairline`, `--accent-text`, …), never raw `--linen-*`/`--steel-*` ramps — raw-ramp components won't theme.
+- **Integration:** SQUAD is CSS-vars + vanilla `.sq-*` classes, _not_ Tailwind/shadcn — the bridge into the app stack must pick one vocabulary (`tokens.json` is the machine input) and must preserve the role-token rule + `data-theme` mechanism. Fonts and icons (Material Symbols Outlined) are **self-hosted — no CDN, no Google Fonts `<link>`**. Sport-key nit: CSS `soccer` = product `football`; reconcile once in the bridge.
+- **Scope guard:** SQUAD is a superset (**waitlist badge**, payments glyphs, ratings, win/leaderboard vocabulary all exist). v1 ships only the subset the product scope allows — no payments/waitlists/ratings/scores/teams/live-match. A component existing ≠ the feature is in v1.
+- **Voice (use):** Create game, Request spot, Approve, Decline, Spots left, Pending requests, Confirmed, Cancelled, Venue details. Short verbs, present tense; numbers carry the claim; one verb per CTA. Casing by tier: display/labels/buttons UPPERCASE, title and below mixed-case. No emoji, no em dashes, no exclamation marks.
+- **Voice (avoid in v1 — no payments/booking yet):** Book now, Checkout, Pay, Deposit, Wallet, Ticket, Reserve court, League, Tournament, Waitlist.
 
 ## Standing directives
 

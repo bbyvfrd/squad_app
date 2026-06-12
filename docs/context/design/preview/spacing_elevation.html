@@ -1,0 +1,34 @@
+<!doctype html>
+<!-- @dsCard group="Spacing" name="Elevation" subtitle="Hero Lift only · everything else flat" viewport="700x280" -->
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>SQUAD · Card · Elevation</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--linen-200);font-family:var(--font-sans);color:var(--steel-700);min-height:280px}
+  .card{padding:36px;box-sizing:border-box;width:700px;display:grid;grid-template-columns:1fr 1fr;gap:28px}
+  .item{display:flex;flex-direction:column;gap:14px}
+  .head{font-family:var(--font-mono);font-size:10px;letter-spacing:0.22em;text-transform:uppercase;font-weight:600;color:var(--terra-500)}
+  .demo{height:120px;border-radius:6px;background:var(--steel-700);color:var(--linen-200);
+    display:flex;align-items:center;justify-content:center;font-family:var(--font-sans);
+    font-weight:900;font-size:32px;letter-spacing:-0.035em;text-transform:uppercase}
+  .demo.lifted{box-shadow:0 2px 6px rgba(0,0,0,0.08), 0 12px 40px rgba(0,0,0,0.08)}
+  .demo.flat{background:var(--linen-100);color:var(--steel-700)}
+  .meta{font-family:var(--font-mono);font-size:9px;letter-spacing:0.16em;
+    text-transform:uppercase;color:var(--steel-500);font-weight:500;line-height:1.6}
+  .meta b{color:var(--steel-700);font-weight:600}
+</style></head>
+<body>
+<div class="card">
+  <div class="item">
+    <div class="head">Hero Lift · the only shadow</div>
+    <div class="demo lifted">HERO ONLY</div>
+    <div class="meta"><b>0 2 6 / 0 12 40</b><br>rgba(0,0,0,0.08) · diffuse · ambient</div>
+  </div>
+  <div class="item">
+    <div class="head">Flat · everything else</div>
+    <div class="demo flat">FLAT BY DEFAULT</div>
+    <div class="meta"><b>NO SHADOW</b><br>Depth from color shift, never blur</div>
+  </div>
+</div>
+</body></html>

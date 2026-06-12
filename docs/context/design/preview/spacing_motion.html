@@ -1,0 +1,42 @@
+<!doctype html>
+<!-- @dsCard group="Spacing" name="Motion" subtitle="ease-out-quart · 180/320ms · no bounce" viewport="700x230" -->
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>SQUAD · Card · Motion</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--linen-200);font-family:var(--font-sans);color:var(--steel-700)}
+  .card{padding:28px 32px;box-sizing:border-box;width:700px;display:grid;gap:14px}
+  .head{font-family:var(--font-mono);font-size:10px;letter-spacing:0.22em;text-transform:uppercase;font-weight:600;color:var(--terra-500)}
+  .row{display:grid;grid-template-columns:130px 1fr 80px;gap:16px;align-items:center;
+    padding:8px 0;border-bottom:1px solid var(--linen-300);font-family:var(--font-mono);
+    font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--steel-500);font-weight:500}
+  .nm{color:var(--steel-700);font-weight:600}
+  .v{color:var(--steel-700);font-weight:700;text-align:right;letter-spacing:0.06em}
+  .curve{height:32px;position:relative}
+  .curve svg{display:block;width:100%;height:100%}
+  .ball{width:14px;height:14px;border-radius:999px;background:var(--terra-500);
+    position:absolute;top:50%;transform:translateY(-50%);left:0;
+    animation:roll 2.4s var(--ease-out) infinite alternate}
+  @keyframes roll{from{left:0}to{left:calc(100% - 14px)}}
+</style></head>
+<body>
+<div class="card">
+  <div class="head">Motion · ease-out-quart · no bounce</div>
+  <div class="row">
+    <span class="nm">ease-out</span>
+    <div class="curve"><svg viewBox="0 0 100 32" preserveAspectRatio="none"><path d="M0,28 C25,28 30,4 100,4" fill="none" stroke="#13222C" stroke-width="2"/></svg></div>
+    <span class="v">cubic-bezier(.25,1,.5,1)</span>
+  </div>
+  <div class="row">
+    <span class="nm">duration-fast</span>
+    <div class="curve"><div class="ball" style="animation-duration:0.36s"></div></div>
+    <span class="v">180 ms</span>
+  </div>
+  <div class="row" style="border:none">
+    <span class="nm">duration-standard</span>
+    <div class="curve"><div class="ball" style="animation-duration:0.64s"></div></div>
+    <span class="v">320 ms</span>
+  </div>
+</div>
+</body></html>

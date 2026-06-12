@@ -1,0 +1,82 @@
+<!-- @dsCard group="Colors" -->
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>SQUAD · Card · Contrast & a11y</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--linen-200);font-family:var(--font-sans);color:var(--steel-700)}
+  .frame{padding:30px 34px;width:840px;box-sizing:border-box}
+  .head{font-family:var(--font-sans);font-size:10px;letter-spacing:.22em;text-transform:uppercase;font-weight:700;color:var(--terra-500)}
+  .sub{font-family:var(--font-body);font-size:12.5px;color:var(--steel-500);margin:6px 0 20px;max-width:74ch}
+  table{border-collapse:collapse;width:100%;font-size:13px}
+  th{font-family:var(--font-sans);font-weight:600;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--steel-400);text-align:left;padding:0 10px 8px}
+  td{padding:6px 10px;border-top:1px solid var(--linen-300);vertical-align:middle}
+  .grp td{border-top:none;padding-top:18px;font-family:var(--font-sans);font-weight:700;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--terra-600)}
+  .chip{display:inline-flex;align-items:center;padding:7px 13px;border-radius:7px;font-weight:700;font-size:13px;white-space:nowrap}
+  .ratio{font-family:var(--font-sans);font-weight:800;font-variant-numeric:tabular-nums;font-size:14px}
+  .pf{font-family:var(--font-sans);font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:5px;display:inline-block;min-width:38px;text-align:center}
+  .pass{background:var(--success-50);color:var(--success-700)}
+  .fail{background:var(--error-50);color:var(--error-700)}
+  .note{margin-top:22px;display:grid;gap:10px}
+  .callout{display:grid;grid-template-columns:auto 1fr;gap:12px;background:var(--warning-50);padding:14px 16px;border-radius:8px}
+  .callout .ic{width:26px;height:26px;border-radius:7px;background:var(--warning-500);color:var(--steel-800);display:grid;place-items:center;font-weight:900}
+  .callout b{font-family:var(--font-sans)}
+  .callout p{margin:3px 0 0;font-family:var(--font-body);font-size:12.5px;line-height:1.5;color:var(--steel-600)}
+</style></head>
+<body>
+<div class="frame">
+  <div class="head">Contrast &amp; accessibility · WCAG 2.1 · AA floor</div>
+  <p class="sub">Computed contrast ratios for every load-bearing foreground/background pairing, light and dark. AA needs ≥4.5 for normal text, ≥3.0 for large (≥24px, or ≥18.7px bold). Three pairings are size-restricted — see the rules below. This card computes live from the token hexes.</p>
+  <table id="tbl"><thead><tr><th>Sample</th><th>Ratio</th><th>AA normal</th><th>AA large</th></tr></thead><tbody></tbody></table>
+
+  <div class="note">
+    <div class="callout"><div class="ic">!</div><div><b>Terracotta is a large-only text color.</b><p>Fired Terracotta as text on linen scores 3.06 (3.37 on bone) — AA-large only. Use it for the one accent word in a headline, big numbers, or links ≥24px. <strong>Never for body or small UI text.</strong> This is the Color Spike Rule, now with a number.</p></div></div>
+    <div class="callout"><div class="ic">!</div><div><b>Caption Ash (steel-400) is for large or non-essential text.</b><p>On bone it scores 4.23 — just under AA-normal. Fine for hints, timestamps, and ≥16px captions; for body-critical small text, step up to Body Smoke (steel-500, 8.74).</p></div></div>
+    <div class="callout"><div class="ic">!</div><div><b>Prefer the soft success badge for status text.</b><p>Linen on the Turf Green solid is 3.79 — below AA for small badge text. Use the solid green for icon chips and large fills; for a text status, use the soft variant (deep green on wash, 8.58).</p></div></div>
+  </div>
+</div>
+<script>
+function lum(hex){const c=hex.replace('#','').match(/.{2}/g).map(x=>parseInt(x,16)/255).map(v=>v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4));return 0.2126*c[0]+0.7152*c[1]+0.0722*c[2];}
+function ratio(a,b){const L1=lum(a),L2=lum(b),hi=Math.max(L1,L2),lo=Math.min(L1,L2);return (hi+0.05)/(lo+0.05);}
+const rows=[
+  ['grp','Light · text on surfaces'],
+  ['Jet Ink — primary text','#13222C','#EBE7DB'],
+  ['Jet Ink on card','#13222C','#F5F2E9'],
+  ['Body Smoke — body','#3A4550','#F5F2E9'],
+  ['Caption Ash — caption','#6B7480','#F5F2E9'],
+  ['Terracotta text on linen','#EE4721','#EBE7DB'],
+  ['Linen on Jet (dark surface)','#EBE7DB','#13222C'],
+  ['grp','Solid fills · on-solid text'],
+  ['Pressed Jet on Terracotta (CTA)','#0C1820','#EE4721'],
+  ['Linen on Turf Green','#F5F2E9','#3C8A52'],
+  ['Pressed Jet on Ochre','#0C1820','#C68A1C'],
+  ['Linen on Signal Red','#F5F2E9','#CE2530'],
+  ['Linen on Slate Blue','#F5F2E9','#2C6E9B'],
+  ['grp','Soft status · text on wash (light)'],
+  ['Turf on wash','#1F4E2E','#EDF4EE'],
+  ['Ochre on wash','#6E4B0E','#FAF1DC'],
+  ['Error on wash','#761016','#FBEAE9'],
+  ['Info on wash','#163E54','#E9F0F5'],
+  ['grp','Dark theme'],
+  ['Pressed Bone — primary','#F5F2E9','#0C1820'],
+  ['Cool Slate — body','#BEC4CE','#13222C'],
+  ['Deep Slate — caption','#8E96A1','#13222C'],
+  ['Heat Terracotta — accent text','#F26B49','#13222C'],
+  ['Open badge text on wash','#8FD6A2','#16271C'],
+];
+const tb=document.querySelector('#tbl tbody');
+for(const r of rows){
+  const tr=document.createElement('tr');
+  if(r[0]==='grp'){ tr.className='grp'; tr.innerHTML='<td colspan="4">'+r[1]+'</td>'; tb.appendChild(tr); continue; }
+  const [name,fg,bg]=r, v=ratio(fg,bg);
+  const aN=v>=4.5, aL=v>=3;
+  tr.innerHTML=
+    '<td><span class="chip" style="color:'+fg+';background:'+bg+'">'+name+'</span></td>'+
+    '<td class="ratio">'+v.toFixed(2)+'</td>'+
+    '<td><span class="pf '+(aN?'pass':'fail')+'">'+(aN?'Pass':'Fail')+'</span></td>'+
+    '<td><span class="pf '+(aL?'pass':'fail')+'">'+(aL?'Pass':'Fail')+'</span></td>';
+  tb.appendChild(tr);
+}
+</script>
+</body></html>

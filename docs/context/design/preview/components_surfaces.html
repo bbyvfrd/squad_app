@@ -1,0 +1,50 @@
+<!doctype html>
+<!-- @dsCard group="Components" name="Surface Cards" subtitle="Bone · Navy · Terracotta — three variants" viewport="700x250" -->
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>SQUAD · Card · Surface Cards</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--linen-200);font-family:var(--font-sans);color:var(--steel-700)}
+  .frame{padding:24px 32px;box-sizing:border-box;width:700px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  .surf{border-radius:6px;padding:22px;min-height:200px;display:flex;flex-direction:column;justify-content:space-between}
+  .light{background:var(--linen-100);color:var(--steel-700)}
+  .dark{background:var(--steel-600);color:var(--linen-200)}
+  .terra{background:var(--terra-500);color:var(--linen-200)}
+  .eyb{font-family:var(--font-mono);font-size:9px;font-weight:600;letter-spacing:0.22em;
+    text-transform:uppercase;color:var(--steel-400)}
+  .dark .eyb{color:var(--steel-200)}
+  .terra .eyb{color:rgba(235,231,219,0.8)}
+  h2{margin:14px 0 0;font-weight:900;font-size:34px;line-height:0.9;letter-spacing:-0.035em;text-transform:uppercase}
+  .light h2 .a{color:var(--terra-500)}
+  .dark h2 .a{color:var(--terra-300)}
+  .terra h2 .a{color:var(--steel-700)}
+  p{margin:0;font-family:var(--font-body);font-size:12px;line-height:1.55;color:var(--steel-500);font-weight:400}
+  .dark p{color:var(--steel-200)}
+  .terra p{color:rgba(235,231,219,0.9)}
+</style></head>
+<body>
+<div class="frame">
+  <div class="surf light">
+    <div class="eyb">LIGHT · BONE</div>
+    <div>
+      <h2>Move<br><span class="a">Together</span>.</h2>
+      <p style="margin-top:14px">Default content surface, one tonal step above linen page.</p>
+    </div>
+  </div>
+  <div class="surf dark">
+    <div class="eyb">DARK · NAVY</div>
+    <div>
+      <h2>"No bench.<br><span class="a">All front.</span>"</h2>
+      <p style="margin-top:14px">Pull-quote and emphasis variant.</p>
+    </div>
+  </div>
+  <div class="surf terra">
+    <div class="eyb">SPIKE · TERRA</div>
+    <div>
+      <h2>A squad<br><span class="a">holds</span>.</h2>
+      <p style="margin-top:14px">One per layout maximum. Never a backdrop.</p>
+    </div>
+  </div>
+</div>
+</body></html>

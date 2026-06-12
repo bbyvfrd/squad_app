@@ -1,0 +1,47 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>SQUAD · Card · Badges</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--linen-200);font-family:var(--font-sans);color:var(--steel-700)}
+  .frame{padding:28px 32px;box-sizing:border-box;width:700px;display:grid;gap:22px}
+  .head{font-family:var(--font-sans);font-size:10px;letter-spacing:0.22em;text-transform:uppercase;font-weight:700;color:var(--terra-500);margin-bottom:10px}
+  .sub{font-family:var(--font-body);font-size:12.5px;color:var(--steel-500);margin:-4px 0 12px;max-width:60ch}
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .sq-icon{font-size:14px!important}
+</style></head>
+<body>
+<div class="frame">
+  <div>
+    <div class="head">In-app badge · <code>.sq-badge</code> · Montserrat 700</div>
+    <p class="sub">The badge you see on product surfaces — game state and roles. Semantic wash + deep text; Full and Hosting take Jet. This is the in-app voice; the mono <code>.sq-status</code> stays for tabular / signage contexts.</p>
+    <div class="row">
+      <span class="sq-badge is-open">Open</span>
+      <span class="sq-badge is-filling">Filling fast</span>
+      <span class="sq-badge is-waiting"><span class="sq-dot is-warning"></span> Waitlist</span>
+      <span class="sq-badge is-cancelled">Cancelled</span>
+      <span class="sq-badge is-full">Full</span>
+      <span class="sq-badge is-host"><span class="sq-icon">verified</span> Hosting</span>
+      <span class="sq-badge is-terra">New</span>
+    </div>
+  </div>
+  <div>
+    <div class="head">Mono status badge · <code>.sq-status</code> · tabular / signage</div>
+    <div class="row">
+      <span class="sq-status is-success">Confirmed</span>
+      <span class="sq-status is-info">Nearby</span>
+      <span class="sq-status-soft is-warning">Pending</span>
+      <span class="sq-status-soft is-error">Cancelled</span>
+    </div>
+  </div>
+  <div>
+    <div class="head">Eyebrows · Kicker · 0.22em &nbsp;·&nbsp; Tactical labels · 0.16em</div>
+    <div class="row">
+      <span class="sq-kicker sq-accent">SPEC 01 · GLOBAL SPORTS</span>
+      <span class="sq-label" style="color:var(--steel-400)">SOCCER · 7V7 · SAHIL PARK</span>
+    </div>
+  </div>
+</div>
+</body></html>

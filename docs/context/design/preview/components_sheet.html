@@ -1,0 +1,72 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>SQUAD · Card · Bottom sheet</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--linen-300);font-family:var(--font-sans)}
+  .frame{padding:30px;display:flex;gap:26px;align-items:flex-start}
+  .col h2{font-family:var(--font-sans);font-size:10px;letter-spacing:.22em;text-transform:uppercase;font-weight:700;color:var(--accent-text);margin:0 0 12px}
+  /* a contained "phone" so the sheet anchors to a positioned ancestor */
+  .device{position:relative;width:330px;height:460px;border-radius:28px;overflow:hidden;background:var(--bg-page);box-shadow:inset 0 0 0 1px var(--rule-hairline)}
+  .behind{padding:20px;display:grid;gap:12px;filter:saturate(.9)}
+  .ph-line{height:14px;border-radius:7px;background:var(--bg-surface);box-shadow:inset 0 0 0 1px var(--rule-hairline)}
+  .meta{display:flex;flex-wrap:wrap;gap:7px}
+  .det{display:flex;align-items:center;gap:8px;font-family:var(--font-body);font-size:13.5px;color:var(--fg-body)}
+  .det .sq-icon{font-size:18px;color:var(--fg-caption)}
+</style></head>
+<body>
+<div class="frame">
+  <div class="col">
+    <h2>Bottom sheet · light</h2>
+    <div class="device">
+      <div class="behind"><div class="ph-line" style="width:55%"></div><div class="ph-line"></div><div class="ph-line" style="width:80%"></div></div>
+      <div class="sq-scrim">
+        <div class="sq-sheet">
+          <div class="sq-sheet-grip"></div>
+          <div class="sq-sheet-head">
+            <h3 class="sq-sheet-title">Join this game?</h3>
+            <button class="sq-sheet-close"><span class="sq-icon" style="font-size:20px">close</span></button>
+          </div>
+          <div class="sq-sheet-body">
+            <p class="sq-sheet-sub">Tuesday Pickup · Soccer 7v7. The organizer confirms within a few hours.</p>
+            <div class="det"><span class="sq-icon">schedule</span> Tue, Jun 2 · 19:30 – 21:00</div>
+            <div class="det"><span class="sq-icon">location_on</span> Sahil Park · 1.2 km away</div>
+            <div class="det"><span class="sq-icon">payments</span> 10 ₼ · pay at the pitch</div>
+          </div>
+          <div class="sq-sheet-foot">
+            <button class="sq-btn sq-btn-outline">Cancel</button>
+            <button class="sq-btn sq-btn-primary">Join now</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col" data-theme="dark">
+    <h2>Bottom sheet · dark</h2>
+    <div class="device">
+      <div class="behind"><div class="ph-line" style="width:55%"></div><div class="ph-line"></div><div class="ph-line" style="width:80%"></div></div>
+      <div class="sq-scrim">
+        <div class="sq-sheet">
+          <div class="sq-sheet-grip"></div>
+          <div class="sq-sheet-head">
+            <h3 class="sq-sheet-title">Filter games</h3>
+            <button class="sq-sheet-close"><span class="sq-icon" style="font-size:20px">close</span></button>
+          </div>
+          <div class="sq-sheet-body">
+            <label class="sq-choice"><input type="checkbox" checked><span class="sq-radio-dot"></span>Open games only</label>
+            <label class="sq-choice"><input type="radio" name="d" checked><span class="sq-radio-dot"></span>Within 10 km</label>
+            <label class="sq-choice"><input type="radio" name="d"><span class="sq-radio-dot"></span>Anywhere in Baku</label>
+          </div>
+          <div class="sq-sheet-foot">
+            <button class="sq-btn sq-btn-outline" style="color:var(--fg-primary);box-shadow:inset 0 0 0 2px var(--rule-hairline-strong)">Reset</button>
+            <button class="sq-btn sq-btn-primary">Show 12 games</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body></html>

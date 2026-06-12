@@ -1,0 +1,41 @@
+<!doctype html>
+<!-- @dsCard group="Colors" name="Semantic Color Roles" subtitle="Page bg, card, body, caption, accents" viewport="700x420" -->
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>SQUAD · Card · Semantic Colors</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--linen-200);font-family:var(--font-sans);color:var(--steel-700)}
+  .card{padding:24px 32px;box-sizing:border-box;width:700px}
+  table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:11px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--linen-300);
+    letter-spacing:0.1em;text-transform:uppercase;font-weight:500;color:var(--steel-500)}
+  th{font-weight:700;color:var(--steel-700);font-size:9px;letter-spacing:0.22em;
+    border-bottom:1px solid var(--steel-700);padding-top:0;color:var(--terra-500)}
+  td.role{color:var(--steel-700);font-weight:600;letter-spacing:0.16em}
+  td.swatch{display:flex;align-items:center;gap:8px}
+  td.swatch i{width:18px;height:18px;border-radius:3px;display:inline-block;border:1px solid rgba(0,0,0,0.04)}
+  td.hex{font-weight:600;color:var(--steel-700)}
+</style></head>
+<body>
+<div class="card">
+  <table>
+    <thead><tr><th>Role</th><th>Token</th><th>Color</th></tr></thead>
+    <tbody>
+      <tr><td class="role">page bg</td><td>linen-200</td><td class="swatch"><i style="background:#EBE7DB"></i><span class="hex">#EBE7DB</span></td></tr>
+      <tr><td class="role">card raised</td><td>linen-100</td><td class="swatch"><i style="background:#F5F2E9"></i><span class="hex">#F5F2E9</span></td></tr>
+      <tr><td class="role">card dark</td><td>steel-600</td><td class="swatch"><i style="background:#1D3444"></i><span class="hex">#1D3444</span></td></tr>
+      <tr><td class="role">hero / dark surface</td><td>steel-700</td><td class="swatch"><i style="background:#13222C"></i><span class="hex">#13222C</span></td></tr>
+      <tr><td class="role">primary text on light</td><td>steel-700</td><td class="swatch"><i style="background:#13222C"></i><span class="hex">#13222C</span></td></tr>
+      <tr><td class="role">body text on light</td><td>steel-500</td><td class="swatch"><i style="background:#3A4550"></i><span class="hex">#3A4550</span></td></tr>
+      <tr><td class="role">caption on light</td><td>steel-400</td><td class="swatch"><i style="background:#6B7480"></i><span class="hex">#6B7480</span></td></tr>
+      <tr><td class="role">sub on dark</td><td>steel-200</td><td class="swatch"><i style="background:#BEC4CE"></i><span class="hex">#BEC4CE</span></td></tr>
+      <tr><td class="role">tiny meta on jet</td><td>steel-300</td><td class="swatch"><i style="background:#8E96A1"></i><span class="hex">#8E96A1</span></td></tr>
+      <tr><td class="role">hairline</td><td>linen-300</td><td class="swatch"><i style="background:#D8D4CA"></i><span class="hex">#D8D4CA</span></td></tr>
+      <tr><td class="role" style="color:var(--terra-500)">accent (the spike)</td><td>terra-500</td><td class="swatch"><i style="background:#EE4721"></i><span class="hex">#EE4721</span></td></tr>
+      <tr><td class="role" style="color:var(--terra-500)">accent on dark</td><td>terra-300</td><td class="swatch"><i style="background:#F26B49"></i><span class="hex">#F26B49</span></td></tr>
+      <tr><td class="role">CTA text on terra</td><td>steel-800</td><td class="swatch"><i style="background:#0C1820"></i><span class="hex">#0C1820</span></td></tr>
+    </tbody>
+  </table>
+</div>
+</body></html>

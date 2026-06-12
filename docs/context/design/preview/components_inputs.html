@@ -1,0 +1,85 @@
+<!doctype html>
+<!-- @dsCard group="Components" name="Newsletter Signup" subtitle="The shipped waitlist form — pill row, terracotta focus, success state" viewport="700x230" -->
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>SQUAD · Card · Newsletter Signup (Real)</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--linen-200);font-family:var(--font-sans);color:var(--steel-700);
+    -webkit-font-smoothing:antialiased}
+  .frame{padding:26px 32px;box-sizing:border-box;width:700px;display:grid;gap:18px}
+  .head{display:flex;justify-content:space-between;align-items:baseline;
+    font-family:var(--font-mono);font-size:10px;letter-spacing:0.22em;text-transform:uppercase;
+    font-weight:600;color:var(--terra-500)}
+  .head .flag{color:var(--steel-400);font-weight:500;letter-spacing:0.16em}
+
+  /* Real signup pattern from squad-coming-soon.html .signup-row */
+  .signup{display:grid;gap:10px}
+  .signup-row{
+    display:flex;gap:8px;
+    background:rgba(250,248,241,0.94);
+    border:1px solid rgba(29,52,68,0.18);
+    border-radius:10px;padding:6px;
+    transition:border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+  }
+  .signup-row.is-focus{
+    border-color:var(--terra-500);
+    box-shadow:0 0 0 4px rgba(238,71,33,0.12);
+  }
+  .signup-input{
+    flex:1;min-width:0;background:transparent;border:none;outline:none;
+    color:var(--steel-800);font-family:var(--font-sans);font-size:16px;font-weight:500;
+    padding:14px 16px;letter-spacing:-0.005em;
+  }
+  .signup-input::placeholder{color:var(--steel-500)}
+  .signup-btn{
+    background:var(--terra-500);color:var(--steel-800);border:none;
+    font-family:var(--font-sans);font-weight:800;font-size:14px;letter-spacing:0.06em;
+    text-transform:uppercase;padding:14px 24px;border-radius:7px;cursor:pointer;flex:0 0 auto;white-space:nowrap;
+  }
+  .signup-help{
+    font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:0.16em;
+    text-transform:uppercase;color:var(--steel-500);
+  }
+  .signup-help.is-error{color:var(--terra-500)}
+
+  /* Dark variant — same structure, different surface */
+  .signup-row.dark{background:var(--steel-800);border-color:rgba(190,196,206,0.16)}
+  .signup-row.dark .signup-input{color:var(--linen-200)}
+  .signup-row.dark .signup-input::placeholder{color:var(--steel-300)}
+
+  /* Success state */
+  .done{display:flex;flex-direction:column;gap:8px}
+  .done-headline{
+    font-family:var(--font-sans);font-weight:900;font-size:38px;line-height:0.92;
+    letter-spacing:-0.03em;text-transform:uppercase;color:var(--steel-800);margin:0;
+  }
+  .done-headline .accent{color:var(--terra-500)}
+  .done-sub{font-size:13px;line-height:1.55;color:var(--steel-500);max-width:48ch}
+</style></head>
+<body>
+<div class="frame">
+  <div class="head"><span>Newsletter Signup · The real pattern</span><span class="flag">FROM SQUAD-COMING-SOON.HTML</span></div>
+
+  <div class="signup">
+    <div class="signup-row is-focus">
+      <input class="signup-input" placeholder="Your email" value="rauf@squad.app">
+      <button class="signup-btn">Notify me</button>
+    </div>
+    <div class="signup-help">— LAUNCH SIGNAL ONLY. NO SPAM.</div>
+  </div>
+
+  <div class="signup">
+    <div class="signup-row dark">
+      <input class="signup-input" placeholder="Your email">
+      <button class="signup-btn">Notify me</button>
+    </div>
+    <div class="signup-help is-error">— THAT DOES NOT LOOK LIKE A REAL EMAIL.</div>
+  </div>
+
+  <div class="done">
+    <h3 class="done-headline">YOU'RE <span class="accent">IN.</span></h3>
+    <div class="done-sub">First whistle when SQUAD lands. Watch your inbox.</div>
+  </div>
+</div>
+</body></html>

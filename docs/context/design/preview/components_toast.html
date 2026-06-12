@@ -1,0 +1,39 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>SQUAD · Card · Toast</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--linen-200);font-family:var(--font-sans)}
+  .frame{padding:32px;width:560px;display:grid;gap:22px}
+  .head{font-family:var(--font-sans);font-size:10px;letter-spacing:.22em;text-transform:uppercase;font-weight:700;color:var(--accent-text)}
+  .sub{font-family:var(--font-body);font-size:12.5px;color:var(--fg-body);margin:-10px 0 0;max-width:58ch}
+  .stack{display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+</style></head>
+<body>
+<div class="frame">
+  <div class="head">Toast · snackbar · transient feedback</div>
+  <p class="sub">A floating jet chip (one look in both themes) carrying a solid semantic icon chip — the same "chip carries the meaning" pattern as the alert. One optional text action in Heat Terracotta.</p>
+  <div class="stack">
+    <div class="sq-toast">
+      <span class="sq-toast-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4"><path d="M20 6 9 17l-5-5"/></svg></span>
+      <span class="sq-toast-msg">You're in. <b>Tuesday Pickup</b> is on your calendar.</span>
+      <button class="sq-toast-action">Undo</button>
+    </div>
+    <div class="sq-toast">
+      <span class="sq-toast-ic is-info"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="7" r="1.6"/><rect x="11" y="10" width="2" height="8" rx="1"/></svg></span>
+      <span class="sq-toast-msg">Request sent to the organizer.</span>
+    </div>
+    <div class="sq-toast">
+      <span class="sq-toast-ic is-warning"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 2 20h20L12 3Z" opacity=".0"/><rect x="11" y="8" width="2" height="6" rx="1"/><circle cx="12" cy="17" r="1.3"/></svg></span>
+      <span class="sq-toast-msg">2 spots left — fills fast.</span>
+      <button class="sq-toast-action">View</button>
+    </div>
+    <div class="sq-toast">
+      <span class="sq-toast-ic is-error"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg></span>
+      <span class="sq-toast-msg"><b>Game cancelled.</b> The organizer called it off.</span>
+    </div>
+  </div>
+</div>
+</body></html>

@@ -1,0 +1,50 @@
+<!doctype html>
+<!-- @dsCard group="Colors" name="Brand Color Anchors" subtitle="Fired Terracotta · Jet Ink · Warm Linen" viewport="700x270" -->
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>SQUAD · Card · Brand Anchors</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--linen-200);font-family:var(--font-sans);color:var(--steel-700)}
+  .card{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:28px;
+    width:700px;box-sizing:border-box}
+  .anchor{border-radius:6px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;gap:26px;
+    min-height:212px;position:relative}
+  .star{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase}
+  .nm{font-family:var(--font-sans);font-weight:900;font-size:23px;line-height:0.94;letter-spacing:-0.03em;text-transform:uppercase}
+  .hex{font-family:var(--font-mono);font-size:11px;letter-spacing:0.16em;font-weight:500;margin-top:8px;text-transform:uppercase}
+  .role{font-family:var(--font-mono);font-size:9px;letter-spacing:0.16em;text-transform:uppercase;font-weight:500;opacity:0.7;margin-top:4px}
+  .a-terra{background:#EE4721;color:#EBE7DB}
+  .a-jet{background:#13222C;color:#EBE7DB}
+  .a-jet .star{color:#F26B49}
+  .a-linen{background:#EBE7DB;color:#13222C;outline:1px solid #D8D4CA;outline-offset:-1px}
+  .a-linen .star{color:#EE4721}
+</style></head>
+<body>
+<div class="card">
+  <div class="anchor a-terra">
+    <div class="star">★ ANCHOR · ACCENT</div>
+    <div>
+      <div class="nm">Fired<br>Terracotta</div>
+      <div class="hex">#EE4721 · terra-500</div>
+      <div class="role">The spike. One per surface.</div>
+    </div>
+  </div>
+  <div class="anchor a-jet">
+    <div class="star">★ ANCHOR · DARK</div>
+    <div>
+      <div class="nm">Jet<br>Ink</div>
+      <div class="hex">#13222C · steel-700</div>
+      <div class="role">Replaces black.</div>
+    </div>
+  </div>
+  <div class="anchor a-linen">
+    <div class="star">★ ANCHOR · NEUTRAL</div>
+    <div>
+      <div class="nm">Warm<br>Linen</div>
+      <div class="hex">#EBE7DB · linen-200</div>
+      <div class="role">Replaces white. Page bg.</div>
+    </div>
+  </div>
+</div>
+</body></html>

@@ -1,0 +1,41 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>SQUAD · Card · Buttons</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--linen-200);font-family:var(--font-sans);color:var(--steel-700)}
+  .card{padding:28px 32px;box-sizing:border-box;width:700px;display:grid;gap:20px}
+  .head{font-family:var(--font-sans);font-size:10px;letter-spacing:0.22em;text-transform:uppercase;font-weight:700;color:var(--terra-500)}
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .row.dark{background:var(--steel-700);padding:16px;border-radius:var(--r-card)}
+  .lbl{font-family:var(--font-sans);font-size:9px;letter-spacing:0.16em;
+    text-transform:uppercase;color:var(--steel-400);font-weight:600;width:100%;margin-bottom:2px}
+  .row.dark .lbl{color:var(--steel-200)}
+</style></head>
+<body>
+<div class="card">
+  <div class="head">Buttons · Montserrat 800 · 0.06em · chunky glossy primary</div>
+  <div class="row">
+    <span class="lbl">On light · the terracotta primary is the tactile spike, then descending weight</span>
+    <button class="sq-btn sq-btn-primary">Join Game</button>
+    <button class="sq-btn sq-btn-secondary">Create Game</button>
+    <button class="sq-btn sq-btn-outline">Browse Venues</button>
+    <button class="sq-btn sq-btn-ghost">View All →</button>
+    <button class="sq-btn" disabled>Filled</button>
+  </div>
+  <div class="row">
+    <span class="lbl">Sizes · sm (in-card actions) · default · lg (primary moments)</span>
+    <button class="sq-btn sq-btn-primary sq-btn-sm">Join</button>
+    <button class="sq-btn sq-btn-primary">Join Game</button>
+    <button class="sq-btn sq-btn-primary sq-btn-lg">Create a Game</button>
+  </div>
+  <div class="row dark">
+    <span class="lbl">On dark · the primary still spikes; outline turns linen</span>
+    <button class="sq-btn sq-btn-primary">Join Game</button>
+    <button class="sq-btn sq-btn-outline" style="color:var(--linen-200);box-shadow:inset 0 0 0 2px var(--steel-200)">List a Venue</button>
+    <button class="sq-btn sq-btn-ghost">View All →</button>
+  </div>
+</div>
+</body></html>
