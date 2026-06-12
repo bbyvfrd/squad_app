@@ -1,0 +1,1033 @@
+/* ─────────────────────────────────────────────────────────────
+   SQUAD Design System — colors & type
+   Source of truth: reference/DESIGN.md (type system revised post-launch)
+   "Built Chunky" — Montserrat headings + Karla body.
+   No pure black, no pure white. Terracotta as a surgical spike.
+   ───────────────────────────────────────────────────────────── */
+
+/* ─── Material Symbols (icon font) — self-hosted, no CDN ───────
+   The committed icon set: Outlined (stroke-only) satisfies the
+   brand's "no fills" rule. Self-hosted woff2 (same-origin) so it
+   paints in any renderer with zero external dependencies — this
+   matches the shipped mobile app. */
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: block;
+  src: url('fonts/MaterialSymbolsOutlined.woff2') format('woff2');
+}
+
+/* ─── Self-hosted brand fonts (no CDN) ────────────────────────
+   Montserrat = signage voice · Karla = reading voice.
+   Both shipped as variable fonts (weight axis), normal + italic. */
+@font-face {
+  font-family: 'Montserrat';
+  src: url('fonts/Montserrat-VariableFont_wght.ttf') format('truetype-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Montserrat';
+  src: url('fonts/Montserrat-Italic-VariableFont_wght.ttf') format('truetype-variations');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Karla';
+  src: url('fonts/Karla-VariableFont_wght.ttf') format('truetype-variations');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Karla';
+  src: url('fonts/Karla-Italic-VariableFont_wght.ttf') format('truetype-variations');
+  font-weight: 200 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  /* ─── Terracotta ramp (the accent voice) ───────────────── */
+  --terra-50:  #FDEDE6;
+  --terra-100: #FBDDD2; /* Wash Terracotta */
+  --terra-200: #F8B79F;
+  --terra-300: #F26B49; /* Heat Terracotta */
+  --terra-400: #F05633;
+  --terra-500: #EE4721; /* Fired Terracotta — BRAND ANCHOR */
+  --terra-600: #C5371A; /* Deep Terracotta */
+  --terra-700: #9D2C14;
+  --terra-800: #75210E;
+  --terra-900: #4D1608;
+
+  /* ─── Steel ramp (the dark structural family) ──────────── */
+  --steel-50:  #F0F2F4;
+  --steel-100: #D6DBE0;
+  --steel-200: #BEC4CE; /* Cool Slate */
+  --steel-300: #8E96A1; /* Deep Slate */
+  --steel-400: #6B7480; /* Caption Ash */
+  --steel-500: #3A4550; /* Body Smoke */
+  --steel-600: #1D3444; /* Field Navy */
+  --steel-700: #13222C; /* Jet Ink — BRAND ANCHOR */
+  --steel-800: #0C1820; /* Pressed Jet */
+  --steel-900: #060D14;
+
+  /* ─── Linen ramp (the warm neutral family) ─────────────── */
+  --linen-50:  #FAF8F1;
+  --linen-100: #F5F2E9; /* Pressed Bone — the brand's "white" */
+  --linen-200: #EBE7DB; /* Warm Linen — BRAND ANCHOR / page bg */
+  --linen-300: #D8D4CA; /* Hairline */
+  --linen-400: #B5B0A2;
+  --linen-500: #8C8775;
+  --linen-600: #635E4D;
+  --linen-700: #423F30;
+  --linen-800: #28261B;
+  --linen-900: #15130A;
+
+  /* ─── Descriptive aliases ──────────────────────────────── */
+  --terra:           var(--terra-500);
+  --terra-pressed:   var(--terra-400);
+  --terra-hover:     var(--terra-300);
+  --terra-deep:      var(--terra-600);
+  --terra-wash:      var(--terra-100);
+  --jet:             var(--steel-700);
+  --jet-pressed:     var(--steel-800);
+  --navy:            var(--steel-600);
+  --linen:           var(--linen-200);
+  --bone:            var(--linen-100);
+  --hairline:        var(--linen-300);
+  --body-smoke:      var(--steel-500);
+  --caption-ash:     var(--steel-400);
+  --cool-slate:      var(--steel-200);
+  --deep-slate:      var(--steel-300);
+
+  /* ─── Semantic role tokens ─────────────────────────────── */
+  --bg-page:         var(--linen-200); /* Warm Linen */
+  --bg-card:         var(--bg-surface); /* alias → the raised surface (flips in dark) */
+  --bg-card-dark:    var(--steel-600); /* Field Navy */
+  --bg-hero:         var(--steel-700); /* Jet Ink */
+  --bg-spike:        var(--terra-500); /* Fired Terracotta */
+  --fg-primary:      var(--steel-700); /* Jet on light */
+  --fg-body:         var(--steel-500); /* Body Smoke on light */
+  --fg-caption:      var(--steel-400); /* Caption Ash on light */
+  --fg-on-dark:      var(--linen-200); /* Linen on jet/navy */
+  --fg-sub-on-dark:  var(--steel-200); /* Cool Slate */
+  --fg-meta-on-dark: var(--steel-300); /* Deep Slate — tiny copyright */
+  --fg-on-spike:     var(--steel-800); /* Pressed Jet on terracotta CTAs */
+  --rule-hairline:   var(--linen-300);
+  --rule-hairline-strong: var(--linen-400); /* hover / active hairline */
+  --accent:          var(--terra-500);
+  --accent-on-dark:  var(--terra-300); /* Heat Terracotta where Fired loses contrast */
+  --accent-text:     var(--terra-500); /* terracotta TEXT spike (→ Heat in dark) */
+
+  /* surface + ink ROLE tokens — these are what flip in dark. Components
+     reference these, never the raw ramp, so theming costs nothing. */
+  --bg-surface:      var(--linen-100); /* Pressed Bone — the raised card */
+  --bg-elevated:     var(--linen-50);  /* a step above a surface (hover) */
+  --bg-input:        var(--linen-50);  /* field / search / chip fill */
+  --bg-track:        var(--linen-200); /* progress + capacity tracks */
+  --fg-muted:        var(--steel-300); /* placeholder / faint */
+
+  /* ─── Type families ────────────────────────────────────── */
+  /* TWO families. Montserrat = the signage voice (display, headline,
+     title, labels, kickers, buttons, big numbers). Karla = the reading
+     voice (body, lede, form inputs, prose). --font-sans stays Montserrat
+     so headings/labels need no change; --font-body is Karla. */
+  --font-sans: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body: 'Karla', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: var(--font-sans);
+  --font-label: var(--font-sans);
+
+  /* ─── Tracking primitives (only canonical values) ──────── */
+  /* Montserrat is open and geometric — it does NOT want the heavy negative
+     tracking Inter Tight needed. Display/headline sit near-neutral. */
+  --track-display:  -0.015em;
+  --track-headline: -0.012em;
+  --track-title:    -0.01em;
+  --track-body:     normal; /* @kind font */
+  --track-label:    0.16em;   /* Label voice  */
+  --track-kicker:   0.22em;   /* Kicker voice */
+  --track-button:   0.06em;   /* The One Tracking Rule */
+
+  /* ─── Type scale ───────────────────────────────────────── */
+  --fs-display:   clamp(120px, 18vw, 296px); /* @kind font */
+  --fs-headline:  clamp(64px, 8vw, 108px); /* @kind font */
+  --fs-title:     34px;
+  --fs-lede:      24px;
+  --fs-body:      17px;
+  --fs-label:     11px;
+  --fs-kicker:    12px;
+
+  --lh-display:  0.82;  /* @kind font */
+  --lh-headline: 0.88;  /* @kind font */
+  --lh-title:    1.1;   /* @kind font */
+  --lh-lede:     1.5;   /* @kind font */
+  --lh-body:     1.6;   /* @kind font */
+  --lh-label:    1.7;   /* @kind font */
+
+  /* ─── Spacing (8-grid) ─────────────────────────────────── */
+  --s1: 8px;  --s2: 16px;  --s3: 24px;  --s4: 32px;
+  --s5: 40px; --s6: 48px;  --s7: 56px;  --s8: 64px;
+  --s10: 80px; --s12: 96px; --s14: 112px; --s16: 128px;
+
+  /* ─── Radii ────────────────────────────────────────────── */
+  --r-xs:  4px;   /* badges */
+  --r-sm:  6px;   /* cards, buttons (default) */
+  --r-md:  10px;
+  --r-lg:  14px;   /* buttons, text fields (the soft tappable layer) */
+  --r-card: 16px;  /* soft in-app card */
+  --r-xl:  18px;
+  --r-xxl: 24px;
+  --r-pill: 999px;
+
+  /* ─── Elevation ──────────────────────────────────────────
+     Two shadows: Hero Lift (top-level hero moment) and Card Lift
+     (interactive .sq-card hover/press). Both deepen in dark. */
+  --shadow-hero-lift: 0 2px 6px rgba(0,0,0,0.08), 0 12px 40px rgba(0,0,0,0.08);
+  --shadow-card-lift: 0 8px 22px rgba(19,34,44,0.08);
+
+  /* ─── Motion ───────────────────────────────────────────── */
+  --ease-out: cubic-bezier(0.25, 1, 0.5, 1); /* @kind other */
+  --ease-quint: cubic-bezier(0.22, 1, 0.36, 1); /* @kind other */
+  --dur-fast: 180ms;     /* @kind other */
+  --dur-standard: 320ms; /* @kind other */
+}
+
+/* ─── Base type element styles ────────────────────────────── */
+
+.sq-display {
+  font-family: var(--font-sans);
+  font-weight: 900;
+  font-size: var(--fs-display);
+  line-height: var(--lh-display);
+  letter-spacing: var(--track-display);
+  text-transform: uppercase;
+  font-style: normal; /* italic forbidden */
+  margin: 0;
+}
+
+.sq-headline {
+  font-family: var(--font-sans);
+  font-weight: 900;
+  font-size: var(--fs-headline);
+  line-height: var(--lh-headline);
+  letter-spacing: var(--track-headline);
+  text-transform: uppercase;
+  font-style: normal;
+  margin: 0;
+}
+
+.sq-title {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: var(--fs-title);
+  line-height: var(--lh-title);
+  letter-spacing: var(--track-title);
+  font-style: normal;
+  margin: 0;
+}
+
+.sq-lede {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--fs-lede);
+  line-height: var(--lh-lede);
+  letter-spacing: var(--track-body);
+  margin: 0;
+}
+
+.sq-body {
+  font-family: var(--font-body);
+  font-weight: 400; /* Karla 400 — clean, open reading weight */
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  letter-spacing: normal;
+  color: var(--fg-body);
+  max-width: 68ch;
+  margin: 0;
+}
+.sq-body strong { font-weight: 700; }
+.sq-alert-msg, .sq-prose { font-family: var(--font-body); }
+
+.sq-label {
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+}
+
+.sq-kicker {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: var(--fs-kicker);
+  line-height: var(--lh-label);
+  letter-spacing: var(--track-kicker);
+  text-transform: uppercase;
+}
+
+.sq-accent { color: var(--terra-500); }
+.sq-accent-on-dark { color: var(--terra-300); }
+
+/* Tabular numerals on stat blocks / score panels */
+.sq-tabular { font-variant-numeric: tabular-nums; }
+
+/* ═════════════════════════════════════════════════════════════
+   ICONS — Material Symbols Outlined
+   The committed icon set. Outlined (no FILL) keeps icons stroke-only,
+   matching the brand's "no fills, no two-tone" rule. Icons inherit
+   currentColor and reinforce text — they are never a color spike,
+   except a single tactical terracotta pinpoint per card.
+   ═══════════════════════════════════════════════════════════════ */
+.sq-icon {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;            /* default — overridden by size modifiers */
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  display: inline-block;
+  vertical-align: middle;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Brand defaults: outline (FILL 0), weight 500 to feel substantial
+     beside Montserrat, neutral grade, 24px optical size. */
+  font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+  user-select: none;
+}
+
+/* Size modifiers — match the documented icon sizes */
+.sq-icon-16 { font-size: 16px; font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 20; }
+.sq-icon-20 { font-size: 20px; font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 20; }
+.sq-icon-24 { font-size: 24px; font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24; }
+.sq-icon-32 { font-size: 32px; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 40; }
+.sq-icon-48 { font-size: 48px; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48; }
+
+/* Weight modifiers (rarely needed; default 500 is the brand weight) */
+.sq-icon-bold  { font-variation-settings: 'FILL' 0, 'wght' 700, 'GRAD' 0, 'opsz' 24; }
+.sq-icon-thin  { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+
+/* Filled — RESTRICTED. Only for a deliberate solid status glyph
+   (e.g. a confirmed checkmark inside an alert chip). Not a default. */
+.sq-icon-fill  { font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24; }
+
+/* The one allowed accent use: a single terracotta pinpoint per card */
+.sq-icon-accent { color: var(--terra-500); }
+
+/* ═════════════════════════════════════════════════════════════
+   SEMANTIC & STATUS COLORS
+   Tuned to the SQUAD temperature: muted, warm-leaning, athletic.
+   NOT Bootstrap neon. Each family carries a wash (50), tint (100),
+   border (200), solid (500), pressed (600), and on-light text (700).
+
+   THE SEMANTIC SEPARATION RULE: Fired Terracotta is the BRAND accent,
+   never a status. Error is a true signal-red (hue ~25°, redder + deeper
+   than terracotta's orange ~35°) so "something is wrong" never reads as
+   "this is on-brand." Never use terra-500 to mean error/destructive.
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  /* ─── Success · Turf Green (hue ~150°) ─── the pitch is on ─── */
+  --success-50:  #EDF4EE;
+  --success-100: #D3E6D7;
+  --success-200: #ABD0B3;
+  --success-500: #3C8A52;  /* solid — SUCCESS ANCHOR */
+  --success-600: #2E6E41;
+  --success-700: #1F4E2E;  /* text on light */
+
+  /* ─── Warning · Ochre (hue ~75°) ─── attention, not alarm ─── */
+  --warning-50:  #FAF1DC;
+  --warning-100: #F3E1B6;
+  --warning-200: #E7CB83;
+  --warning-500: #C68A1C;  /* solid — WARNING ANCHOR */
+  --warning-600: #9C6B12;
+  --warning-700: #6E4B0E;  /* text on light */
+
+  /* ─── Error · Signal Red (hue ~25°) ─── distinct from terra ─ */
+  --error-50:  #FBEAE9;
+  --error-100: #F6CFCC;
+  --error-200: #EDA8A3;
+  --error-500: #CE2530;  /* solid — ERROR ANCHOR */
+  --error-600: #A71722;
+  --error-700: #761016;  /* text on light */
+
+  /* ─── Info · Slate Blue (hue ~235°) ─── from the steel family ─ */
+  --info-50:  #E9F0F5;
+  --info-100: #C9DDE9;
+  --info-200: #9DBFD4;
+  --info-500: #2C6E9B;  /* solid — INFO ANCHOR */
+  --info-600: #205676;
+  --info-700: #163E54;  /* text on light */
+
+  /* ─── Semantic role aliases ─── */
+  --fg-success: var(--success-700);
+  --fg-warning: var(--warning-700);
+  --fg-error:   var(--error-700);
+  --fg-info:    var(--info-700);
+
+  /* ─── Solid-fill text rule (mirrors the CTA Contrast Rule) ───
+     Linen text on success/error/info solids; Pressed Jet on the
+     ochre warning solid (gold needs dark text, like terracotta). */
+  --on-success: var(--linen-100);
+  --on-warning: var(--steel-800);
+  --on-error:   var(--linen-100);
+  --on-info:    var(--linen-100);
+
+  /* ─── Focus ring (the one interaction primitive) ─── */
+  --focus-ring: 0 0 0 2px var(--bg-page), 0 0 0 4px var(--terra-500);
+}
+
+/* ═════════════════════════════════════════════════════════════
+   DARK THEME  ·  set data-theme="dark" on <html> (or any container)
+   ─────────────────────────────────────────────────────────────
+   Only ROLE tokens flip. The identity ramps (terra / steel / linen)
+   and the semantic SOLIDS (…-500/600) never move. Surfaces climb the
+   steel ramp (page → card → elevated = 800 → 700 → 600); ink inverts
+   to linen; the semantic WASH + on-light-text stops (50 / 700) retune
+   so badges, alerts, and soft status read on jet. Custom properties
+   inherit, so this also works scoped to any subtree. */
+[data-theme="dark"] {
+  --bg-page:      var(--steel-800);   /* #0C1820 Pressed Jet */
+  --bg-surface:   var(--steel-700);   /* #13222C Jet Ink — raised card */
+  --bg-elevated:  var(--steel-600);   /* #1D3444 Field Navy — hover/raised */
+  --bg-input:     rgba(255,255,255,0.045);
+  --bg-track:     rgba(255,255,255,0.09);
+  --bg-card-dark: var(--steel-600);
+  --bg-card:      var(--steel-700);   /* re-declared so the alias re-themes under a scoped container, not just <html> */
+
+  --fg-primary:   var(--linen-100);   /* Pressed Bone */
+  --fg-body:      var(--steel-200);   /* Cool Slate */
+  --fg-caption:   var(--steel-300);   /* Deep Slate */
+  --fg-muted:     var(--steel-400);   /* Caption Ash */
+
+  --rule-hairline:        rgba(255,255,255,0.10);
+  --rule-hairline-strong: rgba(255,255,255,0.20);
+
+  --accent-text:  var(--terra-300);   /* Heat Terracotta — Fired loses contrast on jet */
+
+  --shadow-card-lift: 0 10px 26px rgba(0,0,0,0.5);
+  --shadow-hero-lift: 0 2px 6px rgba(0,0,0,0.4), 0 16px 44px rgba(0,0,0,0.5);
+  --focus-ring: 0 0 0 2px var(--bg-page), 0 0 0 4px var(--terra-300);
+
+  /* semantic surface stops — wash (50) goes deep, on-light text (700)
+     goes light. The solids (500/600) and on-solid text stay put. */
+  --success-50: #16271C; --success-700: #8FD6A2;
+  --warning-50: #2A2410; --warning-700: #E9C879;
+  --error-50:   #2C1614; --error-700:   #F0A39C;
+  --info-50:    #13202B; --info-700:    #93C4E2;
+}
+
+/* ─── Inline alert / banner ───────────────────────────────────
+   Flat. Semantics are carried by a SOLID ICON CHIP, never a colored
+   edge stripe (that's the banned border-accent trope). Background is
+   the family wash; the chip is the family solid. */
+.sq-alert {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: var(--r-sm);
+  background: var(--status-wash, var(--info-50));
+  font-family: var(--font-sans);
+}
+.sq-alert-icon {
+  width: 30px; height: 30px;
+  display: grid; place-items: center;
+  border-radius: var(--r-sm);
+  background: var(--status, var(--info-500));
+  color: var(--status-on, var(--linen-100));
+  flex: 0 0 auto;
+}
+.sq-alert-icon svg { width: 17px; height: 17px; display: block; }
+.sq-alert-body { display: grid; gap: 3px; min-width: 0; align-self: center; }
+.sq-alert-title {
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 600;
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--status-fg, var(--info-700));
+}
+.sq-alert-msg {
+  font-size: 14px; line-height: 1.5; font-weight: 400;
+  color: var(--fg-body);
+}
+.sq-alert.is-success { --status: var(--success-500); --status-wash: var(--success-50); --status-fg: var(--success-700); --status-on: var(--on-success); }
+.sq-alert.is-warning { --status: var(--warning-500); --status-wash: var(--warning-50); --status-fg: var(--warning-700); --status-on: var(--on-warning); }
+.sq-alert.is-error   { --status: var(--error-500);   --status-wash: var(--error-50);   --status-fg: var(--error-700);   --status-on: var(--on-error); }
+.sq-alert.is-info    { --status: var(--info-500);     --status-wash: var(--info-50);     --status-fg: var(--info-700);     --status-on: var(--on-info); }
+
+/* ─── Status badge (solid) ─── small, mono, semantic fill ─── */
+.sq-status {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 11px; border-radius: var(--r-xs);
+  font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+  letter-spacing: var(--track-kicker); text-transform: uppercase;
+}
+.sq-status.is-success { background: var(--success-500); color: var(--on-success); }
+.sq-status.is-warning { background: var(--warning-500); color: var(--on-warning); }
+.sq-status.is-error   { background: var(--error-500);   color: var(--on-error); }
+.sq-status.is-info    { background: var(--info-500);    color: var(--on-info); }
+
+/* ─── Status badge (soft) ─── wash fill + deep text ─── */
+.sq-status-soft { display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 11px; border-radius: var(--r-xs);
+  font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+  letter-spacing: var(--track-kicker); text-transform: uppercase; }
+.sq-status-soft.is-success { background: var(--success-50); color: var(--success-700); }
+.sq-status-soft.is-warning { background: var(--warning-50); color: var(--warning-700); }
+.sq-status-soft.is-error   { background: var(--error-50);   color: var(--error-700); }
+.sq-status-soft.is-info    { background: var(--info-50);    color: var(--info-700); }
+
+/* ─── Status dot ─── the smallest signal; pairs with a mono label ─ */
+.sq-dot { display: inline-block; width: 8px; height: 8px; border-radius: var(--r-pill); flex: 0 0 auto; }
+.sq-dot.is-success { background: var(--success-500); }
+.sq-dot.is-warning { background: var(--warning-500); }
+.sq-dot.is-error   { background: var(--error-500); }
+.sq-dot.is-info    { background: var(--info-500); }
+.sq-dot.is-live { background: var(--success-500); box-shadow: 0 0 0 0 var(--success-500); animation: sq-pulse 2s var(--ease-out) infinite; }
+@keyframes sq-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(60,138,82,0.5); }
+  70%  { box-shadow: 0 0 0 7px rgba(60,138,82,0); }
+  100% { box-shadow: 0 0 0 0 rgba(60,138,82,0); }
+}
+@media (prefers-reduced-motion: reduce) { .sq-dot.is-live { animation: none; } }
+
+/* ═════════════════════════════════════════════════════════════
+   FORM INPUTS
+   Bone background, 1px Hairline border, 6px radius, jet text in
+   Karla (the reading voice). Focus = terracotta border + soft glow
+   (the same focus signature as the signup form). Terracotta is the
+   single "on / selected" color across every control.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Field scaffold (label + control + hint) ─── */
+.sq-field { display: grid; gap: 7px; }
+.sq-field-label {
+  font-family: var(--font-label); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--fg-body); display: flex; align-items: center; gap: 6px;
+}
+.sq-field-label .req { color: var(--terra-500); }
+.sq-field-label .opt { color: var(--fg-caption); font-weight: 500; }
+.sq-field-hint {
+  font-family: var(--font-body); font-size: 12.5px; line-height: 1.45; color: var(--fg-caption);
+}
+.sq-field-hint.is-error   { color: var(--error-600); }
+.sq-field-hint.is-success { color: var(--success-700); }
+
+/* ─── Text input · textarea · select (shared) ───
+   Soft & tall: 56px, 14px radius, warm Linen-50 fill. Focus lifts the
+   fill to Pressed Bone and adds a 4px terracotta glow. */
+.sq-input, .sq-textarea, .sq-select {
+  font-family: var(--font-body); font-size: 16px; font-weight: 500; color: var(--fg-primary);
+  background: var(--bg-input); border: 1px solid var(--rule-hairline); border-radius: var(--r-lg);
+  padding: 0 18px; height: 56px; width: 100%; outline: none; -webkit-appearance: none; appearance: none;
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+}
+.sq-input::placeholder, .sq-textarea::placeholder { color: var(--fg-muted); }
+.sq-textarea { height: auto; min-height: 104px; padding: 15px 18px; resize: vertical; line-height: 1.5; }
+.sq-input:hover, .sq-textarea:hover, .sq-select:hover { border-color: var(--rule-hairline-strong); }
+.sq-input:focus, .sq-textarea:focus, .sq-select:focus {
+  border-color: var(--terra-500); background: var(--bg-elevated); box-shadow: 0 0 0 4px rgba(238,71,33,0.12);
+}
+
+/* select chevron */
+.sq-select-wrap { position: relative; display: block; }
+.sq-select { padding-right: 42px; cursor: pointer; }
+.sq-select-wrap::after {
+  content: ""; position: absolute; right: 18px; top: 50%; width: 8px; height: 8px;
+  border-right: 2px solid var(--fg-body); border-bottom: 2px solid var(--fg-body);
+  transform: translateY(-70%) rotate(45deg); pointer-events: none;
+}
+
+/* field row with icon(s) INSIDE the field — leading icon and/or trailing
+   (search, mail, password-reveal). The row carries the border + focus. */
+.sq-input-row {
+  display: flex; align-items: center; gap: 10px; height: 56px; padding: 0 18px;
+  background: var(--bg-input); border: 1px solid var(--rule-hairline); border-radius: var(--r-lg);
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+}
+.sq-input-row:hover { border-color: var(--rule-hairline-strong); }
+.sq-input-row:focus-within { background: var(--bg-elevated); border-color: var(--terra-500); box-shadow: 0 0 0 4px rgba(238,71,33,0.12); }
+.sq-input-row > input {
+  flex: 1; min-width: 0; border: none; outline: none; background: transparent;
+  font-family: var(--font-body); font-size: 16px; font-weight: 500; color: var(--fg-primary);
+}
+.sq-input-row > input::placeholder { color: var(--fg-muted); }
+.sq-input-ic { flex: 0 0 auto; display: flex; align-items: center; color: var(--fg-muted); }
+.sq-input-ic svg { width: 19px; height: 19px; }
+.sq-input-ic.is-action { cursor: pointer; }
+.sq-input-row.is-error { border-color: var(--error-500); }
+.sq-input-row.is-error:focus-within { box-shadow: 0 0 0 4px rgba(206,37,48,0.14); }
+.sq-input-row.is-success { border-color: var(--success-500); }
+
+/* states */
+.sq-input.is-error, .sq-textarea.is-error, .sq-select.is-error { border-color: var(--error-500); }
+.sq-input.is-error:focus, .sq-textarea.is-error:focus { box-shadow: 0 0 0 4px rgba(206,37,48,0.14); }
+.sq-input.is-success, .sq-textarea.is-success { border-color: var(--success-500); }
+.sq-input.is-success:focus { box-shadow: 0 0 0 4px rgba(60,138,82,0.14); }
+.sq-input:disabled, .sq-textarea:disabled, .sq-select:disabled {
+  background: var(--bg-page); color: var(--fg-caption); cursor: not-allowed; border-color: var(--rule-hairline);
+}
+
+/* ─── Checkbox & radio (real input + visual box; fully accessible) ─── */
+.sq-check, .sq-choice {
+  display: inline-flex; align-items: flex-start; gap: 10px; cursor: pointer; position: relative;
+  font-family: var(--font-body); font-size: 15px; color: var(--fg-primary); line-height: 1.4;
+}
+.sq-check > input, .sq-choice > input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; }
+.sq-box {
+  flex: 0 0 auto; width: 20px; height: 20px; border: 1.5px solid var(--rule-hairline-strong);
+  border-radius: var(--r-xs); background: var(--bg-surface); display: grid; place-items: center;
+  margin-top: 1px; transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.sq-box svg { width: 13px; height: 13px; color: var(--steel-800); opacity: 0; transform: scale(0.6);
+  transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out); }
+.sq-check > input:checked + .sq-box,
+.sq-check > input:indeterminate + .sq-box { background: var(--terra-500); border-color: var(--terra-500); }
+.sq-check > input:checked + .sq-box svg,
+.sq-check > input:indeterminate + .sq-box svg { opacity: 1; transform: scale(1); }
+.sq-check > input:focus-visible + .sq-box,
+.sq-choice > input:focus-visible + .sq-radio-dot { box-shadow: 0 0 0 3px rgba(238,71,33,0.22); }
+.sq-check > input:disabled ~ *, .sq-choice > input:disabled ~ * { opacity: 0.45; cursor: not-allowed; }
+
+.sq-radio-dot {
+  flex: 0 0 auto; width: 20px; height: 20px; border: 1.5px solid var(--rule-hairline-strong);
+  border-radius: var(--r-pill); background: var(--bg-surface); display: grid; place-items: center;
+  margin-top: 1px; transition: border-color var(--dur-fast) var(--ease-out);
+}
+.sq-radio-dot::after { content: ""; width: 9px; height: 9px; border-radius: var(--r-pill);
+  background: var(--terra-500); transform: scale(0); transition: transform var(--dur-fast) var(--ease-out); }
+.sq-choice > input:checked + .sq-radio-dot { border-color: var(--terra-500); }
+.sq-choice > input:checked + .sq-radio-dot::after { transform: scale(1); }
+
+/* ─── Toggle / switch (46×26 track, 44px+ hit area via label padding) ─── */
+.sq-switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; position: relative;
+  font-family: var(--font-body); font-size: 15px; color: var(--fg-primary); }
+.sq-switch > input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; }
+.sq-switch-track { width: 46px; height: 26px; border-radius: var(--r-pill); background: var(--rule-hairline-strong);
+  position: relative; flex: 0 0 auto; transition: background var(--dur-standard) var(--ease-out); }
+.sq-switch-knob { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: var(--r-pill);
+  background: var(--linen-100); box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+  transition: transform var(--dur-standard) var(--ease-quint); }
+.sq-switch > input:checked + .sq-switch-track { background: var(--terra-500); }
+.sq-switch > input:checked + .sq-switch-track .sq-switch-knob { transform: translateX(20px); }
+.sq-switch > input:focus-visible + .sq-switch-track { box-shadow: 0 0 0 3px rgba(238,71,33,0.22); }
+.sq-switch > input:disabled ~ * { opacity: 0.45; cursor: not-allowed; }
+
+/* ─── Segmented control ─── */
+.sq-segment { display: inline-flex; gap: 4px; background: var(--bg-surface); padding: 4px;
+  border-radius: var(--r-md); border: 1px solid var(--rule-hairline); }
+.sq-segment button { font-family: var(--font-sans); font-weight: 700; font-size: 12px;
+  letter-spacing: 0.04em; text-transform: uppercase; padding: 8px 14px; border: none; border-radius: 4px;
+  background: transparent; color: var(--fg-body); cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out); }
+.sq-segment button:hover { color: var(--fg-primary); }
+.sq-segment button.is-active { background: var(--fg-primary); color: var(--bg-surface); }
+
+/* ─── Stepper ─── */
+.sq-stepper { display: inline-flex; align-items: center; border: 1px solid var(--rule-hairline);
+  border-radius: var(--r-md); background: var(--bg-surface); overflow: hidden; }
+.sq-stepper button { width: 40px; height: 40px; border: none; background: transparent; color: var(--fg-primary);
+  font-size: 20px; line-height: 1; cursor: pointer; display: grid; place-items: center;
+  transition: background var(--dur-fast) var(--ease-out); }
+.sq-stepper button:hover { background: var(--bg-elevated); }
+.sq-stepper .val { min-width: 48px; text-align: center; font-family: var(--font-sans); font-weight: 700;
+  font-variant-numeric: tabular-nums; color: var(--fg-primary); }
+
+/* ─── Range slider ─── */
+.sq-range { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; border-radius: var(--r-pill);
+  background: var(--bg-track); outline: none; }
+.sq-range::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: var(--r-pill);
+  background: var(--terra-500); cursor: pointer; border: 3px solid var(--bg-surface); box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
+.sq-range::-moz-range-thumb { width: 20px; height: 20px; border-radius: var(--r-pill); background: var(--terra-500);
+  cursor: pointer; border: 3px solid var(--bg-surface); box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
+.sq-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(238,71,33,0.22); }
+
+/* ═════════════════════════════════════════════════════════════
+   APP COMPONENTS  ·  promoted from the shipped product (Home + Games)
+   ─────────────────────────────────────────────────────────────
+   These are the canonical in-app surfaces. They were authored on the
+   mobile screens and are now part of the system so every surface uses
+   ONE button, ONE badge, ONE card. The marketing-only pieces (display
+   hero, flip-timer) stay in the UI kit; everything below is core.
+
+   THE SOFT-CARD EVOLUTION. The original "Built Chunky" container was a
+   crisp 6px flat panel. In-product, tappable list items earned a softer
+   read: a 16px radius, a 1px INSET Hairline ring (no layout-shifting
+   border), and a restrained lift on press/hover. Crisp 6px panels are
+   still valid for dense data blocks; the soft card is the default for
+   anything you tap. Both are on-brand; pick by density.
+   ═════════════════════════════════════════════════════════════ */
+
+/* ─── Soft card — the default in-app container ─── */
+.sq-card {
+  position: relative; background: var(--bg-card); border-radius: var(--r-card);
+  box-shadow: inset 0 0 0 1px var(--rule-hairline); padding: 16px;
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.sq-card.is-interactive { cursor: pointer; width: 100%; text-align: left; border: none; }
+.sq-card.is-interactive:hover {
+  transform: translateY(-1px);
+  box-shadow: inset 0 0 0 1px var(--rule-hairline-strong), var(--shadow-card-lift);
+}
+.sq-card.is-interactive:active { transform: translateY(0); }
+
+/* ─── Hero card — the marquee brand surface ───
+   The one Jet Ink moment on a light page, and the ONLY surface that
+   carries Hero Lift (the Flat-By-Default exception). Use once per
+   page, at the top. Anatomy, top to bottom:
+     1. .sq-hero-top     kicker (Heat Terracotta, signage voice) +
+                         optional inline .sq-badge on the right
+     2. .sq-hero-title   Montserrat 900 uppercase, ONE .spike accent word
+     3. .sq-hero-sub     Karla reading voice in Cool Slate
+     4. .sq-hero-actions one .sq-btn-primary + one .sq-btn-outline-linen
+   Terracotta on jet always uses the Heat stop (--accent-on-dark);
+   Fired loses contrast on dark surfaces. */
+.sq-hero {
+  position: relative; overflow: hidden;
+  background: var(--bg-hero); color: var(--fg-on-dark);
+  border-radius: var(--r-xl); box-shadow: var(--shadow-hero-lift);
+  padding: clamp(28px, 6vw, 56px);
+  display: grid; gap: 20px; justify-items: start;
+}
+.sq-hero-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; }
+.sq-hero-kicker {
+  font-family: var(--font-sans); font-weight: 700; font-size: var(--fs-kicker);
+  letter-spacing: var(--track-kicker); text-transform: uppercase;
+  color: var(--accent-on-dark);
+}
+.sq-hero-title {
+  margin: 0; font-family: var(--font-sans); font-weight: 900;
+  font-size: clamp(40px, 7vw, 76px); line-height: 0.9;
+  letter-spacing: var(--track-headline); text-transform: uppercase;
+  text-wrap: balance;
+}
+.sq-hero-title .spike { color: var(--accent-on-dark); }
+.sq-hero-sub {
+  margin: 0; font-family: var(--font-body); font-size: 16px; line-height: var(--lh-body);
+  color: var(--fg-sub-on-dark); max-width: 52ch;
+}
+.sq-hero-sub strong { color: var(--fg-on-dark); font-weight: 700; font-style: normal; }
+.sq-hero-actions { display: flex; flex-wrap: wrap; gap: 12px; padding-top: 4px; }
+
+/* ─── Chunky button ───
+   The primary is the brand's tactile moment: Fired Terracotta with a
+   Pressed-Jet label (the CTA Contrast Rule) and a glossy press — an
+   inset top highlight, an inset bottom shade, and a soft terracotta
+   drop. 14px radius, Montserrat 800, the One Tracking Rule (0.06em). */
+.sq-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  height: 52px; padding: 0 24px; border: none; cursor: pointer; border-radius: var(--r-lg);
+  font-family: var(--font-sans); font-weight: 800; font-size: 13.5px;
+  letter-spacing: var(--track-button); text-transform: uppercase; white-space: nowrap;
+  transition: background var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+.sq-btn:active { transform: translateY(1px); }
+.sq-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.sq-btn-primary {
+  background: var(--terra-500); color: var(--steel-800);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.42) inset, 0 -3px 8px rgba(157,44,20,0.32) inset, 0 9px 20px rgba(238,71,33,0.26);
+}
+.sq-btn-primary:hover { background: var(--terra-300); }
+.sq-btn-secondary { background: var(--steel-700); color: var(--linen-100); }
+.sq-btn-secondary:hover { background: var(--steel-800); }
+.sq-btn-outline { background: transparent; color: var(--steel-700); box-shadow: inset 0 0 0 2px var(--steel-700); }
+.sq-btn-outline:hover { background: rgba(19,34,44,0.06); }
+.sq-btn-outline-linen { background: transparent; color: var(--linen-200); box-shadow: inset 0 0 0 2px var(--steel-200); }
+.sq-btn-outline-linen:hover { background: rgba(235,231,219,0.08); }
+.sq-btn-ghost { background: transparent; color: var(--terra-500); }
+.sq-btn-ghost:hover { background: rgba(238,71,33,0.08); }
+.sq-btn-sm { height: 40px; padding: 0 18px; font-size: 12px; border-radius: 12px; }
+.sq-btn-lg { height: 56px; padding: 0 30px; font-size: 15px; }
+.sq-btn:disabled { background: var(--linen-300); color: var(--steel-400); cursor: not-allowed; box-shadow: none; transform: none; }
+
+/* ─── In-app badge (Montserrat voice) ───
+   Distinct from the mono .sq-status: this is the badge you see ON the
+   product surfaces — game state, hosting, requests. Montserrat 700,
+   6px radius, semantic wash + deep text. Open=success, Filling=info,
+   Full/Hosting=jet, Waitlist=warning. (Mono .sq-status is retained for
+   tabular / signage contexts.) */
+.sq-badge {
+  display: inline-flex; align-items: center; gap: 5px; height: 23px; padding: 0 9px;
+  border-radius: var(--r-sm); font-family: var(--font-sans); font-weight: 700; font-size: 10.5px;
+  letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap;
+}
+.sq-badge .sq-icon { font-size: 14px !important; }
+.sq-badge .sq-dot { width: 7px; height: 7px; }
+.sq-badge.is-open, .sq-badge.is-success { background: var(--success-50); color: var(--success-700); }
+.sq-badge.is-filling, .sq-badge.is-info { background: var(--info-50); color: var(--info-700); }
+.sq-badge.is-waiting, .sq-badge.is-warning { background: var(--warning-50); color: var(--warning-700); }
+.sq-badge.is-cancelled, .sq-badge.is-error { background: var(--error-50); color: var(--error-700); }
+.sq-badge.is-full, .sq-badge.is-jet, .sq-badge.is-host { background: var(--steel-700); color: var(--linen-100); }
+.sq-badge.is-host .sq-icon { color: var(--terra-300); }
+.sq-badge.is-terra { background: var(--terra-50); color: var(--terra-700); }
+
+/* ─── Capacity / spots bar ───
+   Roster fill for a game. Label + state on top, a thin track below.
+   Fill color carries the state (success when open, info when filling,
+   steel when full) — the one place a progress bar earns color. */
+.sq-spots { display: grid; gap: 6px; }
+.sq-spots-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.sq-spots-label {
+  font-family: var(--font-sans); font-weight: 700; font-size: 11px; letter-spacing: 0.02em;
+  color: var(--fg-body); font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.sq-spots-state {
+  font-family: var(--font-label); font-weight: 600; font-size: 9.5px; letter-spacing: 0.1em;
+  text-transform: uppercase; white-space: nowrap;
+}
+.sq-spots-state.is-open { color: var(--success-700); }
+.sq-spots-state.is-filling { color: var(--info-700); }
+.sq-spots-state.is-full { color: var(--steel-500); }
+.sq-spots-track {
+  height: 6px; border-radius: var(--r-pill); background: var(--bg-track);
+  box-shadow: inset 0 0 0 1px var(--rule-hairline); overflow: hidden;
+}
+.sq-spots-fill { height: 100%; border-radius: var(--r-pill); }
+.sq-spots-fill.is-open { background: var(--success-500); }
+.sq-spots-fill.is-filling { background: var(--info-500); }
+.sq-spots-fill.is-full { background: var(--steel-500); }
+
+/* ─── Overlapping avatar stack ───
+   Who's going. Initials on an oklch sport/identity tint, ringed in the
+   card background so they read as a clean overlap. */
+.sq-avatars { display: flex; }
+.sq-avatars .sq-av {
+  flex: 0 0 auto; width: 31px; height: 31px; border-radius: var(--r-pill);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-sans); font-weight: 800; font-size: 10.5px;
+  box-shadow: 0 0 0 2.5px var(--bg-card); margin-left: -10px;
+}
+.sq-avatars .sq-av:first-child { margin-left: 0; }
+.sq-avatars.sz-30 .sq-av { width: 30px; height: 30px; }
+
+/* ─── Skill-level tag ───
+   Five graded steps from Linen (beginner) to Jet (professional). Steel
+   ramp, never a semantic color — skill is identity, not status. */
+.sq-skill {
+  display: inline-flex; align-items: center; gap: 7px; height: 27px; padding: 0 13px;
+  border-radius: var(--r-pill); box-shadow: inset 0 0 0 1px var(--linen-300);
+  font-family: var(--font-sans); font-weight: 700; font-size: 12.5px;
+}
+.sq-skill .dot { width: 7px; height: 7px; border-radius: var(--r-pill); flex: 0 0 auto; }
+.sq-skill.lv-1 { background: var(--linen-100); color: var(--steel-500); }
+.sq-skill.lv-1 .dot { background: var(--steel-300); }
+.sq-skill.lv-2 { background: var(--linen-200); color: var(--steel-600); }
+.sq-skill.lv-2 .dot { background: var(--steel-400); }
+.sq-skill.lv-3 { background: var(--steel-100); color: var(--steel-700); }
+.sq-skill.lv-3 .dot { background: var(--steel-500); }
+.sq-skill.lv-4 { background: var(--steel-200); color: var(--steel-800); }
+.sq-skill.lv-4 .dot { background: var(--steel-600); }
+.sq-skill.lv-5 { background: var(--steel-700); color: var(--linen-100); box-shadow: none; }
+.sq-skill.lv-5 .dot { background: var(--linen-300); }
+
+/* ─── Filter chip ───
+   Pill, hairline ring, Montserrat 700. Active = terracotta wash + ring
+   (the one "on" signal, same as every input focus). */
+.sq-chip {
+  display: inline-flex; align-items: center; gap: 7px; height: 40px; padding: 0 14px;
+  border: none; border-radius: var(--r-pill); cursor: pointer;
+  background: var(--bg-input); box-shadow: inset 0 0 0 1px var(--rule-hairline);
+  font-family: var(--font-sans); font-weight: 700; font-size: 13px; color: var(--fg-body);
+  transition: background var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.sq-chip .sq-icon { color: var(--fg-caption); }
+.sq-chip:hover { box-shadow: inset 0 0 0 1px var(--rule-hairline-strong); }
+.sq-chip.is-active { background: var(--terra-50); color: var(--terra-700); box-shadow: inset 0 0 0 1.5px var(--terra-500); }
+.sq-chip.is-active .sq-icon { color: var(--terra-600); }
+
+/* ─── Sport icon chip ───
+   The square-rounded tile that holds a sport glyph. Neutral by default;
+   tint it with a sport-identity class (below) to color-code the sport. */
+.sq-sportchip {
+  flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; border-radius: 12px; background: var(--bg-surface);
+  box-shadow: inset 0 0 0 1px var(--rule-hairline); color: var(--fg-body);
+}
+.sq-sportchip.sz-40 { width: 40px; height: 40px; }
+
+/* ═════════════════════════════════════════════════════════════
+   SPORT-IDENTITY TINTS
+   Each sport gets a stable hue so a soccer game always reads green, a
+   basketball game always amber, etc. These are IDENTITY colors, never
+   status — a tinted chip says "this is tennis," not "this is good."
+   Built in oklch off a single hue per sport so chroma/lightness stay
+   constant and the family feels of one piece. Apply .sq-sport-* to a
+   .sq-sportchip (tile tint) or to .sq-av (avatar tint).
+   ═════════════════════════════════════════════════════════════ */
+.sq-sportchip[class*="sq-sport-"] { background: oklch(0.95 0.045 var(--sport-h)); color: oklch(0.56 0.13 var(--sport-h)); box-shadow: none; }
+.sq-av[class*="sq-sport-"] { background: oklch(0.90 0.07 var(--sport-h)); color: oklch(0.40 0.13 var(--sport-h)); }
+.sq-sport-soccer     { --sport-h: 150; /* @kind color */ }
+.sq-sport-basketball { --sport-h: 55;  /* @kind color */ }
+.sq-sport-tennis     { --sport-h: 110; /* @kind color */ }
+.sq-sport-volleyball { --sport-h: 255; /* @kind color */ }
+.sq-sport-padel      { --sport-h: 195; /* @kind color */ }
+.sq-sport-running    { --sport-h: 340; /* @kind color */ }
+.sq-sport-gym        { --sport-h: 290; /* @kind color */ }
+.sq-sport-swimming   { --sport-h: 220; /* @kind color */ }
+
+/* ═════════════════════════════════════════════════════════════
+   DARK THEME — component touch-ups
+   Most components flip for free off the role tokens above. Two need
+   a hand: the skill ladder (its steel ramp must invert so brightness
+   still climbs with level on a dark page) and the location/search
+   chrome washes already use --bg-input. Solid badges keep their jet.
+   ═════════════════════════════════════════════════════════════ */
+[data-theme="dark"] .sq-skill { box-shadow: inset 0 0 0 1px var(--rule-hairline); }
+[data-theme="dark"] .sq-skill.lv-1 { background: rgba(255,255,255,0.05); color: var(--steel-300); }
+[data-theme="dark"] .sq-skill.lv-1 .dot { background: var(--steel-400); }
+[data-theme="dark"] .sq-skill.lv-2 { background: rgba(255,255,255,0.08); color: var(--steel-200); }
+[data-theme="dark"] .sq-skill.lv-2 .dot { background: var(--steel-300); }
+[data-theme="dark"] .sq-skill.lv-3 { background: rgba(255,255,255,0.12); color: var(--linen-300); }
+[data-theme="dark"] .sq-skill.lv-3 .dot { background: var(--steel-200); }
+[data-theme="dark"] .sq-skill.lv-4 { background: rgba(255,255,255,0.20); color: var(--linen-100); }
+[data-theme="dark"] .sq-skill.lv-4 .dot { background: var(--linen-200); }
+[data-theme="dark"] .sq-skill.lv-5 { background: var(--linen-100); color: var(--steel-800); box-shadow: none; }
+[data-theme="dark"] .sq-skill.lv-5 .dot { background: var(--steel-600); }
+
+/* ═════════════════════════════════════════════════════════════
+   FEEDBACK & OVERLAY  ·  bottom sheet · toast · skeleton
+   The three states every real flow needs: a sheet to ask, a toast to
+   confirm, a skeleton to wait. All role-token based, so they theme
+   for free. Place the sheet/toast inside a POSITIONED ancestor (the
+   .sqk-screen, a device frame, or a fixed full-page layer).
+   ═════════════════════════════════════════════════════════════ */
+
+/* ─── Bottom sheet ───
+   Slides up from the bottom edge over a scrim. Soft 24px top corners,
+   a grabber, a titled header with a close, body, and a footer of
+   chunky buttons. The modal surface for join / filter / confirm. */
+.sq-scrim {
+  position: absolute; inset: 0; z-index: 60;
+  background: rgba(6,13,20,0.5);
+  display: flex; align-items: flex-end; justify-content: center;
+  animation: sq-fade var(--dur-standard) var(--ease-out);
+}
+.sq-sheet {
+  width: 100%; background: var(--bg-surface); color: var(--fg-primary);
+  border-radius: var(--r-xxl) var(--r-xxl) 0 0;
+  box-shadow: 0 -12px 44px rgba(0,0,0,0.28);
+  padding: 10px 22px calc(22px + env(safe-area-inset-bottom, 0px));
+  display: grid; gap: 16px;
+  animation: sq-sheet-up var(--dur-standard) var(--ease-out);
+}
+.sq-sheet-grip { width: 38px; height: 4px; border-radius: var(--r-pill); background: var(--rule-hairline-strong); margin: 2px auto 4px; }
+.sq-sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.sq-sheet-title { margin: 0; font-family: var(--font-sans); font-weight: 800; font-size: 20px; letter-spacing: -0.015em; color: var(--fg-primary); }
+.sq-sheet-sub { margin: 0; font-family: var(--font-body); font-size: 13.5px; line-height: 1.5; color: var(--fg-body); }
+.sq-sheet-close {
+  flex: 0 0 auto; width: 34px; height: 34px; border-radius: var(--r-md); border: none; cursor: pointer;
+  background: var(--bg-input); color: var(--fg-body); display: grid; place-items: center;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.sq-sheet-close:hover { background: var(--bg-elevated); }
+.sq-sheet-body { display: grid; gap: 12px; }
+.sq-sheet-foot { display: flex; gap: 10px; }
+.sq-sheet-foot .sq-btn { flex: 1; }
+@keyframes sq-sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes sq-fade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .sq-sheet, .sq-scrim { animation: none; } }
+
+/* ─── Toast / snackbar ───
+   A floating jet chip (works in both themes) carrying a SOLID semantic
+   icon chip — the same "chip carries the meaning" pattern as .sq-alert.
+   Optional single text action in Heat Terracotta. */
+.sq-toast-wrap { position: absolute; left: 16px; right: 16px; bottom: 16px; z-index: 70;
+  display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none; }
+.sq-toast {
+  display: inline-flex; align-items: center; gap: 12px; max-width: 540px; pointer-events: auto;
+  padding: 12px 14px; border-radius: var(--r-lg);
+  background: var(--steel-800); color: var(--linen-100);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.32);
+  font-family: var(--font-body);
+  animation: sq-sheet-up var(--dur-standard) var(--ease-out);
+}
+.sq-toast-ic { flex: 0 0 auto; width: 26px; height: 26px; border-radius: var(--r-sm);
+  display: grid; place-items: center; background: var(--success-500); color: var(--linen-100); }
+.sq-toast-ic svg { width: 15px; height: 15px; }
+.sq-toast-ic.is-info { background: var(--info-500); }
+.sq-toast-ic.is-warning { background: var(--warning-500); color: var(--steel-800); }
+.sq-toast-ic.is-error { background: var(--error-500); }
+.sq-toast-msg { font-size: 14px; line-height: 1.4; flex: 1; min-width: 0; }
+.sq-toast-msg b { font-weight: 700; color: #fff; }
+.sq-toast-action { flex: 0 0 auto; background: none; border: none; cursor: pointer;
+  color: var(--terra-300); font-family: var(--font-sans); font-weight: 800; font-size: 12px;
+  letter-spacing: var(--track-button); text-transform: uppercase; padding: 4px; }
+
+/* ─── Skeleton ───
+   Loading placeholder with a left-to-right sheen. .sq-skeleton-line and
+   -circle are shape helpers; size the rest with inline width/height.
+   Reduced-motion stills the sheen. */
+.sq-skeleton { position: relative; overflow: hidden; background: var(--linen-300); border-radius: 8px; }
+.sq-skeleton-line { height: 12px; border-radius: 6px; }
+.sq-skeleton-circle { border-radius: var(--r-pill); }
+.sq-skeleton::after {
+  content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+  animation: sq-shimmer 1.5s var(--ease-out) infinite;
+}
+[data-theme="dark"] .sq-skeleton { background: rgba(255,255,255,0.07); }
+[data-theme="dark"] .sq-skeleton::after { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); }
+@keyframes sq-shimmer { 100% { transform: translateX(100%); } }
+@media (prefers-reduced-motion: reduce) { .sq-skeleton::after { animation: none; } }
+
+/* ═════════════════════════════════════════════════════════════
+   NAVIGATION  ·  bottom tab bar · top bar · icon button
+   System-owned chrome. The tab bar is the mobile primary nav; the top
+   bar carries screen title + leading/trailing actions; the icon button
+   is the shared 40px affordance both use. All role-token based.
+   ═════════════════════════════════════════════════════════════ */
+
+/* ─── Bottom tab bar ───
+   Sits on a surface above a hairline. Items are icon + label; the
+   active item is the terracotta spike (Heat in dark via --accent-text).
+   Pair the active item's MIcon with FILL 1 to fill the glyph. */
+.sq-tabbar {
+  display: flex; align-items: stretch; gap: 0;
+  padding: 9px 8px 0; background: var(--bg-surface); border-top: 1px solid var(--rule-hairline);
+}
+.sq-tab {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 4px 0; border: none; background: none; cursor: pointer; color: var(--fg-caption);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.sq-tab:hover { color: var(--fg-body); }
+.sq-tab.is-active { color: var(--accent-text); }
+.sq-tab-label {
+  font-family: var(--font-sans); font-weight: 700; font-size: 10px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+
+/* ─── Top bar / app bar ───
+   Leading (back or big title), a spacer, trailing actions. Transparent
+   on the page by default; add .has-rule for a hairline under it when the
+   content below scrolls. */
+.sq-topbar { display: flex; align-items: center; gap: 12px; height: 60px; padding: 0 18px; background: var(--bg-page); }
+.sq-topbar.has-rule { border-bottom: 1px solid var(--rule-hairline); }
+.sq-topbar-title { margin: 0; font-family: var(--font-sans); font-weight: 800; font-size: 20px; letter-spacing: -0.015em; color: var(--fg-primary); }
+.sq-topbar-title.is-lg { font-size: 27px; letter-spacing: -0.02em; }
+.sq-topbar-spacer { flex: 1; }
+.sq-topbar-actions { display: flex; align-items: center; gap: 8px; }
+
+/* ─── Icon button ───
+   The shared 40px round-rect affordance: back, close, overflow, theme,
+   filter. Filled (hairline ring on input fill) or ghost. */
+.sq-iconbtn {
+  flex: 0 0 auto; width: 40px; height: 40px; border-radius: var(--r-md); border: none; cursor: pointer;
+  background: var(--bg-input); color: var(--fg-body); display: grid; place-items: center;
+  box-shadow: inset 0 0 0 1px var(--rule-hairline);
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.sq-iconbtn:hover { background: var(--bg-elevated); color: var(--fg-primary); }
+.sq-iconbtn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.sq-iconbtn.is-ghost { background: transparent; box-shadow: none; }
+.sq-iconbtn.is-ghost:hover { background: var(--bg-input); }

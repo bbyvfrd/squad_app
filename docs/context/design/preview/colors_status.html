@@ -1,0 +1,133 @@
+<!doctype html>
+<!-- @dsCard group="Colors" name="Semantic & Status Colors" subtitle="Success/warning/error/info · alerts · status badges & dots · mapped to game states" viewport="760x560" -->
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>SQUAD · Card · Semantic & Status Colors</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--linen-200);font-family:var(--font-sans);color:var(--steel-700);
+    -webkit-font-smoothing:antialiased}
+  .card{padding:26px 32px 30px;box-sizing:border-box;width:760px;display:grid;gap:22px}
+  .head{display:flex;justify-content:space-between;align-items:baseline}
+  .head h2{font-family:var(--font-mono);font-size:13px;font-weight:600;letter-spacing:0.22em;
+    text-transform:uppercase;margin:0;color:var(--steel-700)}
+  .head .sub{font-family:var(--font-mono);font-size:10px;letter-spacing:0.16em;
+    text-transform:uppercase;color:var(--steel-400)}
+
+  /* four family columns */
+  .fams{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .fam{display:grid;gap:8px}
+  .fam-name{font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:0.16em;
+    text-transform:uppercase;display:flex;align-items:center;gap:7px}
+  .fam-name .meta{color:var(--steel-400);font-weight:500;font-size:9px;letter-spacing:0.12em}
+  .ramp{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;height:42px}
+  .ramp i{border-radius:3px;display:block}
+  .solid{border-radius:6px;padding:12px;display:flex;flex-direction:column;gap:3px}
+  .solid .hex{font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:0.08em}
+  .solid .stop{font-family:var(--font-mono);font-size:8.5px;letter-spacing:0.16em;opacity:0.78;text-transform:uppercase}
+
+  /* alerts */
+  .alerts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+  /* state map */
+  .states{display:grid;gap:8px}
+  .states-h{font-family:var(--font-mono);font-size:9px;font-weight:600;letter-spacing:0.22em;
+    text-transform:uppercase;color:var(--terra-500)}
+  .state-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .pair{display:flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:10px;
+    font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:var(--steel-500)}
+
+  .badges{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+</style></head>
+<body>
+<div class="card">
+  <div class="head">
+    <h2>Semantic &amp; Status</h2>
+    <span class="sub">Muted · athletic · error ≠ terracotta</span>
+  </div>
+
+  <div class="fams">
+    <div class="fam">
+      <div class="fam-name" style="color:var(--success-700)">Success <span class="meta">TURF · 150°</span></div>
+      <div class="ramp">
+        <i style="background:var(--success-50)"></i><i style="background:var(--success-100)"></i>
+        <i style="background:var(--success-200)"></i><i style="background:var(--success-500)"></i>
+        <i style="background:var(--success-600)"></i><i style="background:var(--success-700)"></i>
+      </div>
+      <div class="solid" style="background:var(--success-500);color:var(--on-success)">
+        <span class="stop">500 · solid</span><span class="hex">#3C8A52</span>
+      </div>
+    </div>
+    <div class="fam">
+      <div class="fam-name" style="color:var(--warning-700)">Warning <span class="meta">OCHRE · 75°</span></div>
+      <div class="ramp">
+        <i style="background:var(--warning-50)"></i><i style="background:var(--warning-100)"></i>
+        <i style="background:var(--warning-200)"></i><i style="background:var(--warning-500)"></i>
+        <i style="background:var(--warning-600)"></i><i style="background:var(--warning-700)"></i>
+      </div>
+      <div class="solid" style="background:var(--warning-500);color:var(--on-warning)">
+        <span class="stop">500 · jet text</span><span class="hex">#C68A1C</span>
+      </div>
+    </div>
+    <div class="fam">
+      <div class="fam-name" style="color:var(--error-700)">Error <span class="meta">SIGNAL · 25°</span></div>
+      <div class="ramp">
+        <i style="background:var(--error-50)"></i><i style="background:var(--error-100)"></i>
+        <i style="background:var(--error-200)"></i><i style="background:var(--error-500)"></i>
+        <i style="background:var(--error-600)"></i><i style="background:var(--error-700)"></i>
+      </div>
+      <div class="solid" style="background:var(--error-500);color:var(--on-error)">
+        <span class="stop">500 · solid</span><span class="hex">#CE2530</span>
+      </div>
+    </div>
+    <div class="fam">
+      <div class="fam-name" style="color:var(--info-700)">Info <span class="meta">SLATE · 235°</span></div>
+      <div class="ramp">
+        <i style="background:var(--info-50)"></i><i style="background:var(--info-100)"></i>
+        <i style="background:var(--info-200)"></i><i style="background:var(--info-500)"></i>
+        <i style="background:var(--info-600)"></i><i style="background:var(--info-700)"></i>
+      </div>
+      <div class="solid" style="background:var(--info-500);color:var(--on-info)">
+        <span class="stop">500 · solid</span><span class="hex">#2C6E9B</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="alerts">
+    <div class="sq-alert is-success">
+      <span class="sq-alert-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></span>
+      <div class="sq-alert-body"><div class="sq-alert-title">Squad locked</div><div class="sq-alert-msg">All 14 spots confirmed. Kickoff Fri 19:30.</div></div>
+    </div>
+    <div class="sq-alert is-warning">
+      <span class="sq-alert-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg></span>
+      <div class="sq-alert-body"><div class="sq-alert-title">2 unconfirmed</div><div class="sq-alert-msg">Two players have not paid. Send a reminder.</div></div>
+    </div>
+    <div class="sq-alert is-error">
+      <span class="sq-alert-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="m15 9-6 6M9 9l6 6"/></svg></span>
+      <div class="sq-alert-body"><div class="sq-alert-title">Game cancelled</div><div class="sq-alert-msg">Venue double-booked. Refunds issued automatically.</div></div>
+    </div>
+    <div class="sq-alert is-info">
+      <span class="sq-alert-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></span>
+      <div class="sq-alert-body"><div class="sq-alert-title">New venue nearby</div><div class="sq-alert-msg">Sahil Park added 3 evening slots this week.</div></div>
+    </div>
+  </div>
+
+  <div class="states">
+    <div class="states-h">Mapped to product states</div>
+    <div class="state-row">
+      <span class="sq-status is-success">Open · 3 spots</span>
+      <span class="sq-status-soft is-warning">Waitlist</span>
+      <span class="sq-status is-info">Filling fast</span>
+      <span class="sq-status-soft is-error">Cancelled</span>
+      <span class="sq-status" style="background:var(--steel-700);color:var(--linen-100)">Full</span>
+    </div>
+    <div class="state-row" style="margin-top:4px">
+      <span class="pair"><span class="sq-dot is-live"></span>Live now</span>
+      <span class="pair"><span class="sq-dot is-success"></span>Confirmed</span>
+      <span class="pair"><span class="sq-dot is-warning"></span>Pending pay</span>
+      <span class="pair"><span class="sq-dot is-error"></span>Dropped out</span>
+      <span class="pair"><span class="sq-dot is-info"></span>Invited</span>
+    </div>
+  </div>
+</div>
+</body></html>

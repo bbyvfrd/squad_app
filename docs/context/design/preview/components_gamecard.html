@@ -1,0 +1,78 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>SQUAD · Card · Game Card</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--linen-200);font-family:var(--font-sans);color:var(--steel-700)}
+  .frame{padding:32px;box-sizing:border-box;width:560px}
+  .head{font-family:var(--font-sans);font-size:10px;letter-spacing:0.22em;text-transform:uppercase;font-weight:700;color:var(--terra-500);margin-bottom:6px}
+  .sub{font-family:var(--font-body);font-size:12.5px;color:var(--steel-500);margin:0 0 20px;max-width:58ch}
+  /* the canonical game card composes .sq-card + .sq-badge/.sq-spots/.sq-avatars/.sq-skill/.sq-btn;
+     these wrappers are the only card-specific layout (also shipped in the UI kit's kit.css). */
+  .gcard{display:flex;flex-direction:column;gap:12px;padding:15px 16px}
+  .bar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .time{display:inline-flex;align-items:center;gap:6px;height:29px;padding:0 11px;border-radius:8px;
+    background:var(--terra-50);color:var(--terra-700);font-weight:800;font-size:13px;font-variant-numeric:tabular-nums}
+  .time .sq-icon{color:var(--terra-600);font-size:15px!important}
+  .top{display:flex;align-items:center;gap:13px}
+  .title{font-weight:800;font-size:16px;letter-spacing:-0.01em;line-height:1.1}
+  .fmt{font-family:var(--font-body);font-size:12.5px;color:var(--steel-500);margin-top:2px}
+  .meta{display:flex;flex-wrap:wrap;gap:6px 15px}
+  .mi{display:inline-flex;align-items:center;gap:5px;font-family:var(--font-body);font-size:12.5px;color:var(--steel-500)}
+  .mi .sq-icon{color:var(--steel-400);font-size:15px!important}
+  .foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:13px;border-top:1px solid var(--linen-300)}
+  .going{display:flex;align-items:center;gap:11px}
+  .going-count{font-family:var(--font-body);font-size:13px;color:var(--steel-500)}
+  .going-count b{color:var(--steel-700);font-weight:700}
+  .skillrow{display:flex;align-items:center;gap:10px}
+  .skillcap{font-family:var(--font-sans);font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--steel-400)}
+</style></head>
+<body>
+<div class="frame">
+  <div class="head">Game card · canonical <code>.sq-card</code> · the in-app workhorse</div>
+  <p class="sub">A soft 16px <code>.sq-card</code> composing the system pieces: a Montserrat <code>.sq-badge</code>, a sport-tinted <code>.sq-sportchip</code>, the <code>.sq-spots</code> capacity bar, an overlapping <code>.sq-avatars</code> stack, a graded <code>.sq-skill</code> tag, and the chunky <code>.sq-btn</code> JOIN. The terracotta time pill is the only card-specific flourish.</p>
+
+  <button class="sq-card is-interactive gcard">
+    <div class="bar">
+      <span class="time"><span class="sq-icon">schedule</span>19:30 – 21:00</span>
+      <span class="sq-badge is-open">Open</span>
+    </div>
+    <div class="top">
+      <span class="sq-sportchip sq-sport-soccer"><span class="sq-icon" style="font-size:24px">sports_soccer</span></span>
+      <div style="flex:1;min-width:0">
+        <div class="title">Tuesday Pickup</div>
+        <div class="fmt">Soccer · 7v7</div>
+      </div>
+    </div>
+    <div class="meta">
+      <span class="mi"><span class="sq-icon">location_on</span>Sahil Park</span>
+      <span class="mi"><span class="sq-icon">distance</span>1.2 km</span>
+      <span class="mi"><span class="sq-icon">payments</span>10 ₼</span>
+    </div>
+    <div class="sq-spots">
+      <div class="sq-spots-row">
+        <span class="sq-spots-label">8/14 players</span>
+        <span class="sq-spots-state is-open">6 spots left</span>
+      </div>
+      <div class="sq-spots-track"><div class="sq-spots-fill is-open" style="width:57%"></div></div>
+    </div>
+    <div class="foot">
+      <div class="going">
+        <div class="sq-avatars">
+          <span class="sq-av" style="background:oklch(0.90 0.07 20);color:oklch(0.40 0.13 20)">AM</span>
+          <span class="sq-av" style="background:oklch(0.90 0.07 210);color:oklch(0.40 0.13 210)">NR</span>
+          <span class="sq-av" style="background:oklch(0.90 0.07 120);color:oklch(0.40 0.13 120)">EL</span>
+        </div>
+        <span class="going-count"><b>8</b> going</span>
+      </div>
+      <span class="sq-btn sq-btn-primary sq-btn-sm">Join</span>
+    </div>
+    <div class="skillrow">
+      <span class="skillcap">Skill</span>
+      <span class="sq-skill lv-3"><span class="dot"></span>Intermediate</span>
+    </div>
+  </button>
+</div>
+</body></html>

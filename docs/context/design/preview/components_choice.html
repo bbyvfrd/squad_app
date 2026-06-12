@@ -1,0 +1,63 @@
+<!doctype html>
+<!-- @dsCard group="Components" name="Choice Controls" subtitle="Checkbox, radio, toggle, segmented, stepper, range" viewport="760x360" -->
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>SQUAD · Card · Choice Controls</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--linen-200);font-family:var(--font-sans);color:var(--steel-700);
+    -webkit-font-smoothing:antialiased}
+  .card{width:760px;box-sizing:border-box;padding:28px 32px;display:grid;gap:24px}
+  .head{display:flex;justify-content:space-between;align-items:baseline}
+  .head h2{margin:0;font-size:12px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--terra-500)}
+  .head .sub{font-family:var(--font-body);font-size:12px;color:var(--steel-400)}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+  .group{display:grid;gap:13px;align-content:start}
+  .glabel{font-family:var(--font-label);font-size:10px;font-weight:600;letter-spacing:0.16em;
+    text-transform:uppercase;color:var(--steel-400)}
+  .rowwrap{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:center}
+</style></head>
+<body>
+<div class="card">
+  <div class="head"><h2>Choice Controls</h2><span class="sub">Terracotta = selected, everywhere</span></div>
+
+  <div class="cols">
+    <div class="group">
+      <div class="glabel">Checkbox</div>
+      <label class="sq-check"><input type="checkbox" checked><span class="sq-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4"><path d="M20 6 9 17l-5-5"/></svg></span>Confirmed I'll attend</label>
+      <label class="sq-check"><input type="checkbox"><span class="sq-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4"><path d="M20 6 9 17l-5-5"/></svg></span>Bring a guest (+1)</label>
+      <label class="sq-check"><input type="checkbox" id="ind"><span class="sq-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4"><path d="M5 12h14"/></svg></span>Notify my squad <span style="color:var(--steel-400)">(some)</span></label>
+      <label class="sq-check"><input type="checkbox" checked disabled><span class="sq-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4"><path d="M20 6 9 17l-5-5"/></svg></span>Agree to house rules <span style="color:var(--steel-400)">(locked)</span></label>
+    </div>
+
+    <div class="group">
+      <div class="glabel">Radio · skill level</div>
+      <label class="sq-choice"><input type="radio" name="lvl"><span class="sq-radio-dot"></span>Casual</label>
+      <label class="sq-choice"><input type="radio" name="lvl" checked><span class="sq-radio-dot"></span>Intermediate</label>
+      <label class="sq-choice"><input type="radio" name="lvl"><span class="sq-radio-dot"></span>Competitive</label>
+      <label class="sq-choice"><input type="radio" name="lvl" disabled><span class="sq-radio-dot"></span>Pro <span style="color:var(--steel-400)">(invite only)</span></label>
+    </div>
+
+    <div class="group">
+      <div class="glabel">Toggle</div>
+      <label class="sq-switch"><input type="checkbox" checked><span class="sq-switch-track"><span class="sq-switch-knob"></span></span>Auto-fill from waitlist</label>
+      <label class="sq-switch"><input type="checkbox"><span class="sq-switch-track"><span class="sq-switch-knob"></span></span>Make game public</label>
+      <label class="sq-switch"><input type="checkbox" disabled><span class="sq-switch-track"><span class="sq-switch-knob"></span></span>Recurring weekly <span style="color:var(--steel-400)">(soon)</span></label>
+    </div>
+
+    <div class="group">
+      <div class="glabel">Segmented · stepper · range</div>
+      <div class="sq-segment"><button class="is-active">5v5</button><button>7v7</button><button>11v11</button></div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="sq-stepper"><button>−</button><span class="val">14</span><button>+</button></div>
+        <span style="font-family:var(--font-body);font-size:13px;color:var(--steel-400)">players</span>
+      </div>
+      <div style="display:grid;gap:6px">
+        <input class="sq-range" type="range" min="0" max="100" value="62">
+        <span style="font-family:var(--font-body);font-size:12px;color:var(--steel-400)">Max distance · 6 km</span>
+      </div>
+    </div>
+  </div>
+</div>
+<script>document.getElementById('ind').indeterminate = true;</script>
+</body></html>

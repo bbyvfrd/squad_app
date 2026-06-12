@@ -1,0 +1,39 @@
+<!doctype html>
+<!-- @dsCard group="Type" name="Type Scale" subtitle="Headline · Title · Lede · Body · Label · Kicker" viewport="700x340" -->
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>SQUAD · Card · Type Scale</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--linen-200);font-family:var(--font-sans);color:var(--steel-700);
+    -webkit-font-smoothing:antialiased}
+  .card{padding:28px 32px;box-sizing:border-box;width:700px}
+  .row{display:grid;grid-template-columns:104px 1fr 132px;gap:18px;align-items:baseline;
+    padding:14px 0;border-bottom:1px solid var(--linen-300)}
+  .row:last-child{border-bottom:none}
+  .row.body-row{align-items:start}
+  .nm{font-family:var(--font-mono);font-size:10px;letter-spacing:0.22em;
+    text-transform:uppercase;font-weight:600;color:var(--terra-500)}
+  .ex{color:var(--steel-700);min-width:0}
+  .ex.oneline{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .specs{font-family:var(--font-mono);font-size:9px;letter-spacing:0.12em;
+    text-transform:uppercase;color:var(--steel-400);text-align:right;font-weight:500;line-height:1.5}
+  .ex.h1{font-weight:900;font-size:42px;line-height:0.9;letter-spacing:-0.012em;text-transform:uppercase}
+  .ex.t{font-weight:800;font-size:22px;line-height:1.1;letter-spacing:-0.02em}
+  .ex.l{font-family:var(--font-body);font-weight:500;font-size:18px;line-height:1.5}
+  /* Body now mirrors the corrected token: 440 weight, 1.65 line, slight positive tracking */
+  .ex.b{font-family:var(--font-body);font-weight:400;font-size:17px;line-height:1.6;letter-spacing:normal;color:var(--steel-500);max-width:46ch}
+  .ex.b strong{font-weight:700;color:var(--steel-700)}
+  .ex.lab{font-family:var(--font-label);font-weight:600;font-size:11px;letter-spacing:0.16em;text-transform:uppercase}
+  .ex.kic{font-family:var(--font-label);font-weight:700;font-size:12px;letter-spacing:0.22em;text-transform:uppercase;color:var(--terra-500)}
+</style></head>
+<body>
+<div class="card">
+  <div class="row"><div class="nm">Headline</div><div class="ex h1 oneline">MOVE TOGETHER</div><div class="specs">MONTSERRAT 900 / 0.88</div></div>
+  <div class="row"><div class="nm">Title</div><div class="ex t oneline">Card titles, second-tier headings</div><div class="specs">MONTSERRAT 800 / 34</div></div>
+  <div class="row"><div class="nm">Lede</div><div class="ex l oneline">Hero subtitles and lead paragraphs</div><div class="specs">KARLA 500 / 24 / 1.5</div></div>
+  <div class="row body-row"><div class="nm">Body</div><div class="ex b">Find a game across the city, see who's already confirmed, and join with clear expectations on cost, level, and venue. <strong>Reliability is built in</strong>, so you turn up knowing the game holds.</div><div class="specs">KARLA 400 / 17 / 1.6</div></div>
+  <div class="row"><div class="nm">Label</div><div class="ex lab oneline">SOCCER · 7V7 · SAHIL PARK</div><div class="specs">600 / 11 / 0.16em</div></div>
+  <div class="row"><div class="nm">Kicker</div><div class="ex kic oneline">FIND YOUR GAME</div><div class="specs">700 / 12 / 0.22em</div></div>
+</div>
+</body></html>

@@ -1,0 +1,79 @@
+<!-- @dsCard group="Colors" -->
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>SQUAD · Card · Light & Dark</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--linen-300);font-family:var(--font-sans)}
+  .wrap{display:grid;grid-template-columns:1fr 1fr;gap:1px;width:760px}
+  .panel{background:var(--bg-page);color:var(--fg-primary);padding:26px 24px;display:grid;gap:18px}
+  .ttl{font-family:var(--font-sans);font-weight:800;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-text);display:flex;align-items:center;gap:7px}
+  .ttl .sq-icon{font-size:16px}
+  .swatches{display:flex;gap:8px}
+  .sw{width:46px;height:46px;border-radius:10px;box-shadow:inset 0 0 0 1px var(--rule-hairline)}
+  .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .demo-card{padding:14px;display:grid;gap:12px}
+  .dc-top{display:flex;align-items:center;justify-content:space-between}
+  .dc-name{font-weight:800;font-size:15px;color:var(--fg-primary)}
+  .dc-meta{font-family:var(--font-body);font-size:12.5px;color:var(--fg-body)}
+  .sq-icon{font-size:14px!important}
+  .cap{font-family:var(--font-body);font-size:11.5px;color:var(--fg-caption)}
+</style></head>
+<body>
+<div class="wrap">
+  <!-- LIGHT -->
+  <div class="panel">
+    <div class="ttl"><span class="sq-icon">light_mode</span> Light · default</div>
+    <div class="swatches">
+      <div class="sw" style="background:var(--bg-page)"></div>
+      <div class="sw" style="background:var(--bg-surface)"></div>
+      <div class="sw" style="background:var(--bg-elevated)"></div>
+      <div class="sw" style="background:var(--terra-500);box-shadow:none"></div>
+    </div>
+    <p class="cap">page · surface · elevated · accent</p>
+    <div class="sq-card demo-card">
+      <div class="dc-top"><span class="dc-name">Tuesday Pickup</span><span class="sq-badge is-open">Open</span></div>
+      <div class="dc-meta">Soccer · 7v7 · Sahil Park</div>
+      <div class="sq-spots"><div class="sq-spots-row"><span class="sq-spots-label">8/14 players</span><span class="sq-spots-state is-open">6 left</span></div><div class="sq-spots-track"><div class="sq-spots-fill is-open" style="width:57%"></div></div></div>
+      <div class="row"><span class="sq-btn sq-btn-primary sq-btn-sm">Join</span><span class="sq-skill lv-3"><span class="dot"></span>Intermediate</span></div>
+    </div>
+    <div class="row">
+      <input class="sq-input" style="height:44px;font-size:14px" placeholder="Search games…">
+    </div>
+    <div class="row">
+      <span class="sq-badge is-filling">Filling</span>
+      <span class="sq-badge is-waiting">Waitlist</span>
+      <span class="sq-badge is-full">Full</span>
+      <span class="sq-badge is-host"><span class="sq-icon">verified</span> Hosting</span>
+    </div>
+  </div>
+
+  <!-- DARK -->
+  <div class="panel" data-theme="dark">
+    <div class="ttl"><span class="sq-icon">dark_mode</span> Dark · data-theme="dark"</div>
+    <div class="swatches">
+      <div class="sw" style="background:var(--bg-page)"></div>
+      <div class="sw" style="background:var(--bg-surface)"></div>
+      <div class="sw" style="background:var(--bg-elevated)"></div>
+      <div class="sw" style="background:var(--terra-500);box-shadow:none"></div>
+    </div>
+    <p class="cap">page · surface · elevated · accent</p>
+    <div class="sq-card demo-card">
+      <div class="dc-top"><span class="dc-name">Tuesday Pickup</span><span class="sq-badge is-open">Open</span></div>
+      <div class="dc-meta">Soccer · 7v7 · Sahil Park</div>
+      <div class="sq-spots"><div class="sq-spots-row"><span class="sq-spots-label">8/14 players</span><span class="sq-spots-state is-open">6 left</span></div><div class="sq-spots-track"><div class="sq-spots-fill is-open" style="width:57%"></div></div></div>
+      <div class="row"><span class="sq-btn sq-btn-primary sq-btn-sm">Join</span><span class="sq-skill lv-3"><span class="dot"></span>Intermediate</span></div>
+    </div>
+    <div class="row">
+      <input class="sq-input" style="height:44px;font-size:14px" placeholder="Search games…">
+    </div>
+    <div class="row">
+      <span class="sq-badge is-filling">Filling</span>
+      <span class="sq-badge is-waiting">Waitlist</span>
+      <span class="sq-badge is-full">Full</span>
+      <span class="sq-badge is-host"><span class="sq-icon">verified</span> Hosting</span>
+    </div>
+  </div>
+</div>
+</body></html>

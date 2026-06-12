@@ -1,0 +1,101 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="Iconography" subtitle="Material Symbols Outlined · product glyphs, sizes, usage" viewport="700x470" -->
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>SQUAD · Card · Iconography</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--linen-200);font-family:var(--font-sans);color:var(--steel-700);
+    -webkit-font-smoothing:antialiased}
+  .card{width:700px;box-sizing:border-box;padding:26px 30px;display:grid;gap:20px}
+  .top{display:flex;justify-content:space-between;align-items:baseline}
+  .top h2{margin:0;font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--terra-500)}
+  .top .note{font-size:10px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--steel-400)}
+
+  .groups{display:grid;grid-template-columns:repeat(2,1fr);gap:18px 28px}
+  .group .glabel{font-size:9px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;
+    color:var(--steel-400);margin-bottom:12px;padding-bottom:7px;border-bottom:1px solid var(--linen-300)}
+  .icons{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 8px}
+  .ic{display:grid;justify-items:center;gap:6px}
+  .ic .sq-icon{color:var(--steel-700)}
+  .ic .nm{font-size:8px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;
+    color:var(--steel-400);text-align:center;line-height:1.2}
+
+  .scale{display:flex;align-items:flex-end;gap:22px;padding:16px 18px;background:var(--linen-100);border-radius:6px}
+  .scale .s{display:grid;justify-items:center;gap:8px}
+  .scale .s .sq-icon{color:var(--steel-700)}
+  .scale .s .t{font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--steel-400)}
+
+  .usage{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .chip{display:inline-flex;align-items:center;gap:8px;padding:9px 13px;border-radius:6px;
+    font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase}
+  .chip.dark{background:var(--steel-700);color:var(--linen-200)}
+  .chip.dark .sq-icon{color:var(--linen-200)}
+  .chip.terra{background:var(--terra-500);color:var(--steel-800)}
+  .chip.terra .sq-icon{color:var(--steel-800)}
+  .chip.line{background:transparent;box-shadow:inset 0 0 0 1px var(--linen-300);color:var(--steel-700)}
+  .chip.line .sq-icon-accent{color:var(--terra-500)}
+  .meta-row{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-body);
+    font-size:13px;font-weight:500;color:var(--steel-500)}
+  .meta-row .sq-icon{color:var(--steel-400)}
+
+  .foot{font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--steel-400);display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .foot .x{color:var(--terra-500)}
+</style></head>
+<body>
+<div class="card">
+  <div class="top">
+    <h2>Iconography · Material Symbols</h2>
+    <span class="note">Outlined · stroke only · wght 500</span>
+  </div>
+
+  <div class="groups">
+    <div class="group">
+      <div class="glabel">Discover &amp; Play</div>
+      <div class="icons">
+        <div class="ic"><span class="sq-icon">search</span><span class="nm">search</span></div>
+        <div class="ic"><span class="sq-icon">sports_soccer</span><span class="nm">soccer</span></div>
+        <div class="ic"><span class="sq-icon">sports_basketball</span><span class="nm">basketball</span></div>
+        <div class="ic"><span class="sq-icon">stadium</span><span class="nm">stadium</span></div>
+        <div class="ic"><span class="sq-icon">distance</span><span class="nm">distance</span></div>
+        <div class="ic"><span class="sq-icon">tune</span><span class="nm">filter</span></div>
+        <div class="ic"><span class="sq-icon">explore</span><span class="nm">explore</span></div>
+        <div class="ic"><span class="sq-icon">trophy</span><span class="nm">trophy</span></div>
+      </div>
+    </div>
+    <div class="group">
+      <div class="glabel">Coordinate &amp; Trust</div>
+      <div class="icons">
+        <div class="ic"><span class="sq-icon">group</span><span class="nm">squad</span></div>
+        <div class="ic"><span class="sq-icon">event</span><span class="nm">schedule</span></div>
+        <div class="ic"><span class="sq-icon">location_on</span><span class="nm">venue</span></div>
+        <div class="ic"><span class="sq-icon">payments</span><span class="nm">payment</span></div>
+        <div class="ic"><span class="sq-icon">verified</span><span class="nm">verified</span></div>
+        <div class="ic"><span class="sq-icon">notifications</span><span class="nm">alerts</span></div>
+        <div class="ic"><span class="sq-icon">share</span><span class="nm">share</span></div>
+        <div class="ic"><span class="sq-icon">lock</span><span class="nm">locked</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scale">
+    <div class="s"><span class="sq-icon sq-icon-16">sports_soccer</span><span class="t">16</span></div>
+    <div class="s"><span class="sq-icon sq-icon-20">sports_soccer</span><span class="t">20</span></div>
+    <div class="s"><span class="sq-icon sq-icon-24">sports_soccer</span><span class="t">24</span></div>
+    <div class="s"><span class="sq-icon sq-icon-32">sports_soccer</span><span class="t">32</span></div>
+    <div class="s"><span class="sq-icon sq-icon-48">sports_soccer</span><span class="t">48</span></div>
+    <div class="s" style="margin-left:auto"><span class="meta-row"><span class="sq-icon sq-icon-16">schedule</span>Fri 19:30</span><span class="t" style="margin-top:8px">inline w/ Karla</span></div>
+  </div>
+
+  <div class="usage">
+    <span class="chip terra"><span class="sq-icon sq-icon-20">add</span>Create Game</span>
+    <span class="chip dark"><span class="sq-icon sq-icon-20">person_add</span>Join</span>
+    <span class="chip line"><span class="sq-icon sq-icon-20 sq-icon-accent">location_on</span>Browse Venues</span>
+  </div>
+
+  <div class="foot">
+    <span class="x">Outlined only</span><span>·</span><span>match adjacent text color</span><span>·</span><span>8px gap to label</span><span>·</span><span>fill restricted to status glyphs</span>
+  </div>
+</div>
+</body></html>

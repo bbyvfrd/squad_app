@@ -1,0 +1,94 @@
+<!doctype html>
+<!-- @dsCard group="Components" name="Text Fields" subtitle="56px · 14px radius · icon inside · terracotta focus · error/success/disabled" viewport="760x480" -->
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>SQUAD · Card · Text Fields</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--linen-200);font-family:var(--font-sans);color:var(--steel-700);
+    -webkit-font-smoothing:antialiased}
+  .card{width:760px;box-sizing:border-box;padding:28px 32px;display:grid;gap:20px}
+  .head{display:flex;justify-content:space-between;align-items:baseline}
+  .head h2{margin:0;font-size:12px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--terra-500)}
+  .head .sub{font-family:var(--font-body);font-size:12px;color:var(--steel-400)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .full{grid-column:1 / -1}
+  svg{display:block}
+</style></head>
+<body>
+<div class="card">
+  <div class="head"><h2>Text Fields</h2><span class="sub">56px · 14px radius · icon inside · terracotta focus</span></div>
+
+  <div class="grid">
+    <div class="sq-field">
+      <span class="sq-field-label">Full name</span>
+      <div class="sq-input-row">
+        <span class="sq-input-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span>
+        <input value="Tural Mammadov">
+      </div>
+    </div>
+
+    <div class="sq-field">
+      <span class="sq-field-label">Email <span class="req">*</span></span>
+      <div class="sq-input-row" style="background:var(--linen-100);border-color:var(--terra-500);box-shadow:0 0 0 4px rgba(238,71,33,0.12)">
+        <span class="sq-input-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span>
+        <input value="tural@">
+      </div>
+      <span class="sq-field-hint">Focused · terracotta border + glow.</span>
+    </div>
+
+    <div class="sq-field">
+      <span class="sq-field-label">Password</span>
+      <div class="sq-input-row">
+        <span class="sq-input-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>
+        <input type="password" value="passpass">
+        <span class="sq-input-ic is-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span>
+      </div>
+    </div>
+
+    <div class="sq-field">
+      <span class="sq-field-label">Search venues</span>
+      <div class="sq-input-row">
+        <span class="sq-input-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
+        <input placeholder="Pitch, district, surface…">
+      </div>
+    </div>
+
+    <label class="sq-field">
+      <span class="sq-field-label">Sport</span>
+      <span class="sq-select-wrap">
+        <select class="sq-select"><option>Soccer · 7v7</option><option>Basketball · 5v5</option><option>Volleyball · 6v6</option></select>
+      </span>
+    </label>
+
+    <div class="sq-field">
+      <span class="sq-field-label">Phone <span class="req">*</span></span>
+      <div class="sq-input-row is-error">
+        <span class="sq-input-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h4l2 5-3 2a12 12 0 0 0 5 5l2-3 5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg></span>
+        <input value="+994 50 12">
+      </div>
+      <span class="sq-field-hint is-error">Enter a full mobile number.</span>
+    </div>
+
+    <label class="sq-field full">
+      <span class="sq-field-label">Game notes <span class="opt">· optional</span></span>
+      <textarea class="sq-textarea" placeholder="Mid-level, bring both shirts, cash on arrival…"></textarea>
+    </label>
+
+    <label class="sq-field">
+      <span class="sq-field-label">Venue ID</span>
+      <input class="sq-input" value="SAHIL-PITCH-B" disabled>
+      <span class="sq-field-hint">Locked · assigned by venue.</span>
+    </label>
+
+    <div class="sq-field">
+      <span class="sq-field-label">Handle</span>
+      <div class="sq-input-row is-success">
+        <span class="sq-input-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span>
+        <input value="@tural_m">
+      </div>
+      <span class="sq-field-hint is-success">Available.</span>
+    </div>
+  </div>
+</div>
+</body></html>

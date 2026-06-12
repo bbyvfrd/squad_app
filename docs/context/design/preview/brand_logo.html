@@ -1,0 +1,84 @@
+<!doctype html>
+<!-- @dsCard group="Brand" name="Logo & Lockup" subtitle="Approved tints: terra, deep, jet, slate, linen, bone — exact-color PNGs" viewport="700x320" -->
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>SQUAD · Card · Logo & Tints</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--linen-200);font-family:var(--font-sans);color:var(--steel-700);
+    -webkit-font-smoothing:antialiased}
+  .card{width:700px;box-sizing:border-box;padding:26px 30px;display:grid;gap:18px}
+  .top{display:flex;justify-content:space-between;align-items:baseline}
+  .top h2{margin:0;font-size:11px;font-weight:700;letter-spacing:0.2em;
+    text-transform:uppercase;color:var(--terra-500)}
+  .top .note{font-size:10px;font-weight:600;letter-spacing:0.16em;
+    text-transform:uppercase;color:var(--steel-400)}
+
+  .lockups{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .panel{position:relative;height:88px;border-radius:6px;display:grid;place-items:center;overflow:hidden}
+  .panel img{width:188px;height:auto;display:block}
+  .plabel{position:absolute;left:12px;bottom:9px;font-size:9px;
+    font-weight:600;letter-spacing:0.16em;text-transform:uppercase}
+
+  .chips{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+  .chip{display:grid;gap:8px;justify-items:center}
+  .swatch{width:100%;aspect-ratio:1;border-radius:6px;display:grid;place-items:center}
+  .swatch img{width:58%;height:58%;object-fit:contain;display:block}
+  .clabel{font-size:9px;font-weight:600;letter-spacing:0.14em;
+    text-transform:uppercase;color:var(--steel-500);text-align:center;line-height:1.3}
+  .clabel b{display:block;color:var(--steel-700);font-weight:700}
+
+  .foot{font-size:10px;font-weight:600;letter-spacing:0.14em;
+    text-transform:uppercase;color:var(--steel-400);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .foot .x{color:var(--terra-500)}
+</style></head>
+<body>
+<div class="card">
+  <div class="top">
+    <h2>Logo &amp; Tints · Locked</h2>
+    <span class="note">Recolor only within this set</span>
+  </div>
+
+  <div class="lockups">
+    <div class="panel" style="background:var(--linen-100)">
+      <img src="../assets/logo_tints/lockup_terra.png" alt="SQUAD lockup, terracotta">
+      <span class="plabel" style="color:var(--steel-400)">Terra · Default · on Bone</span>
+    </div>
+    <div class="panel" style="background:var(--steel-700)">
+      <img src="../assets/logo_tints/lockup_linen.png" alt="SQUAD lockup, linen">
+      <span class="plabel" style="color:var(--steel-300)">Linen · on Jet</span>
+    </div>
+  </div>
+
+  <div class="chips">
+    <div class="chip">
+      <div class="swatch" style="background:var(--linen-100)"><img src="../assets/logo_tints/mark_terra.png" alt=""></div>
+      <div class="clabel"><b>Terra</b>#EE4721</div>
+    </div>
+    <div class="chip">
+      <div class="swatch" style="background:var(--linen-100)"><img src="../assets/logo_tints/mark_deep.png" alt=""></div>
+      <div class="clabel"><b>Deep</b>#C5371A</div>
+    </div>
+    <div class="chip">
+      <div class="swatch" style="background:var(--linen-100)"><img src="../assets/logo_tints/mark_jet.png" alt=""></div>
+      <div class="clabel"><b>Jet</b>#13222C</div>
+    </div>
+    <div class="chip">
+      <div class="swatch" style="background:var(--linen-100)"><img src="../assets/logo_tints/mark_slate.png" alt=""></div>
+      <div class="clabel"><b>Slate</b>#8E96A1</div>
+    </div>
+    <div class="chip">
+      <div class="swatch" style="background:var(--steel-700)"><img src="../assets/logo_tints/mark_linen.png" alt=""></div>
+      <div class="clabel"><b>Linen</b>on dark</div>
+    </div>
+    <div class="chip">
+      <div class="swatch" style="background:var(--terra-500)"><img src="../assets/logo_tints/mark_bone.png" alt=""></div>
+      <div class="clabel"><b>Bone</b>on terra</div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span class="x">Do not redraw</span><span>·</span><span>Do not recolor outside this set</span><span>·</span><span>White interior stays open</span>
+  </div>
+</div>
+</body></html>

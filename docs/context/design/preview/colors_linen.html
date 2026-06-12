@@ -1,0 +1,49 @@
+<!doctype html>
+<!-- @dsCard group="Colors" name="Linen Ramp" subtitle="50–900, the warm neutral family" viewport="700x190" -->
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>SQUAD · Card · Linen Ramp</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--linen-200);font-family:var(--font-sans);color:var(--steel-700)}
+  .card{padding:28px 32px;box-sizing:border-box;width:700px}
+  .head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px}
+  .head h2{font-size:13px;font-family:var(--font-mono);font-weight:600;letter-spacing:0.22em;
+    text-transform:uppercase;margin:0;color:var(--steel-700)}
+  .head .sub{font-family:var(--font-mono);font-size:10px;letter-spacing:0.16em;
+    text-transform:uppercase;color:var(--steel-400)}
+  .ramp{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;height:80px}
+  .swatch{border-radius:4px;display:flex;flex-direction:column;justify-content:flex-end;
+    padding:8px;font-family:var(--font-mono);font-size:9px;font-weight:600;letter-spacing:0.1em}
+  .swatch .stop{font-size:9px;opacity:0.7}
+  .swatch .hex{font-size:8.5px}
+  .anchor{outline:2px solid var(--terra-500);outline-offset:2px}
+  .marks{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin-top:6px;
+    font-family:var(--font-mono);font-size:8px;letter-spacing:0.12em;
+    text-transform:uppercase;color:var(--steel-400);text-align:center}
+</style></head>
+<body>
+<div class="card">
+  <div class="head">
+    <h2>Linen · hue ~80°</h2>
+    <span class="sub">Warm neutral family · replaces white</span>
+  </div>
+  <div class="ramp">
+    <div class="swatch" style="background:#FAF8F1;color:#13222C;border:1px solid #D8D4CA"><div class="stop">50</div><div class="hex">#FAF8F1</div></div>
+    <div class="swatch" style="background:#F5F2E9;color:#13222C"><div class="stop">100</div><div class="hex">#F5F2E9</div></div>
+    <div class="swatch anchor" style="background:#EBE7DB;color:#13222C;position:relative"><div class="stop">200★</div><div class="hex">#EBE7DB</div></div>
+    <div class="swatch" style="background:#D8D4CA;color:#13222C"><div class="stop">300</div><div class="hex">#D8D4CA</div></div>
+    <div class="swatch" style="background:#B5B0A2;color:#13222C"><div class="stop">400</div><div class="hex">#B5B0A2</div></div>
+    <div class="swatch" style="background:#8C8775;color:#EBE7DB"><div class="stop">500</div><div class="hex">#8C8775</div></div>
+    <div class="swatch" style="background:#635E4D;color:#EBE7DB"><div class="stop">600</div><div class="hex">#635E4D</div></div>
+    <div class="swatch" style="background:#423F30;color:#EBE7DB"><div class="stop">700</div><div class="hex">#423F30</div></div>
+    <div class="swatch" style="background:#28261B;color:#EBE7DB"><div class="stop">800</div><div class="hex">#28261B</div></div>
+    <div class="swatch" style="background:#15130A;color:#EBE7DB"><div class="stop">900</div><div class="hex">#15130A</div></div>
+  </div>
+  <div class="marks">
+    <span></span><span>BONE</span>
+    <span style="color:var(--terra-500);font-weight:700">LINEN ★</span>
+    <span>HAIR</span><span></span><span></span><span></span><span></span><span></span><span></span>
+  </div>
+</div>
+</body></html>

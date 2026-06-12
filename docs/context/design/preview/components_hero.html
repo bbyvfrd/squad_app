@@ -1,0 +1,33 @@
+<!-- @dsCard group="Components" name="Hero Card" subtitle="Jet Ink marquee · kicker + spike headline + sub + CTA row · Hero Lift" viewport="700x520" -->
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>SQUAD · Card · Hero Card</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;background:var(--linen-200);font-family:var(--font-sans);color:var(--steel-700)}
+  .frame{padding:28px 32px 36px;box-sizing:border-box;width:700px}
+  .head{font-family:var(--font-sans);font-size:10px;letter-spacing:0.22em;text-transform:uppercase;font-weight:700;color:var(--terra-500);margin-bottom:6px}
+  .sub{font-family:var(--font-body);font-size:12.5px;color:var(--steel-500);margin:0 0 20px;max-width:62ch}
+  /* preview-only scale cap so the card reads at thumbnail size */
+  .frame .sq-hero-title{font-size:48px}
+</style></head>
+<body>
+<div class="frame">
+  <div class="head">Hero card · <code>.sq-hero</code> · the marquee brand surface</div>
+  <p class="sub">The one Jet Ink moment on a page, the only surface carrying Hero Lift. Four parts: a Heat Terracotta <code>.sq-hero-kicker</code> (plus optional inline <code>.sq-badge</code>), a 900-weight <code>.sq-hero-title</code> with one <code>.spike</code> word, a Karla <code>.sq-hero-sub</code>, and a CTA row. Use once per page.</p>
+
+  <section class="sq-hero">
+    <div class="sq-hero-top">
+      <span class="sq-hero-kicker">This week in Baku</span>
+      <span class="sq-badge is-open"><span class="sq-dot is-live"></span>47 games open</span>
+    </div>
+    <h1 class="sq-hero-title">Find your next <span class="spike">game</span>.</h1>
+    <p class="sq-hero-sub">Pickup soccer, basketball, padel and more, near you. Join in two taps, or host your own and <strong>let the squad come to you</strong>.</p>
+    <div class="sq-hero-actions">
+      <button class="sq-btn sq-btn-primary">Browse games</button>
+      <button class="sq-btn sq-btn-outline-linen">Host a game</button>
+    </div>
+  </section>
+</div>
+</body></html>

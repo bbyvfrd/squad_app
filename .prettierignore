@@ -4,3 +4,8 @@ migrations
 pnpm-lock.yaml
 playwright-report
 coverage
+
+# Vault-synced SQUAD design-system reference (authored upstream; one-way sync —
+# not ours to reformat, and reformatting would just diverge from the vault source).
+docs/context/design/
+docs/context/design-system.md
