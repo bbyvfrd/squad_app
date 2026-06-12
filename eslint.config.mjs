@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Documentation is not application source — keep ESLint scoped to src/.
+    // (The vault-synced design system ships demo .jsx under docs/context/design/.)
+    "docs/**",
   ]),
 ]);
 
