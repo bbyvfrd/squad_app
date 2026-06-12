@@ -11,7 +11,7 @@ Full scope, personas, and domain model: [`docs/context/product.md`](docs/context
 
 ## Prerequisites
 
-- **Node 20+** (tested on Node 24)
+- **Node 24+** (matches CI and the `node:24-alpine` production image)
 - **pnpm 9+**
 - **Docker** (for the container build and local Supabase)
 - **Supabase CLI** (`brew install supabase/tap/supabase` or see [supabase.com/docs/guides/cli](https://supabase.com/docs/guides/cli))
@@ -149,3 +149,22 @@ Docker base image current.
 Reproduce a job locally with Docker (gitleaks/semgrep/trivy) or the matching
 `pnpm` script (`format:check`, `lint`, `typecheck`, `test`, `test:integration`,
 `test:e2e`).
+
+## Deploy & rollback
+
+`deploy.yml` runs after CI succeeds on `main`:
+staging (migrate → deploy → Playwright smoke) → **manual approval** (GitHub
+`production` environment) → production (migrate → atomic deploy → health gate).
+A failed production deploy/health gate auto-calls `rollback.yml` (only after a
+deploy was actually attempted — a rejected approval or pre-deploy failure leaves
+prod untouched and triggers no rollback).
+
+- Approve a production deploy: GitHub → the run → "Review deployments" → approve.
+- Manual rollback: `gh workflow run rollback.yml -f reason="<why>"` — cancel any
+  in-flight Deploy run first (a dispatched rollback can race one and be re-promoted over).
+- Migrations are forward-only; `vercel rollback` reverts the app, not the schema —
+  keep migrations backward-compatible (expand/contract). Every deploy job runs
+  `scripts/verify-migrations.mjs` after migrating (drizzle-kit can fail silently).
+- Smoke/health checks target the stable production domains (`STAGING_URL`/`PROD_URL`
+  repo variables) — per-deployment URLs are auth-protected.
+- Deploy secrets + `STAGING_URL`/`PROD_URL` are managed by `infra/terraform/envs/deploy-secrets`.

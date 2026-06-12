@@ -3,7 +3,7 @@ terraform {
   cloud {
     organization = "SQUAD_APP"
     workspaces {
-      name = "squad-app-prod"
+      name = "squad-app-deploy-secrets"
     }
   }
 }

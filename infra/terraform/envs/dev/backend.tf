@@ -1,7 +1,7 @@
 terraform {
   required_version = ">= 1.7"
   cloud {
-    organization = "REPLACE_WITH_HCP_ORG"
+    organization = "SQUAD_APP"
     workspaces {
       name = "squad-app-dev"
     }

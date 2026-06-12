@@ -34,7 +34,7 @@ Provider schemas drift; **re-verify each provider's current major and resource a
 
 - **`vercel/vercel`** (`/vercel/terraform-provider-vercel`, `>= 4.8`) — `provider "vercel" { api_token, team }`; `vercel_project` with `git_repository = { type="github", repo="owner/repo" }`; `vercel_project_environment_variables` (bulk: `variables = [{ key, value, target=["production","preview","development"], sensitive }]`); `vercel_project_domain { project_id, domain }`. (`production_branch` inside `git_repository`, and setting `git_repository = null` to skip linking, are both valid in v4 — confirm against your pinned version.)
 - **`supabase/supabase`** (`/supabase/terraform-provider-supabase`, `~> 1.0`) — `provider "supabase" {}` reads `SUPABASE_ACCESS_TOKEN`; `supabase_project { organization_id, name, database_password, region, instance_size }` **creates** a project; `supabase_settings { project_ref, api/auth/network/database = jsonencode({...}) }`; data sources `supabase_apikeys` (`anon_key`, `service_role_key`) and `supabase_pooler` (`url["transaction"]`).
-- **`integrations/github`** (`/integrations/terraform-provider-github`, `~> 6.0`) — `github_branch_protection { repository_id, pattern, required_status_checks { strict, contexts }, required_pull_request_reviews { required_approving_review_count } }`; `github_repository_environment { repository, environment, reviewers { users }, deployment_branch_policy {...} }`; `github_actions_secret`/`github_actions_environment_secret` use `value` (the `plaintext_value` arg is deprecated).
+- **`integrations/github`** (`/integrations/terraform-provider-github`, `~> 6.0`) — `github_branch_protection { repository_id, pattern, required_status_checks { strict, contexts }, required_pull_request_reviews { required_approving_review_count } }`; `github_repository_environment { repository, environment, reviewers { users }, deployment_branch_policy {...} }`; `github_actions_secret`/`github_actions_environment_secret` use `plaintext_value` (or pre-encrypted `encrypted_value`) — there is **no** `value` argument on secrets (verified against provider binary v6.12.1; an earlier revision of this line claimed the opposite). `github_actions_variable` (plain variables) is the one that uses `value`.
 
 The committed `.terraform.lock.hcl` files (Task 1) pin exact provider versions for reproducibility; Plan 2's Dependabot already covers the GitHub Actions used by CI.
 
@@ -776,7 +776,7 @@ Create `infra/terraform/envs/dev/backend.tf` (replace the org name with yours fr
 terraform {
   required_version = ">= 1.7"
   cloud {
-    organization = "REPLACE_WITH_HCP_ORG"
+    organization = "SQUAD_APP"
     workspaces {
       name = "sport-app-dev"
     }
@@ -963,7 +963,7 @@ Create `infra/terraform/envs/staging/backend.tf`:
 terraform {
   required_version = ">= 1.7"
   cloud {
-    organization = "REPLACE_WITH_HCP_ORG"
+    organization = "SQUAD_APP"
     workspaces {
       name = "sport-app-staging"
     }
@@ -977,7 +977,7 @@ Create `infra/terraform/envs/prod/backend.tf`:
 terraform {
   required_version = ">= 1.7"
   cloud {
-    organization = "REPLACE_WITH_HCP_ORG"
+    organization = "SQUAD_APP"
     workspaces {
       name = "sport-app-prod"
     }
@@ -1052,7 +1052,7 @@ Create `infra/terraform/envs/repo/backend.tf`:
 terraform {
   required_version = ">= 1.7"
   cloud {
-    organization = "REPLACE_WITH_HCP_ORG"
+    organization = "SQUAD_APP"
     workspaces {
       name = "sport-app-repo"
     }

@@ -25,6 +25,10 @@ RUN pnpm build
 FROM node:24-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+# Pull in already-released Alpine package fixes: the Trivy gate blocks on
+# fixed-upstream HIGH/CRITICAL CVEs (ignore-unfixed), and the node:24-alpine
+# base lags Alpine's patch releases (e.g. openssl CVE-2026-45447).
+RUN apk -U upgrade --no-cache
 # Run as an unprivileged user (Trivy DS002; standard for standalone images).
 RUN addgroup --system --gid 1001 nodejs \
   && adduser --system --uid 1001 nextjs

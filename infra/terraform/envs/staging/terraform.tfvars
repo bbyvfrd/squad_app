@@ -1,9 +1,9 @@
 environment            = "staging"
 project_slug           = "squad-app"
 git_repo               = "" # staging deploys via CLI (Plan 4); no Git link
-supabase_org_id        = "REPLACE_WITH_ORG_SLUG"
+supabase_org_id        = "huddbyyngwpgclzfgcmo"
 supabase_region        = "eu-central-1"
-supabase_instance_size = "micro"
+supabase_instance_size = null # free-plan org can't set compute size; use "micro"+ on a paid plan
 app_site_url           = "https://staging.squad-app.example"
 app_domain             = ""
 vercel_team            = null

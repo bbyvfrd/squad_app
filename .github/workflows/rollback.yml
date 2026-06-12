@@ -1,0 +1,48 @@
+name: Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Why are we rolling back?"
+        required: false
+        default: "manual rollback"
+  workflow_call:
+    inputs:
+      reason:
+        type: string
+        required: false
+        default: "auto rollback"
+
+permissions:
+  contents: read
+
+jobs:
+  rollback-production:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_PROD }}
+    steps:
+      - name: Log reason
+        env:
+          REASON: ${{ inputs.reason }}
+        # Block scalar: the message contains ": ", which YAML forbids in a plain scalar.
+        run: |
+          echo "Rolling back production — reason: $REASON"
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+      # No deployment argument = roll back to the previous production deployment.
+      # (No --yes: rollback has no project-setup prompt; --yes is not documented for it.)
+      - name: Roll back to the previous production deployment
+        run: vercel rollback
+      - name: Verify production health after rollback
+        run: |
+          for i in $(seq 1 5); do
+            if curl -fsS "${{ vars.PROD_URL }}/api/health" | grep -q '"status":"ok"'; then
+              echo "production healthy after rollback"; exit 0
+            fi
+            echo "attempt $i: not healthy yet"; sleep 10
+          done
+          echo "post-rollback health check FAILED"; exit 1
