@@ -1,0 +1,5 @@
+# Keep SAST scoped to application code. The vault-synced SQUAD design-system
+# reference under docs/context/design/ contains demo HTML/CSS/JSX (e.g. a design
+# canvas using window.postMessage("*")) — reference artifacts, not deployed code,
+# so Semgrep findings there are false positives.
+docs/context/design/
