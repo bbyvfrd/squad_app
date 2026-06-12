@@ -776,7 +776,7 @@ Create `infra/terraform/envs/dev/backend.tf` (replace the org name with yours fr
 terraform {
   required_version = ">= 1.7"
   cloud {
-    organization = "REPLACE_WITH_HCP_ORG"
+    organization = "SQUAD_APP"
     workspaces {
       name = "sport-app-dev"
     }
@@ -963,7 +963,7 @@ Create `infra/terraform/envs/staging/backend.tf`:
 terraform {
   required_version = ">= 1.7"
   cloud {
-    organization = "REPLACE_WITH_HCP_ORG"
+    organization = "SQUAD_APP"
     workspaces {
       name = "sport-app-staging"
     }
@@ -977,7 +977,7 @@ Create `infra/terraform/envs/prod/backend.tf`:
 terraform {
   required_version = ">= 1.7"
   cloud {
-    organization = "REPLACE_WITH_HCP_ORG"
+    organization = "SQUAD_APP"
     workspaces {
       name = "sport-app-prod"
     }
@@ -1052,7 +1052,7 @@ Create `infra/terraform/envs/repo/backend.tf`:
 terraform {
   required_version = ">= 1.7"
   cloud {
-    organization = "REPLACE_WITH_HCP_ORG"
+    organization = "SQUAD_APP"
     workspaces {
       name = "sport-app-repo"
     }

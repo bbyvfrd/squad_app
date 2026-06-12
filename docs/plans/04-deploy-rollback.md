@@ -198,7 +198,7 @@ Create `infra/terraform/envs/deploy-secrets/backend.tf`:
 terraform {
   required_version = ">= 1.7"
   cloud {
-    organization = "REPLACE_WITH_HCP_ORG"
+    organization = "SQUAD_APP"
     workspaces {
       name = "squad-app-deploy-secrets"
     }
@@ -206,7 +206,7 @@ terraform {
 }
 ```
 
-(`REPLACE_WITH_HCP_ORG` is the repo's committed-placeholder convention — filled locally before apply, per `infra/terraform/README.md`.)
+(`SQUAD_APP` is the repo's committed-placeholder convention — filled locally before apply, per `infra/terraform/README.md`.)
 
 Create `infra/terraform/envs/deploy-secrets/providers.tf` (confirm the latest `hashicorp/tfe` 0.x via the registry first — see the verification note above):
 
@@ -341,7 +341,7 @@ resource "github_actions_variable" "prod_url" {
 Create `infra/terraform/envs/deploy-secrets/terraform.tfvars` (non-secret values are committed per repo convention; tokens come from the environment: `TF_VAR_github_token`, `TF_VAR_vercel_api_token`, `TFE_TOKEN`):
 
 ```hcl
-hcp_organization  = "REPLACE_WITH_HCP_ORG"
+hcp_organization  = "SQUAD_APP"
 github_owner      = "bbyvfrd"
 github_repository = "squad_app"
 vercel_org_id     = "REPLACE_WITH_VERCEL_ORG_ID" # vercel teams ls / dashboard → settings
