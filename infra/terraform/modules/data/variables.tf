@@ -20,11 +20,14 @@ variable "region" {
 }
 
 variable "instance_size" {
+  # null omits the arg — required for free-plan Supabase orgs, which reject an
+  # explicit instance size (402 "cannot be specified for free plan"). Set a real
+  # size only on a paid org.
   type    = string
-  default = "micro"
+  default = null
   validation {
-    condition     = contains(["micro", "small", "medium", "large"], var.instance_size)
-    error_message = "instance_size must be one of: micro, small, medium, large."
+    condition     = var.instance_size == null || contains(["micro", "small", "medium", "large"], var.instance_size)
+    error_message = "instance_size must be null or one of: micro, small, medium, large."
   }
 }
 

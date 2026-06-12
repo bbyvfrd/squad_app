@@ -33,9 +33,11 @@ module "app" {
 
   environment_variables = [
     for key in local.contract.tf_managed : {
-      key       = key
-      value     = local.env_values[key]
-      target    = local.env_targets
+      key   = key
+      value = local.env_values[key]
+      # Vercel rejects sensitive vars on the `development` target — scope secrets
+      # to production+preview; public NEXT_PUBLIC_* vars stay on all three.
+      target    = contains(local.secret_keys, key) ? ["production", "preview"] : local.env_targets
       sensitive = contains(local.secret_keys, key)
     }
   ]

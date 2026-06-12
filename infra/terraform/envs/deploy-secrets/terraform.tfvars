@@ -1,7 +1,7 @@
-hcp_organization  = "REPLACE_WITH_HCP_ORG"
+hcp_organization  = "SQUAD_APP"
 github_owner      = "bbyvfrd"
 github_repository = "squad_app"
-vercel_org_id     = "REPLACE_WITH_VERCEL_ORG_ID" # vercel teams ls / dashboard → settings
+vercel_org_id     = "Gg46X3Fl1wFUIDzsR3DQIblj" # vercel teams ls / dashboard → settings
 
 # Auto-assigned production domains stay public under Standard Protection.
 # Swap prod_url for the real custom domain once one is attached.

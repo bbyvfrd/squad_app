@@ -14,8 +14,9 @@ variable "vercel_team" {
 variable "supabase_org_id" { type = string }
 variable "supabase_region" { type = string }
 variable "supabase_instance_size" {
+  # null = omit (free-plan orgs reject an explicit size). Set on a paid org.
   type    = string
-  default = "micro"
+  default = null
 }
 variable "supabase_db_password" {
   type      = string
