@@ -103,3 +103,20 @@ dialog.sqapp-sheet-host {
 dialog.sqapp-sheet-host::backdrop {
   background: transparent; /* .sq-scrim carries the scrim look */
 }
+
+/* 7. AA-contrast compensation over the vendored design system. The canonical
+      .sq-tab label colors fall under WCAG-AA 4.5:1 at the 10px label size on the
+      --bg-surface tabbar: inactive --fg-caption (#6B7480) = 4.22:1, active
+      --accent-text (#EE4721) = 3.37:1. Promote the label TEXT to role tokens that
+      pass (--fg-body 8.7:1, --fg-primary 14.5:1) and keep the terracotta spike on
+      the active ICON (aria-hidden; meets the 3:1 non-text bar). Remove once the
+      SQUAD source meets AA upstream. */
+.sq-tabbar .sq-tab {
+  color: var(--fg-body);
+}
+.sq-tabbar .sq-tab.is-active {
+  color: var(--fg-primary);
+}
+.sq-tabbar .sq-tab.is-active .sq-icon {
+  color: var(--accent-text);
+}
