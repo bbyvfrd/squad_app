@@ -13,7 +13,13 @@ type IconProps = {
 export function Icon({ name, size = 24, fill, accent, label, className }: IconProps) {
   return (
     <span
-      className={cn("sq-icon", `sq-icon-${size}`, fill && "sq-icon-fill", accent && "sq-icon-accent", className)}
+      className={cn(
+        "sq-icon",
+        `sq-icon-${size}`,
+        fill && "sq-icon-fill",
+        accent && "sq-icon-accent",
+        className,
+      )}
       aria-hidden={label ? undefined : true}
       aria-label={label}
       role={label ? "img" : undefined}

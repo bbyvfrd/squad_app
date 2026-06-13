@@ -5,7 +5,14 @@ import { GAME_BADGE, PARTICIPATION_BADGE, SKILL_UI, SPORT_UI } from "./mappings"
 describe("SPORT_UI", () => {
   it("maps all 8 seeded sport keys (migrations/0001)", () => {
     expect(Object.keys(SPORT_UI).sort()).toEqual([
-      "basketball", "football", "gym", "padel", "running", "swimming", "tennis", "volleyball",
+      "basketball",
+      "football",
+      "gym",
+      "padel",
+      "running",
+      "swimming",
+      "tennis",
+      "volleyball",
     ]);
   });
   it("reconciles football to the soccer design key exactly once", () => {
@@ -28,7 +35,12 @@ describe("status badges", () => {
     expect(PARTICIPATION_BADGE.requested).toEqual({ className: "is-waiting", label: "Pending" });
   });
   it("covers every participation and game status", () => {
-    expect(Object.keys(PARTICIPATION_BADGE).sort()).toEqual(["approved", "cancelled", "declined", "requested"]);
+    expect(Object.keys(PARTICIPATION_BADGE).sort()).toEqual([
+      "approved",
+      "cancelled",
+      "declined",
+      "requested",
+    ]);
     expect(Object.keys(GAME_BADGE).sort()).toEqual(["cancelled", "full", "open"]);
   });
 });

@@ -21,8 +21,7 @@ export function designVersion(changelog) {
 }
 
 async function fetchIconSubset(names) {
-  const family =
-    "Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200";
+  const family = "Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200";
   const url = `https://fonts.googleapis.com/css2?family=${family}&icon_names=${names.join(",")}&display=block`;
   // A full modern UA is required or the css2 API serves TTF instead of woff2.
   const ua =
@@ -36,7 +35,9 @@ async function fetchIconSubset(names) {
   // Tripwire: a 30-icon subset is tens of KB. If the full ~3.9 MB font ever comes
   // back, fail loudly rather than silently shipping it.
   if (buf.length > 1_000_000) {
-    throw new Error(`icon subset suspiciously large (${(buf.length / 1024 / 1024).toFixed(1)} MB) — refusing to write`);
+    throw new Error(
+      `icon subset suspiciously large (${(buf.length / 1024 / 1024).toFixed(1)} MB) — refusing to write`,
+    );
   }
   writeFileSync(path.join(OUT, "fonts/material-symbols-subset.woff2"), buf);
   console.log(`icon subset: ${names.length} icons, ${(buf.length / 1024).toFixed(1)} KB`);
@@ -52,7 +53,10 @@ async function main() {
   console.log(`vendored design system v${version}`);
   if (process.argv.includes("--icons")) {
     const names = readFileSync(path.join(OUT, "icon-inventory.txt"), "utf8")
-      .split("\n").map((s) => s.trim()).filter(Boolean).sort();
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .sort();
     await fetchIconSubset(names);
   }
 }

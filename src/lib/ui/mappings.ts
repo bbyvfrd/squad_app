@@ -4,8 +4,14 @@ import type { IconName } from "./icon-names";
 
 // DB seed keys — see migrations/0001_signup_trigger_and_sports_seed.sql.
 export type SportKey =
-  | "football" | "basketball" | "tennis" | "volleyball"
-  | "padel" | "running" | "gym" | "swimming";
+  | "football"
+  | "basketball"
+  | "tennis"
+  | "volleyball"
+  | "padel"
+  | "running"
+  | "gym"
+  | "swimming";
 
 export const SPORT_UI: Record<SportKey, { className: string; icon: IconName; label: string }> = {
   football: { className: "sq-sport-soccer", icon: "sports_soccer", label: "Football" }, // DB football ↔ CSS soccer
