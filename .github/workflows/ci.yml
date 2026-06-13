@@ -48,6 +48,8 @@ jobs:
         run: pnpm lint
       - name: Typecheck
         run: pnpm typecheck
+      - name: Design rules
+        run: pnpm check:design
 
   # Stage 3 — unit/contract + integration tests against a real Supabase-provisioned
   # Postgres. The migrations need Supabase's auth schema, roles, and auth.uid(), so CI

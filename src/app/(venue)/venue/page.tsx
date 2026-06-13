@@ -1,3 +1,4 @@
 export default function VenueHome() {
-  return <main>Venue owner surface</main>;
+  // Plain element, not <main>: the (venue) layout already provides the <main> landmark.
+  return <div>Venue owner surface</div>;
 }

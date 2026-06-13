@@ -10,3 +10,4 @@ coverage
 # under docs/context/design/ is authored upstream via one-way sync, so reformatting
 # any of it here would only diverge from the vault source.
 docs/
+src/styles/squad/colors_and_type.css

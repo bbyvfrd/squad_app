@@ -94,6 +94,9 @@ Dockerfile
 - **Skill levels are advisory — the organizer decides.** `games.skill_level` and `client_sport_skills` drive the organizer's "below required" indicator and discovery filtering only. Nothing in the DB or RLS gates a join request based on skill; the `lib/booking` layer may prompt for a level but never blocks the insert.
 - **Match existing code.** Mirror the surrounding file's naming, structure, and idioms.
 - **Tests gate the core loop.** Keep the Playwright path (signup → create game → request → approve) green.
+- **The vocabulary law (design system).** Canonical `.sq-*` looks are consumed ONLY by importing from `src/components/ui/` — screen code never hand-writes `sq-*` class strings; class derivation lives only in `src/components/ui/` + `src/lib/ui/mappings.ts` (`pnpm check:design` gates this in CI). Token-mapped Tailwind utilities (`bg-surface`, `p-s2`, `rounded-card`, …) are for layout and bespoke surfaces; raw ramps (`--terra-*`/`--steel-*`/`--linen-*`) are deliberately not exposed as utilities.
+- **Design-system upgrades are a file swap.** `src/styles/squad/` is generated — never hand-edit. To upgrade: re-run `pnpm sync:design` (and `--icons` if the inventory changed), read `docs/context/design/CHANGELOG.md`, run the theme E2E. Version pin: `src/styles/squad/VERSION`.
+- **New icon = two steps.** Add the ligature name to `src/styles/squad/icon-inventory.txt` AND `src/lib/ui/icon-names.ts` (parity-tested), then `pnpm sync:design --icons`.
 
 ## Commands
 

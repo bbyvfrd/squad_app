@@ -8,9 +8,10 @@ test("health endpoint reports ok when the database is reachable", async ({ reque
 
 // The client surface lives at /app (route group app/(client)/app), not /. There is no
 // root page in v1, so we assert against the path the page actually renders at.
-test("client surface renders", async ({ page }) => {
+test("client surface renders the proof Home", async ({ page }) => {
   await page.goto("/app");
-  await expect(page.getByText("Client surface (player / organizer)")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "FIND YOUR GAME" })).toBeVisible();
+  await expect(page.getByText("Open")).toBeVisible();
 });
 
 test("venue surface renders", async ({ page }) => {

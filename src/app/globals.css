@@ -1,26 +1,122 @@
 @import "tailwindcss";
+@import "../styles/squad/colors_and_type.css";
 
+/* ── Bridge layer (the ONLY sanctioned additions over the vendored CSS) ───────── */
+
+/* 1. Re-point family tokens at next/font (private family names). */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --font-sans: var(--font-montserrat), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: var(--font-karla), system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.sq-icon {
+  font-family: var(--font-icons);
 }
 
+/* 2. Kill Tailwind's stock palette — off-system colors must not compile. */
+@theme {
+  --color-*: initial;
+}
+
+/* 3. Role tokens → utilities. `inline` emits the referenced var at the consuming
+      element, so utilities re-theme under [data-theme] even container-scoped
+      (the same rule as CONTRIBUTING's alias gotcha). Raw ramps stay unmapped. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-page: var(--bg-page);
+  --color-surface: var(--bg-surface);
+  --color-elevated: var(--bg-elevated);
+  --color-input: var(--bg-input);
+  --color-track: var(--bg-track);
+  --color-ink: var(--fg-primary);
+  --color-body: var(--fg-body);
+  --color-caption: var(--fg-caption);
+  --color-muted: var(--fg-muted);
+  --color-hairline: var(--rule-hairline);
+  --color-hairline-strong: var(--rule-hairline-strong);
+  --color-accent: var(--accent);
+  --color-accent-text: var(--accent-text);
+  --color-success: var(--success-500);
+  --color-success-wash: var(--success-50);
+  --color-success-text: var(--fg-success);
+  --color-warning: var(--warning-500);
+  --color-warning-wash: var(--warning-50);
+  --color-warning-text: var(--fg-warning);
+  --color-error: var(--error-500);
+  --color-error-wash: var(--error-50);
+  --color-error-text: var(--fg-error);
+  --color-info: var(--info-500);
+  --color-info-wash: var(--info-50);
+  --color-info-text: var(--fg-info);
+
+  --font-sans: var(--font-sans);
+  --font-body: var(--font-body);
+
+  --spacing-s1: var(--s1);
+  --spacing-s2: var(--s2);
+  --spacing-s3: var(--s3);
+  --spacing-s4: var(--s4);
+  --spacing-s5: var(--s5);
+  --spacing-s6: var(--s6);
+  --spacing-s7: var(--s7);
+  --spacing-s8: var(--s8);
+  --spacing-s10: var(--s10);
+  --spacing-s12: var(--s12);
+  --spacing-s14: var(--s14);
+  --spacing-s16: var(--s16);
+
+  --radius-xs: var(--r-xs);
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+  --radius-card: var(--r-card);
+  --radius-xl: var(--r-xl);
+  --radius-xxl: var(--r-xxl);
+  --radius-pill: var(--r-pill);
+
+  --shadow-hero-lift: var(--shadow-hero-lift);
+  --shadow-card-lift: var(--shadow-card-lift);
+
+  --ease-out: var(--ease-out);
+  --ease-quint: var(--ease-quint);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* 4. Dark variant follows the system's mechanism, not a .dark class. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
+/* 5. Base. */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg-page);
+  color: var(--fg-primary);
+  font-family: var(--font-body);
+}
+
+/* 6. App-local reset for the Sheet host <dialog> (bespoke, not canonical —
+      the canonical .sq-scrim/.sq-sheet render INSIDE it). */
+dialog.sqapp-sheet-host {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  max-width: 100vw;
+  max-height: 100dvh;
+  width: 100vw;
+  height: 100dvh;
+}
+dialog.sqapp-sheet-host::backdrop {
+  background: transparent; /* .sq-scrim carries the scrim look */
+}
+
+/* 7. AA-contrast compensation over the vendored design system. The canonical
+      .sq-tab label colors fall under WCAG-AA 4.5:1 at the 10px label size on the
+      --bg-surface tabbar: inactive --fg-caption (#6B7480) = 4.22:1, active
+      --accent-text (#EE4721) = 3.37:1. Promote the label TEXT to role tokens that
+      pass (--fg-body 8.7:1, --fg-primary 14.5:1) and keep the terracotta spike on
+      the active ICON (aria-hidden; meets the 3:1 non-text bar). Remove once the
+      SQUAD source meets AA upstream. */
+.sq-tabbar .sq-tab {
+  color: var(--fg-body);
+}
+.sq-tabbar .sq-tab.is-active {
+  color: var(--fg-primary);
+}
+.sq-tabbar .sq-tab.is-active .sq-icon {
+  color: var(--accent-text);
 }

@@ -17,12 +17,15 @@
     "test:watch": "vitest",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:e2e": "playwright test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check:design": "node scripts/check-design-rules.mjs",
+    "sync:design": "node scripts/sync-design-system.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.1",
     "drizzle-orm": "^0.45.2",
     "next": "16.2.9",
+    "next-themes": "^0.4.6",
     "postgres": "^3.4.9",
     "react": "19.2.7",
     "react-dom": "19.2.7",
@@ -30,8 +33,11 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
     "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^25",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -39,6 +45,7 @@
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "jsdom": "^29.1.1",
     "prettier": "^3.8.4",
     "tailwindcss": "^4",
     "typescript": "^5",
