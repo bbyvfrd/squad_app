@@ -1,6 +1,9 @@
 add
+arrow_back
 arrow_forward
+bolt
 check
+checklist
 chevron_right
 close
 dark_mode
@@ -9,15 +12,20 @@ distance
 error
 expand_more
 fitness_center
+groups
 image
 info
 light_mode
 location_on
 lock
+mail
+open_in_new
+person
 pool
 remove
 schedule
 search
+smartphone
 sports_basketball
 sports_soccer
 sports_tennis
@@ -26,5 +34,6 @@ stadium
 swap_vert
 tune
 verified
+visibility
 warning
 waving_hand
