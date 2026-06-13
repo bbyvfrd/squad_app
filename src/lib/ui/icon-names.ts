@@ -1,2 +1,10 @@
-// src/lib/ui/icon-names.ts  (stub — replaced in Task 7)
-export type IconName = string;
+// MUST mirror src/styles/squad/icon-inventory.txt (the subset input) — parity-tested.
+export const ICON_NAMES = [
+  "add", "arrow_forward", "check", "chevron_right", "close", "dark_mode",
+  "directions_run", "distance", "error", "expand_more", "fitness_center",
+  "image", "info", "light_mode", "location_on", "lock", "pool", "remove",
+  "schedule", "search", "sports_basketball", "sports_soccer", "sports_tennis",
+  "sports_volleyball", "stadium", "swap_vert", "tune", "verified", "warning",
+  "waving_hand",
+] as const;
+export type IconName = (typeof ICON_NAMES)[number];
