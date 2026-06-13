@@ -10,6 +10,12 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Text } from "@/components/ui/text";
 import { SPORT_UI, type SportKey } from "@/lib/ui/mappings";
 
+// Render per-request, not at build: this page queries the DB for the seeded sport
+// rail, and the production Docker image builds with a placeholder DATABASE_URL that
+// is never dialed at build (postgres() is lazy). Static prerender would dial it and
+// fail the no-DB image build. The DB is reached at request time (CI e2e + prod).
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const rows = await db.select().from(sports).orderBy(asc(sports.displayOrder));
   return (
