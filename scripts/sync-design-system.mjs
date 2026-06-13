@@ -24,11 +24,20 @@ async function fetchIconSubset(names) {
   const family =
     "Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200";
   const url = `https://fonts.googleapis.com/css2?family=${family}&icon_names=${names.join(",")}&display=block`;
-  // A modern UA is required or the API serves TTF instead of woff2.
-  const css = await (await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 Chrome/120" } })).text();
-  const woff2 = css.match(/url\((https:[^)]+\.woff2)\)/)?.[1];
+  // A full modern UA is required or the css2 API serves TTF instead of woff2.
+  const ua =
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+  const css = await (await fetch(url, { headers: { "User-Agent": ua } })).text();
+  // The woff2 src is a kit endpoint (/l/font?kit=...) with no .woff2 extension —
+  // match the URL paired with format('woff2'), not a file suffix.
+  const woff2 = css.match(/url\((https:[^)]+)\)\s*format\(['"]woff2['"]\)/)?.[1];
   if (!woff2) throw new Error(`No woff2 URL in css2 response:\n${css.slice(0, 300)}`);
   const buf = Buffer.from(await (await fetch(woff2)).arrayBuffer());
+  // Tripwire: a 30-icon subset is tens of KB. If the full ~3.9 MB font ever comes
+  // back, fail loudly rather than silently shipping it.
+  if (buf.length > 1_000_000) {
+    throw new Error(`icon subset suspiciously large (${(buf.length / 1024 / 1024).toFixed(1)} MB) — refusing to write`);
+  }
   writeFileSync(path.join(OUT, "fonts/material-symbols-subset.woff2"), buf);
   console.log(`icon subset: ${names.length} icons, ${(buf.length / 1024).toFixed(1)} KB`);
 }
