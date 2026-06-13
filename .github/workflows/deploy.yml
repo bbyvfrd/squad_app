@@ -12,11 +12,6 @@ on:
     types: [completed]
     branches: [main]
 
-# Never cancel an in-flight production deploy.
-concurrency:
-  group: deploy-production
-  cancel-in-progress: false
-
 permissions:
   contents: read
 
@@ -25,6 +20,12 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
     runs-on: ubuntu-latest
     environment: staging
+    # Staging owns a SEPARATE concurrency group from production — so a pending prod
+    # approval can never block staging deploys of later merges (the bug this fixes).
+    # Serialized (not cancel-in-progress) so a staging migration is never cut mid-run.
+    concurrency:
+      group: deploy-staging
+      cancel-in-progress: false
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -86,6 +87,11 @@ jobs:
     needs: staging
     runs-on: ubuntu-latest
     environment: production
+    # Production serializes on its own group (never cancel an in-flight prod deploy),
+    # scoped to THIS job so a waiting prod approval never blocks the staging job above.
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
     # Read by the rollback job: only roll back if a deploy was actually attempted
     # (outputs set by succeeded steps survive a failed job; an unstarted job — e.g.
     # a REJECTED approval — has no outputs, so rollback is skipped).
