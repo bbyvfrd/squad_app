@@ -69,7 +69,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - uses: supabase/setup-cli@v2
         with:
-          version: latest
+          # Pinned, not "latest": resolving "latest" makes an unauthenticated
+          # GitHub API call that gets rate-limited on shared runner IPs. A pinned
+          # version downloads the release asset directly. Bump deliberately.
+          version: 2.106.0
       - name: Start Supabase (provides auth schema, roles, auth.uid())
         run: supabase start
       - name: Apply migrations (proves migrations apply cleanly)
@@ -170,7 +173,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - uses: supabase/setup-cli@v2
         with:
-          version: latest
+          # Pinned, not "latest": resolving "latest" makes an unauthenticated
+          # GitHub API call that gets rate-limited on shared runner IPs. A pinned
+          # version downloads the release asset directly. Bump deliberately.
+          version: 2.106.0
       - name: Start Supabase
         run: supabase start
       - name: Apply migrations
