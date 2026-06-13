@@ -202,3 +202,14 @@ Explicitly **not** adopted now: Redis, Kafka, PostGIS/H3, Go services, microserv
 - Decision Log
 - Non-Decisions
 - Foundation Plans vs Market Architecture
+
+## The design-system seam (Plan 06)
+
+The SQUAD design system (v1.5, `docs/context/design/`) enters the app through one
+seam: `scripts/sync-design-system.mjs` vendors the canonical CSS into
+`src/styles/squad/` (fonts re-wired through `next/font/local`; Material Symbols
+subsetted to `icon-inventory.txt`), `src/app/globals.css` maps role tokens into
+Tailwind v4 (`@theme inline`, stock palette removed, dark variant on
+`[data-theme="dark"]`), and `src/components/ui/` is the only place `sq-*` class
+strings exist. Product↔design vocabulary (DB `football` ↔ CSS `soccer`, skill
+tiers, status badges) reconciles in `src/lib/ui/mappings.ts` and nowhere else.
