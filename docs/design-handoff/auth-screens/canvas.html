@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>SQUAD · Auth Screens</title>
+<link rel="stylesheet" href="tokens.css"/>
+<link rel="stylesheet" href="auth.css"/>
+<style>
+  html,body{ margin:0; height:100%; background:#f0eee9; }
+  /* keep design-canvas chrome in the system voice */
+  .dc-sectionhead .dc-editable{ font-family:var(--font-sans)!important; font-weight:800!important;
+    text-transform:uppercase!important; letter-spacing:.01em!important; color:var(--steel-700)!important; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="phone.jsx?v=8"></script>
+<script type="text/babel" src="screens-b.jsx?v=8"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+
+<script type="text/babel">
+const { DesignCanvas, DCSection, DCArtboard, DCPostIt } = window;
+const { B_Boot, B_Onb1, B_Onb2, B_Onb3, B_Intent, B_SignUp, B_SignUpPhone, B_LogIn, B_Phone, B_OTP } = window;
+
+const W = 414, H = 868;
+const CARD = { background:'#f0eee9' };
+
+function App(){
+  return (
+    <DesignCanvas>
+      <DCSection id="first-run" title="First Run"
+        subtitle="Warm Linen · boot, then a three-slide intro that walks through what SQUAD does.">
+        <DCArtboard id="b-boot" label="01 · Boot"            width={W} height={H} style={CARD}><B_Boot/></DCArtboard>
+        <DCArtboard id="b-onb1" label="02 · Intro · Discover" width={W} height={H} style={CARD}><B_Onb1/></DCArtboard>
+        <DCArtboard id="b-onb2" label="03 · Intro · Join"     width={W} height={H} style={CARD}><B_Onb2/></DCArtboard>
+        <DCArtboard id="b-onb3" label="04 · Intro · Organize" width={W} height={H} style={CARD}><B_Onb3/></DCArtboard>
+      </DCSection>
+
+      <DCSection id="signup" title="Sign Up Flow"
+        subtitle="New account: pick email or phone → verify (phone) → optional personalization → into the app.">
+        <DCArtboard id="b-signup"    label="05 · Sign up · Email" width={W} height={H} style={CARD}><B_SignUp/></DCArtboard>
+        <DCArtboard id="b-signup-ph" label="06 · Sign up · Phone" width={W} height={H} style={CARD}><B_SignUpPhone/></DCArtboard>
+        <DCArtboard id="b-otp"       label="07 · Verify code"     width={W} height={H} style={CARD}><B_OTP/></DCArtboard>
+        <DCArtboard id="b-intent"    label="08 · How you'll use SQUAD" width={W} height={H} style={CARD}><B_Intent/></DCArtboard>
+      </DCSection>
+
+      <DCSection id="signin" title="Sign In Flow"
+        subtitle="Returning user: email or phone. The phone path reuses the Verify code screen above.">
+        <DCArtboard id="b-login" label="09 · Sign in · Email" width={W} height={H} style={CARD}><B_LogIn/></DCArtboard>
+        <DCArtboard id="b-phone" label="10 · Sign in · Phone" width={W} height={H} style={CARD}><B_Phone/></DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

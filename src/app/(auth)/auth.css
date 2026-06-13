@@ -1,0 +1,865 @@
+/* ───────────────────────────────────────────────────────────
+   SQUAD — Auth / boot / welcome screen styles (LIGHT-ONLY PORT)
+   Verbatim port of the LIGHT blocks from the Claude Design handoff
+   `docs/design-handoff/auth-screens/auth.css` (Direction B "Warm Linen").
+   The dark variant (Direction A) and the phone-frame chrome were retired;
+   `.ph-*`, `.au-field-dark`, every `*-dark` rule, and the unused
+   `.role-card`/`.role-list` block are intentionally NOT ported.
+   All color via design-system vars (src/styles/squad/colors_and_type.css).
+   "Built Chunky." Montserrat signage + Karla reading voice.
+   ─────────────────────────────────────────────────────────── */
+
+* {
+  box-sizing: border-box;
+}
+
+/* ===== SHARED TYPE ================================================== */
+.au-kicker {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+.au-eyebrow {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* ===== FIELDS ======================================================= */
+.au-field-label {
+  display: block;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 9px;
+}
+.au-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 56px;
+  padding: 0 18px;
+  font-family: var(--font-body);
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+.au-input-row input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 500;
+}
+.au-input-row .au-input-fake {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 500;
+}
+.au-input-icon {
+  flex: 0 0 auto;
+  display: flex;
+}
+
+/* light variant (Direction B) — soft, rounded, Google-grade */
+.au-field-light .au-field-label {
+  color: var(--steel-500);
+}
+.au-field-light .au-input-row {
+  background: var(--linen-50);
+  border: 1px solid var(--linen-300);
+  border-radius: 14px;
+}
+.au-field-light .au-input-row input {
+  color: var(--steel-700);
+}
+.au-field-light .au-input-row input::placeholder {
+  color: var(--linen-500);
+}
+.au-field-light .au-input-fake {
+  color: var(--steel-700);
+}
+/* `.is-focus` from the static mockup is realized as `:focus-within` in the app */
+.au-field-light .au-input-row.is-focus,
+.au-field-light .au-input-row:focus-within {
+  background: var(--linen-100);
+  border-color: var(--terra-500);
+  box-shadow: 0 0 0 4px rgba(238, 71, 33, 0.12);
+}
+.au-field-light .au-input-icon {
+  color: var(--linen-500);
+}
+.au-placeholder {
+  color: var(--linen-500) !important;
+}
+
+/* caret */
+.au-caret {
+  display: inline-block;
+  width: 2px;
+  height: 20px;
+  margin-left: 1px;
+  background: var(--terra-500);
+  vertical-align: -4px;
+  animation: au-blink 1.1s steps(1) infinite;
+}
+@keyframes au-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ===== BUTTONS ====================================================== */
+.au-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 56px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+.au-btn:active {
+  transform: translateY(1px);
+}
+/* Gated CTA (e.g. Verify before the code is complete): dim, non-interactive, and
+   no press transform. Keeps the terracotta hue but reads clearly as unavailable. */
+.au-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.au-btn:disabled:active {
+  transform: none;
+}
+.au-btn-primary {
+  background: var(--terra-500);
+  color: var(--steel-800);
+  border-radius: 14px;
+}
+.au-btn-primary:hover {
+  background: var(--terra-300);
+}
+.au-btn-primary.is-clay {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.45) inset,
+    0 -3px 8px rgba(157, 44, 20, 0.35) inset,
+    0 10px 22px rgba(238, 71, 33, 0.3);
+}
+.au-btn-social {
+  background: transparent;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+.au-btn-social-light {
+  color: var(--steel-700);
+  box-shadow: inset 0 0 0 1.5px var(--linen-300);
+  background: var(--linen-50);
+}
+.au-btn-social-light:hover {
+  background: var(--linen-100);
+}
+
+/* ===== LINKS / DIVIDER ============================================== */
+.au-link {
+  font-family: var(--font-body);
+  font-weight: 700;
+  cursor: pointer;
+  /* A11y (Task 9): the inline link text is small (13–14px), so it needs ≥4.5:1.
+     Brand terra-500 on linen is only ~3.1–3.4:1, and these links can sit on the
+     bottom-most linen-200 surface (signup "Log in") where terra-600 is just 4.32.
+     terra-700 clears AA on every auth surface (6.7 on linen-100 / 6.1 on linen-200)
+     while staying terracotta — text only; non-text terra accents are untouched. */
+  color: var(--terra-700);
+  text-decoration: none;
+}
+.au-foot {
+  font-family: var(--font-body);
+  font-size: 14px;
+  text-align: center;
+}
+.au-foot-light {
+  color: var(--steel-500);
+}
+.au-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.au-divider::before,
+.au-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+}
+.au-divider-light {
+  /* A11y (Task 9): the "or" label is tiny (10px) — linen-500 on linen is ~3.2:1.
+     linen-600 keeps the muted hairline look while clearing AA (5.8 / 5.2 on the
+     linen-100 / linen-200 surfaces it renders on). The ::before/::after rules are
+     non-text and stay on linen-300. */
+  color: var(--linen-600);
+}
+.au-divider-light::before,
+.au-divider-light::after {
+  background: var(--linen-300);
+}
+
+/* back / chrome button */
+.au-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: none;
+  cursor: pointer;
+  border-radius: 12px;
+  background: transparent;
+}
+.au-icon-btn-light {
+  color: var(--steel-700);
+  box-shadow: inset 0 0 0 1px var(--linen-300);
+  background: var(--linen-50);
+}
+
+/* legal microcopy */
+.au-legal {
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+.au-legal-light {
+  color: var(--linen-500);
+}
+
+/* pager dots */
+.au-pager {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+.au-pager i {
+  width: 7px;
+  height: 7px;
+  border-radius: 99px;
+  display: block;
+}
+.au-pager i.on {
+  width: 22px;
+  background: var(--terra-500);
+}
+.au-pager-light i {
+  background: var(--linen-300);
+}
+
+/* remember toggle */
+.au-toggle {
+  width: 42px;
+  height: 24px;
+  border-radius: 99px;
+  position: relative;
+  transition: background var(--dur-fast) var(--ease-out);
+  flex: 0 0 auto;
+}
+.au-toggle b {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 99px;
+  background: var(--linen-100);
+  transition: left var(--dur-fast) var(--ease-out);
+}
+.au-toggle.on {
+  background: var(--terra-500);
+}
+.au-toggle.on b {
+  left: 21px;
+}
+.au-toggle.off {
+  background: var(--steel-300);
+}
+
+/* ===== BOOT / SPLASH ================================================ */
+@keyframes boot-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes boot-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.045);
+  }
+}
+.boot-mark {
+  animation: boot-rise 0.7s var(--ease-out) both;
+}
+.boot-mark img {
+  animation: boot-breathe 3.2s var(--ease-out) infinite;
+  display: block;
+}
+
+/* clay shadow under light mark */
+.boot-clay {
+  filter: drop-shadow(0 18px 30px rgba(238, 71, 33, 0.28))
+    drop-shadow(0 6px 10px rgba(157, 44, 20, 0.22));
+}
+
+/* sleek indeterminate bar (Material-grade shuttle) */
+.boot-mat {
+  position: relative;
+  width: 148px;
+  height: 3px;
+  border-radius: 99px;
+  background: var(--linen-300);
+  overflow: hidden;
+}
+.boot-mat::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 99px;
+  background: var(--terra-500);
+  animation: boot-mat 1.5s cubic-bezier(0.65, 0.05, 0.35, 1) infinite;
+}
+@keyframes boot-mat {
+  0% {
+    left: -42%;
+    width: 42%;
+  }
+  55% {
+    left: 32%;
+    width: 58%;
+  }
+  100% {
+    left: 108%;
+    width: 42%;
+  }
+}
+
+/* ===== ONBOARDING SLIDES (multi-screen intro carousel) ============= */
+/* each slide is a feature explainer: a big image-slot placeholder + a
+   headline + body + pager. The visual is clearly marked for generation. */
+.onb-visual {
+  position: relative;
+  overflow: hidden;
+  border-radius: 26px;
+  background: var(--linen-50);
+  box-shadow: inset 0 0 0 1px var(--linen-300);
+}
+.onb-art {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(135deg, var(--linen-100) 0 13px, var(--linen-50) 13px 26px);
+}
+/* feature icon chip, top-left */
+.onb-chip {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  width: 46px;
+  height: 46px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--steel-700);
+  color: var(--terra-300);
+  box-shadow: 0 8px 20px rgba(19, 34, 44, 0.2);
+}
+/* centered placeholder caption: what image to generate here */
+.onb-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 30px;
+  text-align: center;
+}
+.onb-center .frame {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card);
+  color: var(--steel-400);
+  box-shadow: 0 2px 10px rgba(19, 34, 44, 0.07);
+}
+.onb-center .cap {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--steel-400);
+  max-width: 24ch;
+  line-height: 1.5;
+}
+/* small device-context tag, bottom-left */
+.onb-tag {
+  position: absolute;
+  bottom: 18px;
+  left: 18px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border-radius: 9px;
+  background: var(--bg-card);
+  color: var(--steel-700);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  box-shadow: 0 2px 10px rgba(19, 34, 44, 0.1);
+}
+.onb-tag .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 99px;
+  background: var(--terra-500);
+}
+/* corner ribbon marking the visual as a placeholder */
+.ob-ph-flag {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 3;
+  padding: 6px 10px;
+  border-bottom-left-radius: 12px;
+  background: rgba(19, 34, 44, 0.78);
+  color: var(--linen-100);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* ===== ONBOARDING HERO ART (real 3D clay illustration) ============= */
+.onb-hero {
+  position: relative;
+  height: 362px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.onb-hero-sweep {
+  position: absolute;
+  width: 108%;
+  height: 70%;
+  left: 50%;
+  top: 48%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(238, 71, 33, 0.1), rgba(238, 71, 33, 0) 64%);
+}
+.clay-ground {
+  position: absolute;
+  bottom: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 62%;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(19, 34, 44, 0.2), rgba(19, 34, 44, 0) 70%);
+  filter: blur(3px);
+  animation: clay-ground 5.5s var(--ease-out) infinite;
+}
+.clay-float {
+  position: relative;
+  width: 114%;
+  max-width: none;
+  display: block;
+  filter: drop-shadow(0 26px 30px rgba(19, 34, 44, 0.2))
+    drop-shadow(0 10px 14px rgba(157, 44, 20, 0.12));
+  animation: clay-bob 5.5s var(--ease-out) infinite;
+}
+@keyframes clay-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-9px);
+  }
+}
+@keyframes clay-ground {
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateX(-50%) scale(0.9);
+    opacity: 0.7;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .clay-float,
+  .clay-ground {
+    animation: none;
+  }
+}
+
+/* circular "next" button for intermediate onboarding slides */
+.au-next {
+  flex: 0 0 auto;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--terra-500);
+  color: var(--steel-800);
+  border: none;
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+.au-next:hover {
+  background: var(--terra-300);
+}
+.au-next:active {
+  transform: translateY(1px);
+}
+.au-next.is-clay {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.45) inset,
+    0 -3px 8px rgba(157, 44, 20, 0.35) inset,
+    0 10px 22px rgba(238, 71, 33, 0.3);
+}
+
+/* ===== ROLE VENUE LAUNCH (cross-app entry — not a selectable role) == */
+/* venue lives in a separate app — a light launch row, not a selectable role */
+.role-vendor {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  padding: 14px 16px;
+  border: none;
+  border-radius: 16px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--linen-300);
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+.role-vendor:hover {
+  background: var(--linen-100);
+  box-shadow: inset 0 0 0 1px var(--linen-400);
+}
+.role-vendor .rv-ic {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--linen-100);
+  color: var(--steel-500);
+  box-shadow: inset 0 0 0 1px var(--linen-300);
+}
+.role-vendor .rv-txt {
+  flex: 1;
+  min-width: 0;
+}
+.role-vendor .rv-name {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--steel-700);
+}
+.role-vendor .rv-sub {
+  font-family: var(--font-body);
+  font-size: 12px;
+  /* A11y: 12px sub copy — steel-400 on linen-100 is 4.22:1 (just under AA). Before
+     the scroll fix this row could be clipped below the pinned viewport so axe never
+     evaluated it; now that the screen flows and the venue row is always visible, it
+     must clear AA. steel-500 reads as the same muted sub and clears (8.7:1). */
+  color: var(--steel-500);
+  margin-top: 1px;
+}
+.role-vendor .rv-go {
+  flex: 0 0 auto;
+  color: var(--steel-400);
+  display: flex;
+}
+
+/* ===== INTENT CHIPS (optional multi-select personalization) ======== */
+.chip-group {
+  margin-bottom: 16px;
+}
+.chip-grouplabel {
+  font-family: var(--font-label);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  /* A11y (Task 9): 11px caption — steel-400 on linen-100 is 4.22:1 (just under AA).
+     steel-500 clears comfortably (8.7:1) and reads as the same muted label. */
+  color: var(--steel-500);
+  margin-bottom: 10px;
+}
+.chip-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 15px;
+  border: none;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  background: var(--linen-50);
+  box-shadow: inset 0 0 0 1px var(--linen-300);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--steel-600);
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+.chip:hover {
+  box-shadow: inset 0 0 0 1px var(--linen-400);
+  background: var(--linen-100);
+}
+.chip.is-on {
+  background: var(--terra-50);
+  color: var(--terra-700);
+  box-shadow: inset 0 0 0 1.5px var(--terra-500);
+}
+.chip .sq-icon {
+  color: var(--terra-600);
+  margin-left: -2px;
+}
+.chip-skip {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  /* A11y (Task 9): 11px label — steel-400 is 4.22:1 on linen; steel-500 clears AA
+     (8.7:1). :hover already darkens to steel-600. */
+  color: var(--steel-500);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 4px;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.chip-skip:hover {
+  color: var(--steel-600);
+}
+
+/* ===== PHONE AUTH ================================================== */
+/* country-code prefix inside the field row (no emoji flags — brand rule) */
+.au-phone-cc {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  padding: 0 12px 0 2px;
+  margin-right: 2px;
+  height: 30px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-right: 1px solid var(--linen-300);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--steel-700);
+}
+.au-phone-cc .sq-icon {
+  color: var(--steel-400);
+}
+
+/* OTP code boxes */
+.otp-row {
+  display: flex;
+  gap: 10px;
+}
+.otp-box {
+  flex: 1;
+  height: 62px;
+  border-radius: 14px;
+  background: var(--linen-50);
+  box-shadow: inset 0 0 0 1px var(--linen-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 26px;
+  color: var(--steel-700);
+  font-variant-numeric: tabular-nums;
+}
+.otp-box.is-focus {
+  background: var(--linen-100);
+  box-shadow:
+    inset 0 0 0 1.5px var(--terra-500),
+    0 0 0 4px rgba(238, 71, 33, 0.12);
+}
+.otp-box .au-caret {
+  height: 28px;
+}
+.au-resend {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  color: var(--steel-400);
+  text-align: center;
+}
+
+/* method chooser — icon buttons (Email / Phone) */
+.method-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.method-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 50px;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  background: var(--linen-50);
+  color: var(--steel-500);
+  box-shadow: inset 0 0 0 1px var(--linen-300);
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+.method-btn:hover {
+  background: var(--linen-100);
+  box-shadow: inset 0 0 0 1px var(--linen-400);
+}
+.method-btn:active {
+  transform: translateY(1px);
+}
+.method-btn .sq-icon {
+  color: var(--steel-400);
+}
+.method-btn.is-active {
+  background: var(--steel-700);
+  color: var(--linen-100);
+  box-shadow: none;
+}
+.method-btn.is-active .sq-icon {
+  color: var(--terra-300);
+}
+
+/* ===== REDUCED MOTION (global auth) ================================ */
+@media (prefers-reduced-motion: reduce) {
+  .boot-mark,
+  .boot-mark img,
+  .boot-mat::before,
+  .au-caret {
+    animation: none;
+  }
+}
+
+/* ===== PLAN 07 · TASK 3 ADAPTATION =================================
+   Small glue rules where live components diverge from the static mockup:
+   the OTP box now wraps a REAL <input> (the prototype rendered a glyph), and
+   the social row needs flex:1 children (the prototype set it inline per button).
+   Everything else is the verbatim light port above. */
+
+/* OTP: each box hosts a bare, centered numeric input. The focus ring moves from
+   the mockup's `.otp-box.is-focus` to a genuine `:focus-within` on the box. */
+.otp-box {
+  padding: 0;
+}
+.otp-box .otp-cell {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 26px;
+  color: var(--steel-700);
+  font-variant-numeric: tabular-nums;
+}
+.otp-box:focus-within {
+  background: var(--linen-100);
+  box-shadow:
+    inset 0 0 0 1.5px var(--terra-500),
+    0 0 0 4px rgba(238, 71, 33, 0.12);
+}
+
+/* social row: Google / Apple buttons share the row evenly */
+.au-social-flex {
+  flex: 1;
+}

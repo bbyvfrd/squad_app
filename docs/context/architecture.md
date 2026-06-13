@@ -213,3 +213,32 @@ Tailwind v4 (`@theme inline`, stock palette removed, dark variant on
 `[data-theme="dark"]`), and `src/components/ui/` is the only place `sq-*` class
 strings exist. Product↔design vocabulary (DB `football` ↔ CSS `soccer`, skill
 tiers, status badges) reconciles in `src/lib/ui/mappings.ts` and nowhere else.
+
+## Auth screens (Plan 07)
+
+The ten Direction-B "Warm Linen" auth/onboarding artboards are implemented as six
+routes under `app/(auth)/` (`/boot /welcome /signup /verify /intent /signin`),
+sourced from the Claude Design handoff (`docs/design-handoff/auth-screens/`).
+
+Key architectural points:
+
+- **Handoff-sourced (Claude Design).** Layout, copy, and `auth.css` styling are ported
+  verbatim from the handoff bundle; the rendered spec is the source of truth.
+- **Light-only via `.auth-root` token re-assertion.** There is no `[data-theme="light"]`
+  selector in the SQUAD system — raw ramps don't flip, but role-token aliases do. The
+  `(auth)` layout re-asserts `--bg-page`, `--bg-card`, and `--bg-surface` to their linen
+  values plus `color-scheme: light` on the `.auth-root` wrapper, keeping screens light
+  even when the app's `data-theme="dark"` is active.
+- **No phone-frame chrome.** The screens are real mobile-width pages (max 480 px, centered
+  on desktop); the real device is the phone. `.ph-*` frame elements from the handoff are
+  dropped entirely.
+- **Material-icon ligatures, never SVG.** All icons render through the Plan 06 `Icon`
+  component (font ligatures). The only SVGs are the Google and Apple brand marks
+  (`GoogleMark`/`AppleMark` inline components) — logos, not icons.
+- **Real client interactions.** Method toggle, password reveal, onboarding carousel, OTP
+  entry/auto-advance, chip multi-select, remember toggle, and screen-to-screen navigation
+  are all real `useState` interactions; form submits call `router.push(...)` per the route
+  map.
+- **Deferred auth wiring.** Supabase auth is not wired in this plan — email/phone/social
+  submits advance the UI flow only. Real auth (`lib/auth` adapter, phone OTP, OAuth) is a
+  deliberate follow-up plan.
