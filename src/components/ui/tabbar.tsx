@@ -10,10 +10,16 @@ export type TabItem = { href: string; icon: IconName; label: string };
 
 export function Tabbar({ items }: { items: TabItem[] }) {
   const pathname = usePathname();
+  // Active = the item whose href is the LONGEST prefix of the current path. This
+  // keeps an index tab (e.g. "/app") from also matching every sub-route, so only
+  // one tab is ever active (no duplicate aria-current).
+  const activeHref = items
+    .filter((t) => pathname === t.href || pathname.startsWith(`${t.href}/`))
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
   return (
     <nav className="sq-tabbar" aria-label="Primary">
       {items.map((t) => {
-        const active = pathname === t.href || pathname.startsWith(`${t.href}/`);
+        const active = t.href === activeHref;
         return (
           <Link
             key={t.href}
