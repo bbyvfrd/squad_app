@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
 import { AuField } from "@/components/auth/auth-field";
 import { AuButton } from "@/components/auth/auth-button";
+import { AuthScreen } from "@/components/auth/auth-screen";
 import { PhoneField } from "@/components/auth/phone-field";
 import { MethodTabs, type AuthMethod } from "@/components/auth/method-tabs";
 import { BackButton } from "@/components/auth/back-button";
@@ -66,15 +67,7 @@ export default function SignInPage() {
   }
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        inset: 0,
-        display: "flex",
-        flexDirection: "column",
-        padding: "64px 26px 30px",
-      }}
-    >
+    <AuthScreen padding="64px 26px 30px">
       <BackButton onClick={() => router.push("/welcome")} />
 
       <h1 style={{ ...titleStyle, marginTop: 26, marginBottom: 6 }}>Welcome back</h1>
@@ -123,8 +116,13 @@ export default function SignInPage() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <RememberToggle checked={remember} onChange={setRemember} label="Stay signed in" />
+              <RememberToggle
+                checked={remember}
+                onChange={setRemember}
+                labelledBy="remember-label"
+              />
               <span
+                id="remember-label"
                 style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--steel-500)" }}
               >
                 Stay signed in
@@ -170,6 +168,6 @@ export default function SignInPage() {
           Create account
         </Link>
       </div>
-    </div>
+    </AuthScreen>
   );
 }

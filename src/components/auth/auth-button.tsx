@@ -7,6 +7,8 @@ type AuButtonProps = {
   type?: "button" | "submit";
   /** show the trailing forward arrow (design IconArrowRight, 20px) */
   trailingArrow?: boolean;
+  /** disable the CTA (e.g. gate Verify until the code is complete) */
+  disabled?: boolean;
   className?: string;
 };
 
@@ -16,12 +18,14 @@ export function AuButton({
   onClick,
   type = "button",
   trailingArrow = false,
+  disabled = false,
   className,
 }: AuButtonProps) {
   return (
     <button
       type={type}
       onClick={onClick}
+      disabled={disabled}
       className={cn("au-btn", "au-btn-primary", "is-clay", className)}
     >
       {children}

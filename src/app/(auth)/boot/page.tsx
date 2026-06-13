@@ -21,10 +21,10 @@ export default function BootPage() {
   return (
     <div
       style={{
-        position: "absolute",
-        inset: 0,
         display: "flex",
         flexDirection: "column",
+        flex: 1,
+        minHeight: "100dvh",
         alignItems: "center",
       }}
     >

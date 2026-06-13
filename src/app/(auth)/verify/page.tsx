@@ -41,6 +41,7 @@ const editBtnStyle: CSSProperties = {
 };
 
 const RESEND_SECONDS = 28;
+const OTP_LENGTH = 6;
 
 // `useSearchParams` must live under a Suspense boundary in the App Router, or the
 // route is forced fully dynamic / the build complains. Keep the search-param read
@@ -49,6 +50,10 @@ function VerifyInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [code, setCode] = useState("");
+  // The CTA stays gated until all 6 cells are filled. OtpInput trims only trailing
+  // blanks when it joins, so a complete code is exactly OTP_LENGTH chars — any
+  // interior gap (a cleared middle cell) leaves it shorter and keeps Verify disabled.
+  const codeComplete = code.length === OTP_LENGTH;
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -83,6 +88,7 @@ function VerifyInner() {
   }, []);
 
   function verify() {
+    if (!codeComplete) return;
     // Flow-aware next step: a fresh sign-up continues to personalization; an
     // existing account lands in the app.
     router.push(searchParams.get("flow") === "signup" ? "/intent" : "/app");
@@ -130,7 +136,7 @@ function VerifyInner() {
       <div style={{ flex: 1, minHeight: 24 }} />
 
       <div style={{ marginBottom: 16 }}>
-        <AuButton trailingArrow onClick={verify}>
+        <AuButton trailingArrow onClick={verify} disabled={!codeComplete}>
           Verify
         </AuButton>
       </div>

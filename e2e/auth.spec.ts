@@ -54,6 +54,31 @@ test("signup method toggle swaps email <-> phone fields", async ({ page }) => {
   await expect(page.getByLabel("Email")).toHaveCount(0);
 });
 
+// Short-viewport scroll guard (Plan 07 review fix 1). The screens used to pin each
+// page to the viewport (`position:absolute; inset:0` inside a 100dvh column), so on a
+// phone-height/landscape viewport the bottom CTA clipped and was unreachable. The
+// column now flows and scrolls; /intent is the tallest screen (three chip groups +
+// venue row + CTA), so it's the worst case. Assert Continue is reachable: not in view
+// at the top of a 360x640 viewport, then in view after scrolling to it.
+test("intent CTA is reachable by scrolling on a short mobile viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 640 });
+  await page.goto("/intent");
+
+  const continueBtn = page.getByRole("button", { name: /Continue/ });
+  await expect(continueBtn).toBeAttached();
+
+  // The page must actually scroll (content taller than the viewport) — otherwise the
+  // CTA was never at risk and this guard would be vacuous.
+  const scrollable = await page.evaluate(
+    () => document.documentElement.scrollHeight > window.innerHeight,
+  );
+  expect(scrollable).toBe(true);
+
+  // After scrolling it into view, the CTA is fully within the viewport and clickable.
+  await continueBtn.scrollIntoViewIfNeeded();
+  await expect(continueBtn).toBeInViewport();
+});
+
 // Same zero-serious/critical contract as the /app proof page (theme.spec.ts), run on
 // the four content-heavy auth screens. Light-only, so no theme loop. /boot is excluded
 // (it self-redirects); /verify is covered by the render smoke above.

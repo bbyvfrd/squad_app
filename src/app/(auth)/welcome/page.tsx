@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
 import { type IconName } from "@/lib/ui/icon-names";
 import { AuButton } from "@/components/auth/auth-button";
+import { AuthScreen } from "@/components/auth/auth-screen";
 import { Pager } from "@/components/auth/pager";
 
 // Onboarding intro (artboards 02–04). Ports `OnbSlide` + `B_Onb1..3` as ONE carousel
@@ -85,15 +86,7 @@ export default function WelcomePage() {
   const last = slide === SLIDES.length - 1;
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        inset: 0,
-        display: "flex",
-        flexDirection: "column",
-        padding: "60px 26px 36px",
-      }}
-    >
+    <AuthScreen padding="60px 26px 36px">
       <div
         style={{
           display: "flex",
@@ -199,6 +192,6 @@ export default function WelcomePage() {
           </button>
         </div>
       )}
-    </div>
+    </AuthScreen>
   );
 }

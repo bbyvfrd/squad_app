@@ -24,7 +24,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         style={{
           width: "100%",
           maxWidth: 480,
-          position: "relative",
+          // Flex column so each screen's `flex:1` spacer still pushes the CTA to the
+          // bottom when there's room, but `min-height` (not fixed height) lets content
+          // grow and scroll on short/landscape viewports instead of clipping the CTA.
+          display: "flex",
+          flexDirection: "column",
           minHeight: "100dvh",
           background: "var(--linen-100)",
         }}

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { type CSSProperties } from "react";
 import { AuButton } from "@/components/auth/auth-button";
+import { AuthScreen } from "@/components/auth/auth-screen";
 import { BackButton } from "@/components/auth/back-button";
 import { IntentChip, ChipGroup } from "@/components/auth/intent-chip";
 import { VendorLaunch } from "@/components/auth/vendor-launch";
@@ -44,15 +45,7 @@ export default function IntentPage() {
   const router = useRouter();
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        inset: 0,
-        display: "flex",
-        flexDirection: "column",
-        padding: "62px 24px 28px",
-      }}
-    >
+    <AuthScreen padding="62px 24px 28px">
       <div
         style={{
           display: "flex",
@@ -103,6 +96,6 @@ export default function IntentPage() {
       <AuButton trailingArrow onClick={() => router.push("/app")}>
         Continue
       </AuButton>
-    </div>
+    </AuthScreen>
   );
 }

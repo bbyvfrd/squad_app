@@ -26,4 +26,27 @@ describe("OtpInput", () => {
     // after typing the 3rd digit, focus advances to the 4th box
     expect(boxes[3]).toHaveFocus();
   });
+
+  it("clears a middle cell in place without shifting the surrounding digits", () => {
+    render(<Harness />);
+    const boxes = screen.getAllByRole("textbox");
+    ["5", "2", "9", "1", "0", "4"].forEach((digit, i) => {
+      fireEvent.change(boxes[i], { target: { value: digit } });
+    });
+
+    // Empty the middle box — the fixed-length cell model keeps slot 2 blank rather
+    // than pulling "1","0","4" left (the old joined-string model collapsed the gap).
+    fireEvent.change(boxes[2], { target: { value: "" } });
+    expect(boxes.map((b) => (b as HTMLInputElement).value)).toEqual(["5", "2", "", "1", "0", "4"]);
+  });
+
+  it("places an out-of-order digit in its own cell, not cell 0", () => {
+    render(<Harness />);
+    const boxes = screen.getAllByRole("textbox");
+
+    // Type into the 4th box first: it must land in box 4, leaving the earlier
+    // boxes empty (the old model packed it into box 0).
+    fireEvent.change(boxes[3], { target: { value: "7" } });
+    expect(boxes.map((b) => (b as HTMLInputElement).value)).toEqual(["", "", "", "7", "", ""]);
+  });
 });

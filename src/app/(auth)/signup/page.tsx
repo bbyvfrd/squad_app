@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
 import { AuField } from "@/components/auth/auth-field";
 import { AuButton } from "@/components/auth/auth-button";
+import { AuthScreen } from "@/components/auth/auth-screen";
 import { PhoneField } from "@/components/auth/phone-field";
 import { MethodTabs, type AuthMethod } from "@/components/auth/method-tabs";
 import { BackButton } from "@/components/auth/back-button";
@@ -65,15 +66,7 @@ export default function SignUpPage() {
   }
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        inset: 0,
-        display: "flex",
-        flexDirection: "column",
-        padding: "64px 26px 30px",
-      }}
-    >
+    <AuthScreen padding="64px 26px 30px">
       <div
         style={{
           display: "flex",
@@ -176,6 +169,6 @@ export default function SignUpPage() {
           Log in
         </Link>
       </div>
-    </div>
+    </AuthScreen>
   );
 }
