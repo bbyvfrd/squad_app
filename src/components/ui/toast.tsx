@@ -1,7 +1,7 @@
 "use client";
 
 // Minimal module store — no context needed; Toaster subscribes, toast() pushes.
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { cn } from "@/lib/ui/cn";
 import { Icon } from "./icon";
 import type { IconName } from "@/lib/ui/icon-names";
@@ -73,9 +73,6 @@ export function Toaster() {
     () => items,
     () => items,
   );
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
   return (
     <div className="sq-toast-wrap" role="status" aria-live="polite">
       {snapshot.map((t) => (

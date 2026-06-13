@@ -1,13 +1,22 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { IconButton } from "./icon-button";
+
+// false during SSR + hydration, true once mounted on the client — without a
+// setState-in-effect (next-themes' resolvedTheme is undefined until hydrated).
+function useHydrated() {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+}
 
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useHydrated();
   if (!mounted) return <IconButton icon="dark_mode" label="Toggle theme" ghost disabled />;
   const dark = resolvedTheme === "dark";
   return (
