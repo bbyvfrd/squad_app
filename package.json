@@ -17,7 +17,8 @@
     "test:watch": "vitest",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:e2e": "playwright test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "sync:design": "node scripts/sync-design-system.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.1",

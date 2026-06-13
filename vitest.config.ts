@@ -10,7 +10,7 @@ export default defineConfig({
       NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321",
       NEXT_PUBLIC_SUPABASE_ANON_KEY: "test-anon-key",
     },
-    include: ["src/**/*.test.ts"],
+    include: ["src/**/*.test.ts", "scripts/**/*.test.ts"],
     exclude: ["src/**/*.integration.test.ts"],
   },
 });
