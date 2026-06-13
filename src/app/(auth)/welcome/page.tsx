@@ -108,7 +108,10 @@ export default function WelcomePage() {
             type="button"
             className="au-eyebrow"
             style={{
-              color: "var(--steel-400)",
+              // A11y (Task 9): 11px label — steel-400 is 4.22:1 on the linen surface
+              // (under AA). steel-500 clears (8.7:1). Inline style overrides .au-eyebrow,
+              // so the fix lives here, not in auth.css.
+              color: "var(--steel-500)",
               background: "none",
               border: "none",
               cursor: "pointer",
@@ -146,7 +149,11 @@ export default function WelcomePage() {
       )}
 
       <div style={{ padding: "24px 2px 0" }}>
-        <div className="au-eyebrow" style={{ color: "var(--terra-500)", marginBottom: 12 }}>
+        {/* A11y (Task 9): 11px terracotta eyebrow — terra-500 is 3.37:1 on the linen-100
+            surface (under AA for small text). terra-600 clears (4.77:1) and stays the
+            terracotta spike. Large display titles keep their terra-500 <span> (large text
+            only needs 3:1). Inline style overrides .au-eyebrow, so the fix lives here. */}
+        <div className="au-eyebrow" style={{ color: "var(--terra-600)", marginBottom: 12 }}>
           {data.eyebrow}
         </div>
         <h1 style={titleStyle}>{data.title}</h1>

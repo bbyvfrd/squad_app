@@ -52,8 +52,11 @@ function VerifyInner() {
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  function startCountdown() {
-    setSecondsLeft(RESEND_SECONDS);
+  // Tick the resend countdown down to 0. Split out from `startCountdown` so the
+  // mount effect can start the interval WITHOUT a synchronous setState (the
+  // `react-hooks/set-state-in-effect` rule forbids that — and the initial value is
+  // already RESEND_SECONDS via useState, so the reset is only needed on Resend).
+  function runInterval() {
     if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = setInterval(() => {
       setSecondsLeft((s) => {
@@ -66,8 +69,14 @@ function VerifyInner() {
     }, 1000);
   }
 
+  // Event-handler path (Resend button): resetting state synchronously here is fine.
+  function startCountdown() {
+    setSecondsLeft(RESEND_SECONDS);
+    runInterval();
+  }
+
   useEffect(() => {
-    startCountdown();
+    runInterval();
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };

@@ -182,7 +182,12 @@
   font-family: var(--font-body);
   font-weight: 700;
   cursor: pointer;
-  color: var(--terra-500);
+  /* A11y (Task 9): the inline link text is small (13–14px), so it needs ≥4.5:1.
+     Brand terra-500 on linen is only ~3.1–3.4:1, and these links can sit on the
+     bottom-most linen-200 surface (signup "Log in") where terra-600 is just 4.32.
+     terra-700 clears AA on every auth surface (6.7 on linen-100 / 6.1 on linen-200)
+     while staying terracotta — text only; non-text terra accents are untouched. */
+  color: var(--terra-700);
   text-decoration: none;
 }
 .au-foot {
@@ -210,7 +215,11 @@
   height: 1px;
 }
 .au-divider-light {
-  color: var(--linen-500);
+  /* A11y (Task 9): the "or" label is tiny (10px) — linen-500 on linen is ~3.2:1.
+     linen-600 keeps the muted hairline look while clearing AA (5.8 / 5.2 on the
+     linen-100 / linen-200 surfaces it renders on). The ::before/::after rules are
+     non-text and stay on linen-300. */
+  color: var(--linen-600);
 }
 .au-divider-light::before,
 .au-divider-light::after {
@@ -628,7 +637,9 @@
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--steel-400);
+  /* A11y (Task 9): 11px caption — steel-400 on linen-100 is 4.22:1 (just under AA).
+     steel-500 clears comfortably (8.7:1) and reads as the same muted label. */
+  color: var(--steel-500);
   margin-bottom: 10px;
 }
 .chip-wrap {
@@ -674,7 +685,9 @@
   font-size: 11px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--steel-400);
+  /* A11y (Task 9): 11px label — steel-400 is 4.22:1 on linen; steel-500 clears AA
+     (8.7:1). :hover already darkens to steel-600. */
+  color: var(--steel-500);
   background: none;
   border: none;
   cursor: pointer;
