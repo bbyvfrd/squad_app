@@ -801,3 +801,39 @@
     animation: none;
   }
 }
+
+/* ===== PLAN 07 · TASK 3 ADAPTATION =================================
+   Small glue rules where live components diverge from the static mockup:
+   the OTP box now wraps a REAL <input> (the prototype rendered a glyph), and
+   the social row needs flex:1 children (the prototype set it inline per button).
+   Everything else is the verbatim light port above. */
+
+/* OTP: each box hosts a bare, centered numeric input. The focus ring moves from
+   the mockup's `.otp-box.is-focus` to a genuine `:focus-within` on the box. */
+.otp-box {
+  padding: 0;
+}
+.otp-box .otp-cell {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 26px;
+  color: var(--steel-700);
+  font-variant-numeric: tabular-nums;
+}
+.otp-box:focus-within {
+  background: var(--linen-100);
+  box-shadow:
+    inset 0 0 0 1.5px var(--terra-500),
+    0 0 0 4px rgba(238, 71, 33, 0.12);
+}
+
+/* social row: Google / Apple buttons share the row evenly */
+.au-social-flex {
+  flex: 1;
+}
