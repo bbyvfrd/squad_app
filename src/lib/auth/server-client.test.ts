@@ -27,51 +27,72 @@ import { createServerClient } from "@supabase/ssr";
 import { createSupabaseServerClient } from "./server-client";
 import { SESSION_COOKIE_OPTIONS, REMEMBER_MAX_AGE } from "./cookie-options";
 
+// @supabase/ssr's DEFAULT_COOKIE_OPTIONS.maxAge — what the SDK puts on every SET
+// entry it hands to our setAll (it clobbers cookieOptions.maxAge with this LAST).
+const SDK_DEFAULT_MAX_AGE = 400 * 24 * 60 * 60;
+
+// The per-cookie options shape the SDK actually emits for a SET (chunk write):
+// security flags from our cookieOptions survive, but maxAge is the 400d default.
+const sdkSetOptions = () => ({
+  httpOnly: false,
+  sameSite: "lax" as const,
+  path: "/",
+  maxAge: SDK_DEFAULT_MAX_AGE,
+});
+
 describe("createSupabaseServerClient", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     captured = undefined;
   });
 
-  it("passes the shared cookieOptions with maxAge when remember=true", async () => {
+  it("passes the shared SESSION_COOKIE_OPTIONS as cookieOptions (no maxAge — SDK clobbers it)", async () => {
     await createSupabaseServerClient(true);
-    expect(captured?.cookieOptions).toMatchObject({
-      ...SESSION_COOKIE_OPTIONS,
-      maxAge: REMEMBER_MAX_AGE,
-    });
-  });
-
-  it("omits maxAge for a session cookie when remember=false", async () => {
-    await createSupabaseServerClient(false);
+    // We never put maxAge on cookieOptions: the SDK overwrites it with its 400d
+    // default on every SET, so the lifetime is owned in setAll instead.
     expect(captured?.cookieOptions).toEqual(SESSION_COOKIE_OPTIONS);
     expect("maxAge" in (captured?.cookieOptions ?? {})).toBe(false);
   });
 
-  it("defaults remember to true", async () => {
-    await createSupabaseServerClient();
-    expect(captured?.cookieOptions).toMatchObject({ maxAge: REMEMBER_MAX_AGE });
+  it("SET + remember=true → owns the lifetime: maxAge=REMEMBER_MAX_AGE, httpOnly forced, no expires", async () => {
+    await createSupabaseServerClient(true);
+    captured?.cookies.setAll([{ name: "sb-access", value: "tok", options: sdkSetOptions() }]);
+    expect(setMock).toHaveBeenCalledTimes(1);
+    const [name, value, opts] = setMock.mock.calls[0];
+    expect(name).toBe("sb-access");
+    expect(value).toBe("tok");
+    expect(opts.maxAge).toBe(REMEMBER_MAX_AGE); // overrides the SDK's 400d default
+    expect(opts.httpOnly).toBe(true); // forced — never the supabase-js false
+    expect("expires" in opts).toBe(false); // dropped so a stale expiry can't win
   });
 
-  it("setAll forces the security flags but preserves supabase-js maxAge/expires", async () => {
+  it("SET + remember=false → a session cookie: maxAge omitted, httpOnly forced", async () => {
     await createSupabaseServerClient(false);
-    const expires = new Date("2030-01-01T00:00:00Z");
-    // supabase-js hands us a per-cookie array; simulate it trying to set
-    // httpOnly:false and a delete (maxAge:0) plus an expires we must keep.
-    captured?.cookies.setAll([
-      { name: "sb-access", value: "v1", options: { httpOnly: false, maxAge: 0 } },
-      { name: "sb-refresh", value: "v2", options: { httpOnly: false, expires } },
-    ]);
-    expect(setMock).toHaveBeenCalledTimes(2);
-    const [name1, value1, opts1] = setMock.mock.calls[0];
-    expect(name1).toBe("sb-access");
-    expect(value1).toBe("v1");
-    expect(opts1.httpOnly).toBe(true); // forced — never the supabase-js false
-    expect(opts1.sameSite).toBe("lax");
-    expect(opts1.path).toBe("/");
-    expect(opts1.maxAge).toBe(0); // preserved (delete of a stale chunk)
-    const [, , opts2] = setMock.mock.calls[1];
-    expect(opts2.httpOnly).toBe(true);
-    expect(opts2.expires).toBe(expires); // preserved
+    captured?.cookies.setAll([{ name: "sb-access", value: "tok", options: sdkSetOptions() }]);
+    expect(setMock).toHaveBeenCalledTimes(1);
+    const [, , opts] = setMock.mock.calls[0];
+    expect(opts.maxAge).toBeUndefined(); // session cookie — the 400d default is gone
+    expect("maxAge" in opts).toBe(false);
+    expect(opts.httpOnly).toBe(true);
+  });
+
+  it("DELETE entry (maxAge:0) → preserved untouched (maxAge stays 0), httpOnly forced", async () => {
+    await createSupabaseServerClient(true);
+    // The SDK sends maxAge:0 to clear stale chunks / on signout.
+    captured?.cookies.setAll([{ name: "sb-stale", value: "", options: { maxAge: 0 } }]);
+    expect(setMock).toHaveBeenCalledTimes(1);
+    const [, , opts] = setMock.mock.calls[0];
+    expect(opts.maxAge).toBe(0); // deletion preserved — never bumped to REMEMBER_MAX_AGE
+    expect(opts.httpOnly).toBe(true);
+  });
+
+  it("does not re-add domain when the SDK's entry omits it (host-only deletion fallback)", async () => {
+    await createSupabaseServerClient(true);
+    // The SDK emits a host-only deletion entry with `domain` deliberately stripped;
+    // we must not re-force it back on, or that fallback breaks.
+    captured?.cookies.setAll([{ name: "sb-stale", value: "", options: { maxAge: 0, path: "/" } }]);
+    const [, , opts] = setMock.mock.calls[0];
+    expect("domain" in opts).toBe(false);
   });
 
   it("setAll swallows the Server-Component write error (cannot set cookies there)", async () => {
