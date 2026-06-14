@@ -30,9 +30,11 @@ export const SESSION_COOKIE_OPTIONS = {
   sameSite: "lax" as const,
   path: "/",
   domain: config.authCookieDomain, // undefined → host-only for the demo
-  // maxAge is decided per-call (remember toggle): added for persistent, omitted
-  // for a session cookie. When added, it is scoped to the refresh-token lifetime
-  // (§9), NOT the @supabase/ssr 400-day default.
+  // maxAge is intentionally absent here. It is owned per-call inside setAll (remember
+  // toggle): persistent → REMEMBER_MAX_AGE, session cookie → omitted. It can NOT be set
+  // via cookieOptions because @supabase/ssr clobbers cookieOptions.maxAge with its
+  // 400-day default on every SET. When set, it is scoped to the refresh-token lifetime
+  // (§9), NOT that default.
 };
 export const REMEMBER_MAX_AGE = 60 * 60 * 24 * 30; // 30d persistent (≈ refresh lifetime; tune in §9)
 ```
@@ -50,28 +52,48 @@ import { SESSION_COOKIE_OPTIONS, REMEMBER_MAX_AGE } from "./cookie-options";
 
 export async function createSupabaseServerClient(remember = true) {
   const cookieStore = await cookies(); // async in Next 16
-  // remember=true → persistent cookie (maxAge); remember=false → session cookie (no maxAge).
-  const cookieOptions = remember
-    ? { ...SESSION_COOKIE_OPTIONS, maxAge: REMEMBER_MAX_AGE }
-    : SESSION_COOKIE_OPTIONS;
+  // We pass SESSION_COOKIE_OPTIONS for its SECURITY flags only. We deliberately do NOT
+  // put maxAge here: @supabase/ssr hard-overwrites cookieOptions.maxAge with its own
+  // 400-day DEFAULT on every SET (applied LAST), so the remember/session lifetime can't
+  // be set via cookieOptions — we own it inside setAll instead.
   return createServerClient(config.supabaseUrl, config.supabasePublishableKey, {
-    cookieOptions,
+    cookieOptions: SESSION_COOKIE_OPTIONS,
     cookies: {
       getAll: () => cookieStore.getAll(),
       setAll(toSet) {
         try {
           for (const { name, value, options } of toSet) {
-            // Force the SECURITY flags (so supabase-js can never drop httpOnly), but
-            // PRESERVE its maxAge/expires — it uses maxAge:0 to delete stale chunks,
-            // and the persistent-vs-session maxAge already comes from cookieOptions above.
-            cookieStore.set(name, value, {
+            // @supabase/ssr emits two shapes:
+            //   DELETE → maxAge:0 (clears stale chunks; signout). Preserve untouched.
+            //   SET    → maxAge:400d (its DEFAULT). Override: own the lifetime here.
+            const isDelete = options?.maxAge === 0;
+            if (isDelete) {
+              // Keep the deletion exactly as the SDK intends (maxAge:0, expires kept),
+              // re-forcing only the SECURITY flags. Do NOT touch path/domain: the SDK
+              // emits a host-only deletion entry with domain stripped — re-adding domain
+              // would re-break that fallback.
+              cookieStore.set(name, value, {
+                ...options,
+                httpOnly: SESSION_COOKIE_OPTIONS.httpOnly,
+                secure: SESSION_COOKIE_OPTIONS.secure,
+                sameSite: SESSION_COOKIE_OPTIONS.sameSite,
+              });
+              continue;
+            }
+            // SET path. Re-force the SECURITY flags, then own the lifetime: drop the
+            // SDK's clobbered maxAge AND any expires, then set maxAge to REMEMBER_MAX_AGE
+            // when remember, else omit it (a session cookie). path/domain are left as the
+            // SDK applied them via cookieOptions — we no longer force them here.
+            const setOptions = {
               ...options,
               httpOnly: SESSION_COOKIE_OPTIONS.httpOnly,
               secure: SESSION_COOKIE_OPTIONS.secure,
               sameSite: SESSION_COOKIE_OPTIONS.sameSite,
-              path: SESSION_COOKIE_OPTIONS.path,
-              domain: SESSION_COOKIE_OPTIONS.domain,
-            });
+            };
+            delete setOptions.maxAge;
+            delete setOptions.expires;
+            if (remember) setOptions.maxAge = REMEMBER_MAX_AGE;
+            cookieStore.set(name, value, setOptions);
           }
         } catch {
           // Server Components cannot write cookies; the proxy refreshes the session.
@@ -81,6 +103,8 @@ export async function createSupabaseServerClient(remember = true) {
   });
 }
 ```
+
+> **Implementation correction (found during build):** the earlier draft passed `maxAge` via `cookieOptions` and told `setAll` to **preserve** the SDK's `maxAge`/`expires`. That is wrong: `@supabase/ssr` hard-overwrites `cookieOptions.maxAge` with its 400-day default on every SET, so the lifetime must be **owned inside `setAll`** — on a SET entry we drop the SDK's `maxAge`/`expires` and set `maxAge: REMEMBER_MAX_AGE` (remember) or omit it (a session cookie); on a DELETE entry (`maxAge: 0`) we preserve it untouched. We also no longer force `path`/`domain` in `setAll` (only the SDK's `cookieOptions` apply them), so the SDK's host-only deletion fallback isn't re-broken. The proxy refresh (`update-session.ts`) always uses `REMEMBER_MAX_AGE` because it can't know the original `remember` toggle (a `remember=false` cookie becomes bounded-persistent after the first refresh — accepted v1 limitation; a companion remember-flag cookie is deferred). `/venue` is excluded from the proxy matcher for now (venue auth is deferred this plan).
 
 ### `session.ts` — the single resolver (cookie OR Bearer)
 

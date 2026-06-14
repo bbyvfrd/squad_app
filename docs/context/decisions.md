@@ -14,7 +14,7 @@
 
 ## Locked — implementation
 
-- Responsive **web** for v1 (native mobile is a v1 non-goal).
+- Responsive **web** for v1 (native mobile is a v1 non-goal). <!-- STALE — needs vault re-sync. Contradicts the 2026-06 multi-client pivot (native is the real goal; web/PWA MVP ships first for the investor demo, backend kept client-agnostic). The auth backend (Plan 08) is already built client-agnostic per that pivot. This line is upstream product scope — fix it in the brainstorm vault, then re-sync this file; do not re-decide it in this repo. -->
 - App lives in **this separate repo**; the brainstorm vault stays the product/research source of truth.
 - **One Next.js app, two route groups** (`/app`, `/venue`) sharing one backend.
 - Stack: Supabase (Postgres + Auth), Vercel, Drizzle ORM (migrations = schema source of truth), Tailwind + shadcn/ui, GitHub Actions, Terraform (HCP state), Zod config (fail-fast), Vitest + Playwright.
