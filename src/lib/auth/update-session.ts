@@ -17,7 +17,7 @@ export async function updateSession(
     cookieOptions: SESSION_COOKIE_OPTIONS,
     cookies: {
       getAll: () => request.cookies.getAll(),
-      setAll(toSet, headers) {
+      setAll(toSet) {
         // Mirror onto the request so downstream sees the fresh values, then rebuild
         // the response and re-attach every cookie. This setAll MIRRORS server-client.ts:
         // we force only the SECURITY flags and OWN the lifetime — we never re-force
@@ -60,8 +60,14 @@ export async function updateSession(
           setOptions.maxAge = REMEMBER_MAX_AGE;
           response.cookies.set(name, value, setOptions);
         }
-        // Cache headers (Cache-Control/Expires/Pragma) so a CDN can't cache a Set-Cookie.
-        for (const [key, val] of Object.entries(headers)) response.headers.set(key, val);
+        // A Set-Cookie now rides on this (rebuilt) response. @supabase/ssr@0.12.0
+        // ALWAYS invokes setAll with an empty headers arg, so we cannot rely on the
+        // SDK to attach cache headers — set the no-store policy ourselves so no shared
+        // cache can store (and leak) the session cookie to another user.
+        response.headers.set(
+          "Cache-Control",
+          "private, no-cache, no-store, max-age=0, must-revalidate",
+        );
       },
     },
   });

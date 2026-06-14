@@ -19,8 +19,8 @@ import { AuthClientError, authClient } from "@/lib/auth/client";
 // Ports `B_LogIn` (email) + `B_Phone` (phone) verbatim: back button, title,
 // sub, MethodTabs, then a per-method body. Email → /app; phone →
 // /verify?flow=signin. The phone-frame wrapper is dropped; the `(auth)` layout
-// owns the centered mobile column. UI only — submits navigate, nothing is sent
-// to auth yet.
+// owns the centered mobile column. The email path now calls `authClient` (Plan 08
+// auth backend); the phone path is still an inert UI seam.
 
 // From the prototype's `titleStyle()` (base size 34, used as-is on this screen).
 const titleStyle: CSSProperties = {

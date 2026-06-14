@@ -50,6 +50,10 @@ jobs:
         run: pnpm typecheck
       - name: Design rules
         run: pnpm check:design
+      - name: CSRF guards
+        run: pnpm check:csrf
+      - name: Auth logging
+        run: pnpm check:auth-logging
 
   # Stage 3 — unit/contract + integration tests against a real Supabase-provisioned
   # Postgres. The migrations need Supabase's auth schema, roles, and auth.uid(), so CI

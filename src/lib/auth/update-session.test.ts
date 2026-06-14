@@ -105,11 +105,16 @@ describe("updateSession", () => {
     expect("domain" in opts).toBe(false);
   });
 
-  it("applies the cache headers from setAll's second arg onto the response", async () => {
+  it("sets an explicit no-store Cache-Control on the response when cookies are written", async () => {
+    // @supabase/ssr@0.12.0 always passes an empty headers arg, so the mitigation is
+    // ours: any cookie write must carry a no-store policy so a shared cache can't
+    // store the Set-Cookie and leak a session to another user.
     await updateSession(fakeRequest());
-    captured?.cookies.setAll([], { "Cache-Control": "private, no-store", Pragma: "no-cache" });
-    expect(headerSetMock).toHaveBeenCalledWith("Cache-Control", "private, no-store");
-    expect(headerSetMock).toHaveBeenCalledWith("Pragma", "no-cache");
+    captured?.cookies.setAll([{ name: "sb-access", value: "tok", options: sdkSetOptions() }], {});
+    expect(headerSetMock).toHaveBeenCalledWith(
+      "Cache-Control",
+      "private, no-cache, no-store, max-age=0, must-revalidate",
+    );
   });
 
   it("returns the claims sub as userId, or null when absent", async () => {
