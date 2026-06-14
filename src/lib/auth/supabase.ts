@@ -42,7 +42,7 @@ export class SupabaseAuthProvider implements AuthProvider {
     try {
       const { data, error } = await this.sb.auth.getClaims(token);
       if (error || !data?.claims?.sub) return null;
-      return { id: data.claims.sub, email: (data.claims.email as string) ?? "" };
+      return { id: data.claims.sub, email: data.claims.email ?? "" };
     } catch {
       return null;
     }
