@@ -6,13 +6,15 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-// Each route + a stable bit of copy that proves the screen rendered. `/boot`
-// auto-redirects to `/welcome` after ~1.6s, so assert its eyebrow before the push
-// lands (waitUntil "commit" returns as soon as the response starts, beating the timer).
+// Each route + a stable bit of copy that proves the screen rendered. `/boot` now
+// probes the session on mount and redirects immediately (anon → /welcome), so its
+// case asserts the redirect outcome rather than racing a timer for the eyebrow.
 test.describe("auth screens render", () => {
-  test("boot shows the warming-up eyebrow before it redirects", async ({ page }) => {
-    await page.goto("/boot", { waitUntil: "commit" });
-    await expect(page.getByText("Warming up the pitch")).toBeVisible();
+  test("boot redirects an anonymous visitor to /welcome", async ({ page }) => {
+    // Boot probes the session (authClient.session()) and replace()s immediately —
+    // anon → /welcome. The old eyebrow-before-timer assertion raced this redirect.
+    await page.goto("/boot");
+    await expect(page).toHaveURL(/\/welcome$/);
   });
 
   test("welcome shows the first onboarding slide", async ({ page }) => {

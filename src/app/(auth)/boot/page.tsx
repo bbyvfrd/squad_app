@@ -2,20 +2,31 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth/client";
 
 // Boot / splash (artboard 01). Ports `B_Boot`: a centered stacked logo with the
 // clay drop-shadow, an indeterminate `.boot-mat` shuttle, and the "Warming up the
 // pitch" eyebrow. The phone-frame wrapper is dropped — the `(auth)` layout owns the
-// mobile column and the warm-linen surface. On mount we advance to /welcome after a
-// short beat (a real app would redirect after a session check). The auto-advance
-// fires regardless of `prefers-reduced-motion`; only the clay/bar animations are
-// disabled under that media query (in auth.css).
+// mobile column and the warm-linen surface. The single cold-start decision: probe
+// the session and replace() to /app (authed) or /welcome (anon). On any probe
+// failure we fall to /welcome — boot must never strand the user on the splash.
 export default function BootPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const id = setTimeout(() => router.push("/welcome"), 1600);
-    return () => clearTimeout(id);
+    let cancelled = false;
+    authClient
+      .session()
+      .then((user) => {
+        if (cancelled) return;
+        router.replace(user ? "/app" : "/welcome");
+      })
+      .catch(() => {
+        if (!cancelled) router.replace("/welcome");
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
   return (
