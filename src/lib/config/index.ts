@@ -17,10 +17,14 @@ const envSchema = z
     // Never a *.vercel.app suffix match (CSRF gate parses + compares origins).
     AUTH_ALLOWED_ORIGINS: z.string().optional(),
   })
-  .refine((e) => Boolean(e.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? e.NEXT_PUBLIC_SUPABASE_ANON_KEY), {
-    message: "one of NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY is required",
-    path: ["NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"],
-  });
+  .refine(
+    (e) => Boolean(e.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? e.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+    {
+      message:
+        "one of NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY is required",
+      path: ["NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"],
+    },
+  );
 
 // The exact env keys the schema declares — the single source of truth for the
 // .env.example parity check (see env-parity.test.ts). Avoids a hand-copied list.
