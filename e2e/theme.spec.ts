@@ -1,27 +1,14 @@
 // e2e/theme.spec.ts
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { authenticate } from "./helpers/auth";
 
 const LIGHT_BG = "rgb(235, 231, 219)"; // --linen-200 Warm Linen
 const DARK_BG = "rgb(12, 24, 32)"; // --steel-800
 
-// The /app proxy guard now bounces anonymous visitors to /signin, so the theme
-// proofs (which render the in-app Topbar/ThemeToggle) need a real session first.
-// We mint one the cheap way: POST /api/v1/auth/signup, which writes the httpOnly
-// session cookie into the page's BrowserContext (shared cookie jar between
-// page.request and page navigations). Email confirmations are OFF for the demo
-// (§9), so signup returns a usable session immediately. The CSRF gate (§7) needs
-// both the x-squad-csrf custom header and a same-origin Origin — so we resolve the
-// origin from the configured baseURL and send both.
-async function authenticate(page: Page, baseURL: string | undefined) {
-  const origin = new URL(baseURL ?? "http://127.0.0.1:3000").origin;
-  const email = `theme-${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.com`;
-  const res = await page.request.post("/api/v1/auth/signup", {
-    headers: { "content-type": "application/json", "x-squad-csrf": "1", origin },
-    data: { email, password: "password1", fullName: "Theme Tester", displayName: null },
-  });
-  expect(res.status(), await res.text()).toBe(201);
-}
+// The /app proxy guard bounces anonymous visitors to /signin, so the theme proofs
+// (which render the in-app Topbar/ThemeToggle) need a real session first — minted via
+// the shared authenticate() helper (see e2e/helpers/auth.ts).
 
 test("light is the default and uses the warm linen page", async ({ page, baseURL }) => {
   await authenticate(page, baseURL);

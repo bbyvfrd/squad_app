@@ -27,12 +27,13 @@ export const config = {
   // a cold-start visit to / reaches src/app/page.tsx's /boot redirect), and the public
   // auth/health ENDPOINTS — listed INDIVIDUALLY (not the whole /api/v1/auth prefix) so
   // a future authed endpoint isn't accidentally exempt.
-  // /venue is intentionally not yet guarded (no venue auth this plan).
+  // /venue is excluded — it's a separate surface and venue auth is deferred this plan
+  // (the `venue` alternative below makes that real; without it /venue would be guarded).
   // `missing` prefetch headers stop the proxy firing on router hover-prefetch.
   matcher: [
     {
       source:
-        "/((?!$|_next/static|_next/image|favicon.ico|boot|welcome|signup|verify|intent|signin|forgot|api/v1/auth/signup|api/v1/auth/signin|api/v1/auth/signout|api/v1/auth/session|api/health|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)$).*)",
+        "/((?!$|_next/static|_next/image|favicon.ico|boot|welcome|signup|verify|intent|signin|forgot|venue|api/v1/auth/signup|api/v1/auth/signin|api/v1/auth/signout|api/v1/auth/session|api/health|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)$).*)",
       missing: [
         { type: "header", key: "next-router-prefetch" },
         { type: "header", key: "purpose", value: "prefetch" },

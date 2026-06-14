@@ -29,6 +29,8 @@ describe("proxy matcher", () => {
     "/api/v1/auth/session",
     "/api/health",
     "/logo.svg", // static asset
+    "/venue", // separate surface — venue auth deferred, so it passes through
+    "/venue/listings", // nested venue route stays unguarded too
   ])("does NOT guard the public path %s", (path) => {
     expect(matches(path)).toBe(false);
   });
