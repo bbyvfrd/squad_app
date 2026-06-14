@@ -39,6 +39,13 @@ describe("assertBrowserMutation", () => {
     expect(() => assertBrowserMutation(r)).not.toThrow();
   });
 
+  it("rejects with CSRF (403) when Origin is absent and the Referer is cross-site", () => {
+    const r = req({ referer: "https://evil.com/signin", "x-squad-csrf": "1", cookie: "sb-x=y" });
+    expect(() => assertBrowserMutation(r)).toThrow(
+      expect.objectContaining({ code: "CSRF", status: 403 }),
+    );
+  });
+
   it("rejects with CSRF (403) when both Origin and Referer are missing", () => {
     const r = req({ "x-squad-csrf": "1", cookie: "sb-x=y" });
     expect(() => assertBrowserMutation(r)).toThrow(

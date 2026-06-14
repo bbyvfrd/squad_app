@@ -28,6 +28,12 @@ function parseOrigin(value: string | null | undefined): string | null {
 // substring — host equality only, never a `*.vercel.app` suffix match (§2).
 function allowedOrigins(req: Request): Set<string> {
   const allowed = new Set<string>();
+  // Self-origin from the Host header (NOT new URL(req.url).origin): behind a proxy
+  // like Vercel, req.url is the internal origin, while the browser's Origin reflects
+  // the public host — so Host is what makes a legit same-origin request match. This is
+  // not a CSRF bypass: a victim's browser always sends the real Host, and a cross-origin
+  // attacker still can't set x-squad-csrf. In prod, also pin config.authAllowedOrigins
+  // so the gate never rests on the Host header alone.
   const host = req.headers.get("host");
   if (host) {
     const url = new URL(req.url);
