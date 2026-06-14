@@ -170,7 +170,7 @@ Route handlers must not hold a Supabase client or see a vendor error (Seam Rule)
 
 ## 2. Config — `src/lib/config` (sole env reader)
 
-Add to `envSchema` / `Config` / the return map. **Four** new keys land in the schema, so `.env.example` gets four lines (the parity test asserts `exampleKeys === Object.keys(envSchema.shape)` exactly):
+Add to `envSchema` / `Config` / the return map. **Four** new keys land in the schema, so `.env.example` gets four lines (the parity test asserts `exampleKeys === Object.keys(envSchema.shape)` exactly). **Also** register every new key in `infra/terraform/env-contract.json` — the CI `parity` job (`infra/terraform/scripts/check-env-parity.mjs`) asserts `.env.example` == the TF contract. The three optional auth keys (publishable, cookie-domain, allowed-origins) go in the contract's `app_optional` bucket (app-declared, safe defaults, not TF-provisioned yet — promote to `tf_managed` + add an `env_values` entry per env when a non-default value is actually needed, e.g. `AUTH_ALLOWED_ORIGINS` in prod).
 
 | Env var | Zod | Purpose |
 |---|---|---|

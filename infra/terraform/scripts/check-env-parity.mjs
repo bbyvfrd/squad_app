@@ -10,7 +10,16 @@ function exampleKeys() {
 }
 
 const contract = JSON.parse(readFileSync("infra/terraform/env-contract.json", "utf8"));
-const declared = [...contract.tf_managed, ...contract.platform_managed].sort();
+// Three buckets, all "declared" for parity: tf_managed (TF provisions a value per env —
+// every key here MUST have an env_values entry or the plan fails), platform_managed (set
+// by the platform, e.g. NODE_ENV), and app_optional (app-declared with a safe default/
+// fallback, NOT yet TF-provisioned — promote to tf_managed + add env_values when a
+// non-default value is actually needed, e.g. AUTH_ALLOWED_ORIGINS in prod).
+const declared = [
+  ...contract.tf_managed,
+  ...contract.platform_managed,
+  ...(contract.app_optional ?? []),
+].sort();
 const example = exampleKeys();
 
 const missing = example.filter((k) => !declared.includes(k));
