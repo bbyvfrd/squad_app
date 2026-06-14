@@ -1,10 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { AuthProvider, AuthUser, SignUpMeta } from "./types";
-
-// NOTE (Task 5 follow-up): once `./errors` lands, the `throw new Error(...)` sites
-// below swap to `throw mapSupabaseError(error)` so no raw vendor Error escapes the
-// seam (Seam Rule). `errors.ts` is authored in Task 5; this file stays self-contained
-// until then so the seam typechecks on its own.
+import { mapSupabaseError } from "./errors";
 
 export class SupabaseAuthProvider implements AuthProvider {
   constructor(private readonly sb: SupabaseClient) {}
@@ -20,14 +16,14 @@ export class SupabaseAuthProvider implements AuthProvider {
       // Feeds private.handle_new_user(); display_name is nullable (design spec §3).
       options: { data: { full_name: meta.fullName, display_name: meta.displayName ?? null } },
     });
-    if (error || !data.user) throw new Error(error?.message ?? "signUp failed");
+    if (error || !data.user) throw mapSupabaseError(error);
     return { id: data.user.id, email: data.user.email ?? email };
   }
 
   async signIn(email: string, password: string) {
     const { data, error } = await this.sb.auth.signInWithPassword({ email, password });
     if (error || !data.user || !data.session) {
-      throw new Error(error?.message ?? "signIn failed");
+      throw mapSupabaseError(error);
     }
     return {
       user: { id: data.user.id, email: data.user.email ?? email },
@@ -52,6 +48,6 @@ export class SupabaseAuthProvider implements AuthProvider {
   // this clears the local session held by this client instance.
   async signOut(_token: string): Promise<void> {
     const { error } = await this.sb.auth.signOut({ scope: "local" });
-    if (error) throw new Error(error.message);
+    if (error) throw mapSupabaseError(error);
   }
 }
