@@ -9,6 +9,7 @@ export default defineConfig({
       DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:54322/postgres",
       NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321",
       NEXT_PUBLIC_SUPABASE_ANON_KEY: "test-anon-key",
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "test-publishable-key",
     },
     include: ["src/**/*.test.ts", "src/**/*.test.tsx", "scripts/**/*.test.ts"],
     exclude: ["src/**/*.integration.test.ts"],

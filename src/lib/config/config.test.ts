@@ -23,4 +23,30 @@ describe("parseEnv", () => {
   it("throws when a URL var is malformed", () => {
     expect(() => parseEnv({ ...valid, DATABASE_URL: "not-a-url" })).toThrow();
   });
+
+  it("prefers the publishable key but falls back to the anon key", () => {
+    const withPublishable = parseEnv({
+      ...valid,
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "publishable-key",
+    });
+    expect(withPublishable.supabasePublishableKey).toBe("publishable-key");
+
+    const anonOnly = parseEnv(valid); // no publishable key present
+    expect(anonOnly.supabasePublishableKey).toBe(valid.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+  });
+
+  it("exposes optional cookie domain and allowed origins", () => {
+    const cfg = parseEnv({
+      ...valid,
+      AUTH_COOKIE_DOMAIN: ".squad.example",
+      AUTH_ALLOWED_ORIGINS: "https://squad.example,https://app.squad.example",
+    });
+    expect(cfg.authCookieDomain).toBe(".squad.example");
+    expect(cfg.authAllowedOrigins).toBe("https://squad.example,https://app.squad.example");
+  });
+
+  it("requires at least one of publishable or anon key", () => {
+    const { NEXT_PUBLIC_SUPABASE_ANON_KEY, ...noKeys } = valid;
+    expect(() => parseEnv(noKeys)).toThrow();
+  });
 });
