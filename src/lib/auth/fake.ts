@@ -1,14 +1,14 @@
-import type { AuthProvider, AuthUser } from "./types";
+import type { AuthProvider, AuthUser, SignUpMeta } from "./types";
 
 export class InMemoryAuthProvider implements AuthProvider {
-  private users = new Map<string, { user: AuthUser; password: string }>();
+  private users = new Map<string, { user: AuthUser; password: string; meta: SignUpMeta }>();
   private tokens = new Map<string, string>(); // token -> userId
   private seq = 0;
 
-  async signUp(email: string, password: string): Promise<AuthUser> {
+  async signUp(email: string, password: string, meta: SignUpMeta): Promise<AuthUser> {
     const id = `user_${++this.seq}`;
     const user: AuthUser = { id, email };
-    this.users.set(email, { user, password });
+    this.users.set(email, { user, password, meta });
     return user;
   }
 
@@ -29,5 +29,9 @@ export class InMemoryAuthProvider implements AuthProvider {
       if (user.id === userId) return user;
     }
     return null;
+  }
+
+  async signOut(token: string): Promise<void> {
+    this.tokens.delete(token);
   }
 }
