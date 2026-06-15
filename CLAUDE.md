@@ -62,6 +62,7 @@ Identity uses **split profiles** (one auth account → a base `profiles` row + o
 
 The app ships on managed platforms now but must be portable later **without a rewrite**. Full rationale in `docs/context/architecture.md`. The discipline:
 
+- **Multi-client by design — one backend, many front-ends.** The product's destination is **native mobile apps (iOS/Android) + a web app**, not web alone. v1 ships web-first (Next.js) and the native app is a **planned next phase** (not a someday-maybe), so the backend must stay **client-agnostic from day one**: business and data logic lives behind the `/api/v1` surface and the `lib/` seams (`lib/booking`, `lib/db`, `lib/auth`) so a React Native / Expo client can consume the **same** backend with no rewrite. Anything a screen needs must be reachable as an API call (or a `lib/` function an API route exposes) — never buried in Next.js-only render code. Auth is the Supabase session (works natively via `supabase-js`); Drizzle stays server-side behind the API, never shipped to a client. Web-only conveniences (RSC fetching, server actions) are a thin layer over that shared core, not the home of business logic.
 - **The Seam Rule:** app code **never imports a vendor SDK directly.** Each vendor touchpoint lives behind _one_ adapter implementing _our_ interface. A vendor swap then touches one file.
 - Vendor-specific features (Supabase RLS, Vercel edge) may be used but must **never be load-bearing** — the app stays correct without them.
 - **`lib/config/` is the only place `process.env` is read.** App code imports `config.<x>`.
@@ -147,7 +148,7 @@ Out of scope for v1 — do not build unless the vault's scope changes:
 - maps integration · in-app chat · ratings/reviews/reputation
 - waitlists, replacement automation, cancellation fees/penalties
 - admin panel · venue analytics dashboards · venue-owner game creation
-- tournaments / leagues / teams · native mobile app
+- tournaments / leagues / teams · **building** the native mobile app _in v1_ (web-first now — but native is the **planned next phase**, so keep the backend client-agnostic for it; see [Architecture](#architecture-portable-seams-non-negotiable))
 
 ## Relationship to the brainstorm vault
 
