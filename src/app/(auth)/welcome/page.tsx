@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type CSSProperties, type ReactNode } from "react";
+import { useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
@@ -84,6 +84,24 @@ export default function WelcomePage() {
   const [slide, setSlide] = useState(0);
   const data = SLIDES[slide];
   const last = slide === SLIDES.length - 1;
+  const touchStartX = useRef<number | null>(null);
+
+  // Advance/retreat with clamping. The slide state changes immediately; the
+  // visual cross-fade + rise comes from re-mounting `.onb-stage` (keyed on
+  // `slide`), which replays the `onb-enter` animation. Reduced-motion: instant.
+  function go(next: number) {
+    if (next < 0 || next > SLIDES.length - 1 || next === slide) return;
+    setSlide(next);
+  }
+  function onTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0]?.clientX ?? null;
+  }
+  function onTouchEnd(e: React.TouchEvent) {
+    if (touchStartX.current === null) return;
+    const dx = (e.changedTouches[0]?.clientX ?? 0) - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(dx) > 40) go(dx < 0 ? slide + 1 : slide - 1);
+  }
 
   return (
     <AuthScreen padding="60px 26px 36px">
@@ -117,51 +135,55 @@ export default function WelcomePage() {
         )}
       </div>
 
-      {data.image ? (
-        <div className="onb-hero">
-          <div className="onb-hero-sweep" />
-          <div className="clay-ground" />
-          <img className="clay-float" src={data.image} alt="" />
-        </div>
-      ) : (
-        <div className="onb-visual" style={{ height: 362 }}>
-          <div className="onb-art" />
-          <div className="ob-ph-flag">Placeholder · generate later</div>
-          <div className="onb-chip">{data.chipIcon && <Icon name={data.chipIcon} size={24} />}</div>
-          <div className="onb-center">
-            <span className="frame">
-              <Icon name="image" size={24} />
-            </span>
-            <span className="cap">{data.caption}</span>
+      <div className="onb-stage" key={slide} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+        {data.image ? (
+          <div className="onb-hero">
+            <div className="onb-hero-sweep" />
+            <div className="clay-ground" />
+            <img className="clay-float" src={data.image} alt="" />
           </div>
-          <div className="onb-tag">
-            <span className="dot" />
-            {data.tag}
+        ) : (
+          <div className="onb-visual" style={{ height: 362 }}>
+            <div className="onb-art" />
+            <div className="ob-ph-flag">Placeholder · generate later</div>
+            <div className="onb-chip">
+              {data.chipIcon && <Icon name={data.chipIcon} size={24} />}
+            </div>
+            <div className="onb-center">
+              <span className="frame">
+                <Icon name="image" size={24} />
+              </span>
+              <span className="cap">{data.caption}</span>
+            </div>
+            <div className="onb-tag">
+              <span className="dot" />
+              {data.tag}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <div style={{ padding: "24px 2px 0" }}>
-        {/* A11y (Task 9): 11px terracotta eyebrow — terra-500 is 3.37:1 on the linen-100
+        <div style={{ padding: "24px 2px 0" }}>
+          {/* A11y (Task 9): 11px terracotta eyebrow — terra-500 is 3.37:1 on the linen-100
             surface (under AA for small text). terra-600 clears (4.77:1) and stays the
             terracotta spike. Large display titles keep their terra-500 <span> (large text
             only needs 3:1). Inline style overrides .au-eyebrow, so the fix lives here. */}
-        <div className="au-eyebrow" style={{ color: "var(--terra-600)", marginBottom: 12 }}>
-          {data.eyebrow}
+          <div className="au-eyebrow" style={{ color: "var(--terra-600)", marginBottom: 12 }}>
+            {data.eyebrow}
+          </div>
+          <h1 style={titleStyle}>{data.title}</h1>
+          <p
+            style={{
+              margin: "12px 0 0",
+              maxWidth: 320,
+              fontFamily: "var(--font-body)",
+              fontSize: 15,
+              lineHeight: 1.5,
+              color: "var(--steel-500)",
+            }}
+          >
+            {data.sub}
+          </p>
         </div>
-        <h1 style={titleStyle}>{data.title}</h1>
-        <p
-          style={{
-            margin: "12px 0 0",
-            maxWidth: 320,
-            fontFamily: "var(--font-body)",
-            fontSize: 15,
-            lineHeight: 1.5,
-            color: "var(--steel-500)",
-          }}
-        >
-          {data.sub}
-        </p>
       </div>
 
       <div style={{ flex: 1, minHeight: 18 }} />
@@ -186,7 +208,7 @@ export default function WelcomePage() {
             type="button"
             className="au-next is-clay"
             aria-label="Next"
-            onClick={() => setSlide((s) => Math.min(s + 1, SLIDES.length - 1))}
+            onClick={() => go(slide + 1)}
           >
             <Icon name="arrow_forward" size={20} />
           </button>

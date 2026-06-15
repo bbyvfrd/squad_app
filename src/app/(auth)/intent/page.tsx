@@ -60,10 +60,13 @@ export default function IntentPage() {
         </button>
       </div>
 
+      <div className="au-eyebrow" style={{ color: "var(--steel-500)", marginBottom: 10 }}>
+        You&apos;re in
+      </div>
       <h1 style={titleStyle}>
         How will you use <span style={terra}>SQUAD?</span>
       </h1>
-      <p style={subStyle}>Pick anything that fits — it just tailors your home. Optional.</p>
+      <p style={subStyle}>Pick anything that fits to tailor your home, or skip for now.</p>
 
       <ChipGroup label="What you're here for">
         <IntentChip label="Organize games" defaultOn />
