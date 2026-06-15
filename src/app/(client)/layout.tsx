@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Tabbar, type TabItem } from "@/components/ui/tabbar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Topbar } from "@/components/ui/topbar";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 
 // Routes beyond /app arrive with the screen plans (07+); the tabbar is the
 // canonical chrome and tolerates not-yet-existing routes (they 404 until built).
@@ -21,7 +22,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         leading={
           <Image src="/squad_logo_horizontal.png" alt="SQUAD" width={96} height={24} priority />
         }
-        actions={<ThemeToggle />}
+        actions={
+          <div className="flex items-center gap-s1">
+            <ThemeToggle />
+            <SignOutButton />
+          </div>
+        }
       />
       <main className="flex-1 p-s2">{children}</main>
       <Tabbar items={TABS} />

@@ -36,6 +36,13 @@
       "when": 1780474348876,
       "tag": "0004_full_name_trigger_and_cities_seed",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1780474348877,
+      "tag": "0005_handle_new_user_idempotent",
+      "breakpoints": true
     }
   ]
 }

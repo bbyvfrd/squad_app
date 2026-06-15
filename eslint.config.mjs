@@ -16,6 +16,20 @@ const eslintConfig = defineConfig([
     // (The vault-synced design system ships demo .jsx under docs/context/design/.)
     "docs/**",
   ]),
+  {
+    // Allow intentionally-unused identifiers prefixed with `_` (e.g. seam adapter
+    // params kept for interface parity, like supabase.ts signOut's `_token`).
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;

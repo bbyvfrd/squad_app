@@ -12,13 +12,14 @@ import { MethodTabs, type AuthMethod } from "@/components/auth/method-tabs";
 import { BackButton } from "@/components/auth/back-button";
 import { Divider } from "@/components/auth/divider";
 import { SocialRow } from "@/components/auth/social-row";
+import { AuthClientError, authClient } from "@/lib/auth/client";
 
 // Sign up (artboards 05 Email + 06 Phone) as ONE screen with a method toggle.
 // Ports `B_SignUp` (email) + `B_SignUpPhone` (phone) verbatim: same header
 // (back + 2-dot pager, step 1 of 2), title, sub, MethodTabs, then a per-method
 // body. Email → /intent; phone → /verify?flow=signup. The phone-frame wrapper is
-// dropped; the `(auth)` layout owns the centered mobile column. UI only — submits
-// navigate, nothing is sent to auth yet.
+// dropped; the `(auth)` layout owns the centered mobile column. The email path now
+// calls `authClient` (Plan 08 auth backend); the phone path is still an inert UI seam.
 
 // From the prototype's `titleStyle()` (base size 34, used as-is on this screen).
 const titleStyle: CSSProperties = {
@@ -48,6 +49,15 @@ const revealBtnStyle: CSSProperties = {
   color: "inherit",
 };
 
+// Inline, non-leaky messages keyed on our error envelope `code` (§3). Default is
+// generic so a vendor message never reaches the UI.
+const SIGNUP_ERRORS: Record<string, string> = {
+  EMAIL_TAKEN: "That email is already registered. Try signing in.",
+  WEAK_PASSWORD: "Use at least 8 characters for your password.",
+  INVALID_INPUT: "Check your details and try again.",
+  RATE_LIMITED: "Too many attempts. Wait a moment and try again.",
+};
+
 export default function SignUpPage() {
   const router = useRouter();
   const [method, setMethod] = useState<AuthMethod>("email");
@@ -56,12 +66,23 @@ export default function SignUpPage() {
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function submit() {
-    if (method === "email") {
+  async function submit() {
+    if (method !== "email") {
+      router.push("/verify?flow=signup"); // phone tab stays inert this plan
+      return;
+    }
+    setError(null);
+    setSubmitting(true);
+    try {
+      await authClient.signUp({ email, password, fullName, displayName: null });
       router.push("/intent");
-    } else {
-      router.push("/verify?flow=signup");
+    } catch (e) {
+      const code = e instanceof AuthClientError ? e.code : "UNEXPECTED";
+      setError(SIGNUP_ERRORS[code] ?? "Something went wrong. Try again.");
+      setSubmitting(false);
     }
   }
 
@@ -152,8 +173,22 @@ export default function SignUpPage() {
 
       <div style={{ flex: 1, minHeight: 16 }} />
 
+      {error && (
+        <p
+          role="alert"
+          style={{
+            margin: "0 0 12px",
+            fontFamily: "var(--font-body)",
+            fontSize: 13,
+            color: "var(--error-text)",
+          }}
+        >
+          {error}
+        </p>
+      )}
+
       <div style={{ marginBottom: 16 }}>
-        <AuButton trailingArrow onClick={submit}>
+        <AuButton trailingArrow onClick={submit} disabled={submitting}>
           {method === "email" ? "Create account" : "Send code"}
         </AuButton>
       </div>
