@@ -67,6 +67,7 @@ export default function SignUpPage() {
   const [phone, setPhone] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function submit() {
@@ -78,7 +79,10 @@ export default function SignUpPage() {
     setSubmitting(true);
     try {
       await authClient.signUp({ email, password, fullName, displayName: null });
-      router.push("/intent");
+      // Brief success affirmation so it's clear the account was created before
+      // we flow into the personalization step (the session is already set).
+      setSuccess(true);
+      setTimeout(() => router.push("/intent"), 600);
     } catch (e) {
       const code = e instanceof AuthClientError ? e.code : "UNEXPECTED";
       setError(SIGNUP_ERRORS[code] ?? "Something went wrong. Try again.");
@@ -188,8 +192,16 @@ export default function SignUpPage() {
       )}
 
       <div style={{ marginBottom: 16 }}>
-        <AuButton trailingArrow onClick={submit} disabled={submitting}>
-          {method === "email" ? "Create account" : "Send code"}
+        <AuButton trailingArrow={!success} onClick={submit} disabled={submitting || success}>
+          {success ? (
+            <span className="au-success-in">
+              <Icon name="check" size={20} /> Account created
+            </span>
+          ) : method === "email" ? (
+            "Create account"
+          ) : (
+            "Send code"
+          )}
         </AuButton>
       </div>
       <div style={{ marginBottom: 16 }}>

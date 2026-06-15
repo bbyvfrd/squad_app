@@ -863,3 +863,46 @@
 .au-social-flex {
   flex: 1;
 }
+
+/* ===== Plan 08 UX polish ============================================= */
+/* Onboarding slide transition (cross-fade + rise). Re-mounting `.onb-stage`
+   (keyed on the slide index) replays this on every advance, so the swapped
+   slide fades and lifts in instead of snapping. SQUAD motion tokens only. */
+.onb-stage {
+  animation: onb-enter var(--dur-standard) var(--ease-quint) both;
+}
+@keyframes onb-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Sign-up success affirmation: the CTA's success label pops in. */
+.au-success-in {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  animation: au-pop var(--dur-fast) var(--ease-out) both;
+}
+@keyframes au-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onb-stage,
+  .au-success-in {
+    animation: none;
+  }
+}
