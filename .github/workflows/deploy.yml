@@ -35,7 +35,7 @@ jobs:
       # triggering run to be a push to main, so fork-PR code can never reach this
       # checkout. The semgrep rule can't see job conditions, hence the suppression.
       # nosemgrep: yaml.github-actions.security.workflow-run-target-code-checkout.workflow-run-target-code-checkout
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
       - uses: pnpm/action-setup@v6
@@ -105,7 +105,7 @@ jobs:
       # Same trust argument as staging: `needs: staging` means that job's push-to-main
       # `if` has already held, so head_sha is post-merge code.
       # nosemgrep: yaml.github-actions.security.workflow-run-target-code-checkout.workflow-run-target-code-checkout
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
       - uses: pnpm/action-setup@v6
