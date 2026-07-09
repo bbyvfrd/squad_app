@@ -73,7 +73,7 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - uses: supabase/setup-cli@v2
+      - uses: supabase/setup-cli@v3
         with:
           # Pinned, not "latest": resolving "latest" makes an unauthenticated
           # GitHub API call that gets rate-limited on shared runner IPs. A pinned
@@ -177,7 +177,7 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - uses: supabase/setup-cli@v2
+      - uses: supabase/setup-cli@v3
         with:
           # Pinned, not "latest": resolving "latest" makes an unauthenticated
           # GitHub API call that gets rate-limited on shared runner IPs. A pinned
