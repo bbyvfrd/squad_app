@@ -13,6 +13,15 @@ on:
         type: string
         required: false
         default: "auto rollback"
+    # Declared so deploy.yml can pass exactly these (no `secrets: inherit`).
+    # workflow_dispatch runs still read the same-named repo secrets directly.
+    secrets:
+      VERCEL_TOKEN:
+        required: true
+      VERCEL_ORG_ID:
+        required: true
+      VERCEL_PROJECT_ID_PROD:
+        required: true
 
 permissions:
   contents: read
