@@ -86,6 +86,10 @@ test("intent CTA is reachable by scrolling on a short mobile viewport", async ({
 // (it self-redirects); /verify is covered by the render smoke above.
 for (const path of ["/welcome", "/signup", "/signin", "/intent"]) {
   test(`no serious a11y violations on ${path}`, async ({ page }) => {
+    // Audit the settled UI. axe measures contrast at an element's current opacity, so
+    // a fade-in caught mid-way (/welcome's 320ms onb-enter) reads as a false failure
+    // (terra-600 at ~81% opacity = 3.63:1). Reduced motion only drops the animations.
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(path);
     const results = await new AxeBuilder({ page }).analyze();
     const serious = results.violations.filter(
