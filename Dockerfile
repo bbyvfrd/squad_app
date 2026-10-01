@@ -29,6 +29,12 @@ ENV NODE_ENV=production
 # fixed-upstream HIGH/CRITICAL CVEs (ignore-unfixed), and the node:24-alpine
 # base lags Alpine's patch releases (e.g. openssl CVE-2026-45447).
 RUN apk -U upgrade --no-cache
+# The runtime only runs `node server.js`. Drop the package managers the base image
+# bundles (npm/npx, corepack, yarn): unused here, and npm's own dependencies carry
+# HIGH CVEs (brace-expansion, tar, undici, ip-address) that fail the image gate.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /opt/yarn-v* \
+  && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
+    /usr/local/bin/yarn /usr/local/bin/yarnpkg
 # Run as an unprivileged user (Trivy DS002; standard for standalone images).
 RUN addgroup --system --gid 1001 nodejs \
   && adduser --system --uid 1001 nextjs
