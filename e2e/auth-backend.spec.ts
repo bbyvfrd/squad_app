@@ -34,7 +34,10 @@ test("signup with email/password lands in /app, then signout returns to /welcome
   await expect(page).toHaveURL(/\/intent$/);
   await page.getByRole("button", { name: /continue/i }).click();
   await expect(page).toHaveURL(/\/app$/);
-  await expect(page.getByText("FIND YOUR GAME")).toBeVisible();
+  // By role, not text: after a client-side navigation Next's route announcer
+  // (#__next-route-announcer__) echoes the page's h1 when the streamed title isn't
+  // set yet, so getByText would match twice once it fills (~100ms on staging).
+  await expect(page.getByRole("heading", { name: "FIND YOUR GAME" })).toBeVisible();
 
   // In-app sign-out clears the session and replaces to /welcome.
   await page.getByRole("button", { name: /sign out/i }).click();
