@@ -4,6 +4,11 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
+    # Wait a week before proposing a freshly published version: hijacked releases are
+    # usually caught and pulled within days. Version updates only; security updates
+    # are never delayed. (Semgrep dependabot-missing-cooldown wants >= 7 per entry.)
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 10
     groups:
       all-npm:
@@ -23,10 +28,14 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
   - package-ecosystem: docker
     directory: "/"
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     ignore:
       # Keep the base image on the chosen Node LTS line (24). Move to the next LTS
       # deliberately, not via an automated major bump (e.g. the 24 -> 26 jump).

@@ -15,6 +15,8 @@ on:
 permissions:
   contents: read
 
+# Actions are pinned to full commit SHAs (a tag can be silently repointed, as in the
+# 2026-03 trivy-action compromise); Dependabot bumps the SHA and its version comment.
 jobs:
   staging:
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
@@ -35,11 +37,11 @@ jobs:
       # triggering run to be a push to main, so fork-PR code can never reach this
       # checkout. The semgrep rule can't see job conditions, hence the suppression.
       # nosemgrep: yaml.github-actions.security.workflow-run-target-code-checkout.workflow-run-target-code-checkout
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v6
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: 24
           cache: pnpm
@@ -75,7 +77,7 @@ jobs:
           pnpm test:e2e
         env:
           PLAYWRIGHT_BASE_URL: ${{ vars.STAGING_URL }}
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
           name: playwright-report-staging
@@ -105,11 +107,11 @@ jobs:
       # Same trust argument as staging: `needs: staging` means that job's push-to-main
       # `if` has already held, so head_sha is post-merge code.
       # nosemgrep: yaml.github-actions.security.workflow-run-target-code-checkout.workflow-run-target-code-checkout
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v6
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: 24
           cache: pnpm
@@ -152,6 +154,11 @@ jobs:
     # build) leaves prod serving a healthy build — rolling back would demote it.
     if: failure() && needs.production.result == 'failure' && needs.production.outputs.deploy_attempted == 'true'
     uses: ./.github/workflows/rollback.yml
-    secrets: inherit
+    # Explicit, not `secrets: inherit`: rollback gets only the Vercel prod secrets it
+    # uses, never the migration DB URLs (least privilege; Semgrep secrets-inherit).
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID_PROD: ${{ secrets.VERCEL_PROJECT_ID_PROD }}
     with:
       reason: "auto: production deploy/health gate failed for ${{ github.event.workflow_run.head_sha }}"
