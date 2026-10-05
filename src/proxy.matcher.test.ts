@@ -7,12 +7,13 @@ import { unstable_doesMiddlewareMatch } from "next/experimental/testing/server";
 vi.mock("server-only", () => ({}));
 
 import { config } from "./proxy";
+import { PUBLIC_API_ROUTES } from "../scripts/check-require-user.mjs";
 
 // Classify a path against the real proxy matcher using Next's own tester — this is the
 // same check that surfaced the root-/ guard bug. A "match" means the proxy runs (route
 // is GUARDED); a non-match means the request passes straight through (PUBLIC).
-function matches(pathname: string): boolean {
-  return unstable_doesMiddlewareMatch({ config, url: `https://squad.test${pathname}` });
+function matches(pathname: string, headers?: Record<string, string>): boolean {
+  return unstable_doesMiddlewareMatch({ config, url: `https://squad.test${pathname}`, headers });
 }
 
 describe("proxy matcher", () => {
@@ -43,4 +44,20 @@ describe("proxy matcher", () => {
   ])("guards the protected path %s", (path) => {
     expect(matches(path)).toBe(true);
   });
+
+  // check:require-user skips exactly these handlers. Each must really be proxy-exempt —
+  // otherwise a Bearer-only request could reach a handler the gate never inspected.
+  it.each(PUBLIC_API_ROUTES)("the require-user gate's public route %s is proxy-exempt", (path) => {
+    expect(matches(path)).toBe(false);
+  });
+
+  // The Bearer pass-through is decided INSIDE the proxy (API paths only, no auth
+  // cookie). A header-based matcher exemption (e.g. `missing: authorization`) would
+  // skip the proxy for pages too, so an Authorization header must never un-guard a path.
+  it.each(["/app", "/app/games", "/api/v1/games", "/api/v1/participations/p-1"])(
+    "still runs the proxy for %s when it carries a Bearer",
+    (path) => {
+      expect(matches(path, { authorization: "Bearer native-access-token" })).toBe(true);
+    },
+  );
 });
