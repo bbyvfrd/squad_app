@@ -1,14 +1,37 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/auth/update-session";
 
+// Same transport facts the CSRF gate's mutationContext reads: a non-empty Bearer, and a
+// Supabase SSR session cookie (`sb-<ref>-auth-token`, incl. its `.0`/`.1` chunks).
+function hasBearer(request: NextRequest): boolean {
+  return /^Bearer\s+\S+/i.test(request.headers.get("authorization") ?? "");
+}
+
+function hasAuthCookie(request: NextRequest): boolean {
+  return request.cookies.getAll().some(({ name }) => /^sb-[^=;]*-auth-token/.test(name));
+}
+
 export async function proxy(request: NextRequest) {
+  const { pathname, search } = request.nextUrl;
+
+  // Native transport: a Bearer with no auth cookie is not the proxy's to judge — it only
+  // knows cookies. Let it through UNVERIFIED: every guarded /api handler calls
+  // requireUser(req) first (gated by check:require-user), which verifies the Bearer
+  // locally and never falls back to a cookie — so verifying here too would be redundant.
+  // API paths only: page routes stay cookie-only (a browser navigation has no Bearer).
+  if (pathname.startsWith("/api/") && hasBearer(request) && !hasAuthCookie(request)) {
+    return NextResponse.next();
+  }
+
   const { userId, response } = await updateSession(request);
 
   if (!userId) {
-    const { pathname, search } = request.nextUrl;
     // API routes are programmatic — answer with our error envelope, never an HTML redirect.
     if (pathname.startsWith("/api")) {
-      return NextResponse.json({ error: { code: "UNAUTHORIZED" } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: "UNAUTHORIZED", message: "Sign in to continue." } },
+        { status: 401 },
+      );
     }
     // Page routes — bounce to sign-in, preserving where the user was headed.
     const signin = new URL("/signin", request.url);

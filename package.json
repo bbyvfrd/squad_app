@@ -21,6 +21,7 @@
     "check:design": "node scripts/check-design-rules.mjs",
     "check:csrf": "node scripts/check-csrf-guards.mjs",
     "check:auth-logging": "node scripts/check-auth-logging.mjs",
+    "check:require-user": "node scripts/check-require-user.mjs",
     "sync:design": "node scripts/sync-design-system.mjs"
   },
   "dependencies": {
